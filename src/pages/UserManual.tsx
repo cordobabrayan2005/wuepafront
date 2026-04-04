@@ -21,7 +21,6 @@ export default function UserManual() {
     { id: "getting-started", title: "Primeros Pasos", icon: "🚀" },
     { id: "authentication", title: "Autenticación y Acceso", icon: "🔐" },
     { id: "wuepa-home", title: "Sala Principal", icon: "🕒" },
-    { id: "videocall", title: "Videollamadas", icon: "🎥" },
     { id: "account-security", title: "Cuenta y Seguridad", icon: "👤" },
     { id: "troubleshooting", title: "Solución de Problemas", icon: "🛠️" },
     { id: "faq", title: "Preguntas Frecuentes", icon: "❓" }
@@ -176,45 +175,7 @@ export default function UserManual() {
             </article>
           </section>
 
-          {/* Videocall Section */}
-          <section id="videocall" className="manual-section" aria-labelledby="videocall-title">
-            <h2 id="videocall-title">🎥 Videollamadas</h2>
 
-            <article className="content-block">
-              <h3>Antes de entrar</h3>
-              <ul>
-                <li>Autoriza el acceso a cámara y micrófono cuando lo solicite el navegador.</li>
-                <li>Usa auriculares para reducir eco y mejorar la experiencia de los demás participantes.</li>
-                <li>Hasta 10 participantes pueden estar activos simultáneamente por reunión.</li>
-              </ul>
-            </article>
-
-            <article className="content-block">
-              <h3>Controles principales</h3>
-              <ul>
-                <li><strong>📷 Cámara:</strong> Activa o desactiva tu video. Al apagarla se muestra tu avatar.</li>
-                <li><strong>🎙️ Micrófono:</strong> Silénciate o reactiva tu audio. El estado se sincroniza con el resto de participantes.</li>
-                <li><strong>💬 Chat:</strong> Abre el panel lateral para enviar mensajes. Un punto rojo indica mensajes nuevos.</li>
-                <li><strong>🔗 Código:</strong> Muestra el identificador de la reunión y ofrece copiarlo al portapapeles.</li>
-                <li><strong>📞 Colgar:</strong> Abandona la reunión. El anfitrión puede finalizarla para todos.</li>
-              </ul>
-            </article>
-
-            <article className="content-block">
-              <h3>Chat y participantes</h3>
-              <p>
-                El chat conserva los mensajes enviados durante la reunión. Los participantes se muestran en una cuadrícula dinámica que ajusta el tamaño de cada video.
-                Cuando alguien entra o sale, la lista se actualiza en tiempo real e informa si eres anfitrión o invitado.
-              </p>
-            </article>
-
-            <article className="content-block">
-              <h3>Finalizar reunión</h3>
-              <p>
-                El anfitrión puede terminar la reunión desde la opción Colgar, lo que desconecta a los asistentes y les muestra un aviso. Todos son redirigidos a la sala principal después de unos segundos.
-              </p>
-            </article>
-          </section>
 
           {/* Account & Security Section */}
           <section id="account-security" className="manual-section" aria-labelledby="account-title">

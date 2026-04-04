@@ -12,7 +12,7 @@
  * ## Estructura
  * - **Título:** Encabezado "Mapa del sitio".
  * - **Columnas:**
- *   - Páginas: Enlaces a secciones principales como Inicio, Sobre nosotros, Manual de usuario, Videollamada demo y Perfil.
+ *   - Páginas: Enlaces a secciones principales como Inicio, Sobre nosotros, Manual de usuario y Perfil.
  *   - Autenticación: Enlaces a inicio de sesión, registro, recuperación, restablecimiento y cambio de contraseña.
  * - **Nota de pie:** Aviso de copyright.
  *
@@ -40,7 +40,7 @@ const Sitemap: React.FC = () => {
               <li><Link to="/wuepa">Inicio</Link></li>
               <li><Link to="/about">Sobre nosotros</Link></li>
               <li><Link to="/user-manual">Manual de usuario</Link></li>
-              <li><Link to="/videocall">Videollamada (demo)</Link></li>
+              {/* Enlace a videollamada eliminado */}
               <li><Link to="/profile">Perfil</Link></li>
             </ul>
           </div>
