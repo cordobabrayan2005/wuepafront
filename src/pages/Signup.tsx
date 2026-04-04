@@ -6,24 +6,24 @@ import { useNavigate } from "react-router-dom";
 import { validatePasswordRules } from "../utils/passwordRules";
 
 /**
- * Signup component that renders a registration form for new users.
- * 
- * Features:
- * - Collects personal information (name, lastname, age).
- * - Collects login credentials (email, password, confirm password).
- * - Validates age (must be >= 18).
- * - Validates password confirmation.
- * - Submits data to the signup API.
- * - Displays success or error messages.
- * - Adds/removes a CSS class to the body for styling.
- * 
+ * Componente Signup que renderiza un formulario de registro para nuevos usuarios.
+ *
+ * Características:
+ * - Solicita información personal (nombre, apellido, edad).
+ * - Solicita credenciales de acceso (correo, contraseña, confirmar contraseña).
+ * - Valida la edad (debe ser >= 18).
+ * - Valida la confirmación de la contraseña.
+ * - Envía los datos a la API de registro.
+ * - Muestra mensajes de éxito o error.
+ * - Añade/elimina una clase CSS al body para el estilo.
+ *
  * @component
- * @returns {JSX.Element} The signup page UI.
+ * @returns {JSX.Element} Interfaz de la página de registro.
  */
 export default function Signup() {
 
-   /**
-   * Form state containing user input values.
+  /**
+   * Estado del formulario que contiene los valores ingresados por el usuario.
    */
   const [form, setForm] = useState({
     name: "",
@@ -35,44 +35,43 @@ export default function Signup() {
   });
 
   /**
-   * Message displayed to the user after validation or API response.
+   * Mensaje mostrado al usuario tras la validación o respuesta de la API.
    */
   const [msg, setMsg] = useState("");
 
   /**
-   * Type of message displayed (success, error, info).
+   * Tipo de mensaje mostrado (éxito, error, info).
    */
   const [msgType, setMsgType] = useState<"success" | "error" | "info">("info");
 
   const navigate = useNavigate();
 
   /**
-   * Adds a CSS class to the body when the component mounts,
-   * and removes it when the component unmounts.
+   * Añade una clase CSS al body cuando el componente se monta,
+   * y la elimina cuando se desmonta.
    */
   useEffect(() => {
     document.body.classList.add("login-page");
     return () => document.body.classList.remove("login-page");
   }, []);
 
-   /**
-   * Updates a specific field in the form state.
-   * 
+  /**
+   * Actualiza un campo específico en el estado del formulario.
    * @template K
-   * @param {K} k - The key of the form field to update.
-   * @param {any} v - The new value for the field.
+   * @param {K} k - Clave del campo a actualizar.
+   * @param {any} v - Nuevo valor para el campo.
    */
   function set<K extends keyof typeof form>(k: K, v: any) {
     setForm({ ...form, [k]: v });
   }
 
   /**
-   * Handles form submission.
-   * Validates age and password confirmation before sending data to the API.
-   * 
+   * Maneja el envío del formulario.
+   * Valida la edad y la confirmación de la contraseña antes de enviar los datos a la API.
+   *
    * @async
-   * @param {React.FormEvent} e - The form submission event.
-   * @returns {Promise<void>} Resolves when the signup process completes.
+   * @param {React.FormEvent} e - Evento de envío del formulario.
+   * @returns {Promise<void>} Se resuelve cuando el proceso de registro finaliza.
    */
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();

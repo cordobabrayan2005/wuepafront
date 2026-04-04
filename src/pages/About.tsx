@@ -1,31 +1,30 @@
 /**
- * About component
+ * Componente About
  *
- * This React functional component renders the "About" page of the wuepa demo application.
- * It provides information about the product, its mission, and key features.
+ * Este componente funcional de React renderiza la página "Sobre" de la aplicación demo de Joyería Wuepa.
+ * Proporciona información sobre el producto, su misión y características clave.
  *
- * ## Behavior
- * - On mount, it removes the `login-page` CSS class from the `<body>` element to ensure
- *   correct styling when navigating away from the login view.
- * - It uses semantic HTML and ARIA attributes to improve accessibility and screen reader support.
+ * ## Comportamiento
+ * - Al montarse, elimina la clase CSS `login-page` del elemento `<body>` para asegurar el estilo correcto al navegar fuera de la vista de inicio de sesión.
+ * - Utiliza HTML semántico y atributos ARIA para mejorar la accesibilidad y el soporte para lectores de pantalla.
  *
- * ## Structure
- * - Hero section: Displays the wuepa logo, title, and subtitle.
- * - Content section: Explains what wuepa is, highlights main features, and outlines the mission.
- * - Features grid: Cards describing accessibility, authentication flows, and meeting demo.
- * - Version info: Shows current version and development details.
- * - Navigation: Provides a link back to the home page.
+ * ## Estructura
+ * - Sección principal: Muestra el logo de Wuepa, título y subtítulo.
+ * - Sección de contenido: Explica qué es Wuepa, resalta las características principales y expone la misión.
+ * - Cuadrícula de características: Tarjetas que describen accesibilidad, flujos de autenticación y demo de reuniones.
+ * - Información de versión: Muestra la versión actual y detalles de desarrollo.
+ * - Navegación: Proporciona un enlace de regreso a la página de inicio.
  *
- * ## Accessibility
- * - `role="main"` and `aria-labelledby="about-title"` are used for semantic structure.
- * - WCAG 2.1 principles are followed to ensure compatibility with assistive technologies.
+ * ## Accesibilidad
+ * - Se utilizan `role="main"` y `aria-labelledby="about-title"` para la estructura semántica.
+ * - Se siguen los principios de WCAG 2.1 para asegurar compatibilidad con tecnologías de asistencia.
  *
  * @function About
- * @returns {JSX.Element} The rendered About page component containing product information,
- * mission statement, features, and navigation link.
+ * @returns {JSX.Element} El componente de la página Sobre, que contiene información del producto,
+ * declaración de misión, características y enlace de navegación.
  *
  * @example
- * // Usage in a React Router setup
+ * // Uso en una configuración de React Router
  * import About from './About';
  *
  * function App() {
@@ -48,40 +47,36 @@ export default function About() {
     <main className="about-page" role="main" aria-labelledby="about-title">
       <section className="about-hero">
         <div className="about-hero-inner">
-          <h1 id="about-title">Sobre nosotros</h1>
-          <p className="about-sub">Tu compañero perfecto para disfrutar de las mejores experiencias en tiempo real.</p>
+          <h1 id="about-title">Sobre Joyería Wuepa</h1>
+          <p className="about-sub">Tu destino para las joyas más exclusivas y elegantes.</p>
         </div>
       </section>
 
       <section className="about-content container">
-        <h2 className="section-title">¿Qué es wuepa?</h2>
-        <p className="lead">wuepa es una interfaz de demostración centrada en la autenticación y la experiencia de usuario. Está creada como referencia de diseño para flujos de inicio de sesión, perfil y una demo de reunión. El objetivo es ofrecer una UI limpia y accesible que sirva como base para integraciones posteriores.</p>
+        <h2 className="section-title">¿Qué es Joyería Wuepa?</h2>
+        <p className="lead">Joyería Wuepa es una tienda dedicada a ofrecer piezas únicas de joyería, seleccionadas cuidadosamente para resaltar tu estilo y personalidad. Nos especializamos en brindar una experiencia de compra segura, personalizada y memorable para cada cliente.</p>
 
         <h3 className="section-sub">Características principales</h3>
         <div className="features-grid">
           <article className="feature-card">
-            <div className="feature-icon">🧩</div>
-            <h4>Robusto</h4>
-            <p>Construido bajo los principios de accesibilidad del W3C (WCAG 2.1), garantizando compatibilidad con lectores de pantalla, navegadores modernos y dispositivos de asistencia. Su estructura semántica y uso de roles ARIA aseguran una experiencia consistente y accesible para todos los usuarios.</p>
+            <div className="feature-icon">💎</div>
+            <h4>Piezas exclusivas</h4>
+            <p>Ofrecemos una selección de joyas únicas, hechas con materiales de la más alta calidad y diseños innovadores.</p>
           </article>
-
           <article className="feature-card">
             <div className="feature-icon">🔒</div>
-            <h4>Autenticación</h4>
-            <p>Flujos completos de login, registro, recuperación y cambio de contraseña.</p>
+            <h4>Compra segura</h4>
+            <p>Tu seguridad es nuestra prioridad. Contamos con procesos de autenticación y protección de datos para que compres con total confianza.</p>
           </article>
-
           <article className="feature-card">
-            <div className="feature-icon">💬</div>
-            <h4>Demo de reunión</h4>
-            <p>Vista previa estilo Meet con chat y controles de cámara/mic (UI).</p>
+            <div className="feature-icon">🎁</div>
+            <h4>Atención personalizada</h4>
+            <p>Brindamos asesoría y atención personalizada para ayudarte a encontrar la joya perfecta para cada ocasión.</p>
           </article>
-
-          {/* API de desarrollo: eliminado por petición del cliente */}
         </div>
 
         <h3 className="section-sub">Nuestra misión</h3>
-        <p>Creemos que las herramientas de colaboración en tiempo real deben ser accesibles y fáciles de usar. wuepa nace como una plantilla UI pensada para integrar funcionalidad con rapidez manteniendo una experiencia coherente y pulida.</p>
+        <p>En Joyería Wuepa, creemos que cada persona merece brillar. Nuestra misión es ofrecer joyas que inspiren confianza, elegancia y felicidad en cada uno de nuestros clientes.</p>
 
         <div className="version-row">
           <div className="version-box">
@@ -90,12 +85,12 @@ export default function About() {
               <span className="badge">v1.0.0</span>
               <span className="badge green">Estable</span>
             </div>
-            <p className="muted">Construido con React + Vite + TypeScript + SASS. Sustituir `api.ts` por tu backend para producción.</p>
+            <p className="muted">Construido con React + Vite + TypeScript + SASS. Plataforma lista para mostrar y vender joyas en línea.</p>
           </div>
 
           <div className="dev-box">
             <h4>Desarrollado por</h4>
-            <div className="dev-badge">wuepa</div>
+            <div className="dev-badge">Joyería Wuepa</div>
           </div>
         </div>
 

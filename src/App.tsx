@@ -14,9 +14,9 @@ import { useAuthStore } from './stores/authStore';
 import ProtectedRoute from "./components/ProtectedRoute";
 
 /**
- * Root application component that mounts the routing shell inside a browser router.
+ * Componente raíz de la aplicación que monta la capa de rutas dentro de un router de navegador.
  *
- * @returns {JSX.Element} React application entry point.
+ * @returns {JSX.Element} Punto de entrada de la aplicación React.
  */
 export default function App() {
   return (
@@ -27,9 +27,9 @@ export default function App() {
 }
 
 /**
- * Shell routing layer that renders navigation controls, guarded routes, and layout chrome.
+ * Capa de rutas (Shell) que renderiza controles de navegación, rutas protegidas y el layout general.
  *
- * @returns {JSX.Element} Shell layout for authenticated and public routes.
+ * @returns {JSX.Element} Layout para rutas públicas y autenticadas.
  */
 function Shell() {
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ function Shell() {
   const { isAuthed, logout, checkAuth } = useAuthStore();  
 
   /**
-   * Performs initial authentication checks and subscribes to sidebar toggle events.
+   * Realiza comprobaciones iniciales de autenticación y suscribe a eventos de apertura/cierre del menú lateral.
    */
   useEffect(() => {
     checkAuth();
@@ -49,10 +49,10 @@ function Shell() {
   }, []);
 
   /**
-   * Closes the sidebar if it is currently open.
+   * Cierra el menú lateral si está abierto.
    */
   /**
-   * Logs out the current user and returns to the login route.
+   * Cierra la sesión del usuario actual y regresa a la ruta de inicio de sesión.
    */
   function handleLogout() {
     logout();

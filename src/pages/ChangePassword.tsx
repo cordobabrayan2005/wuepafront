@@ -6,44 +6,44 @@ import PasswordField from "../components/PasswordField";
 import { validatePasswordRules } from "../utils/passwordRules";
 
 /**
- * ChangePassword component.
+ * Componente ChangePassword.
  *
- * Provides a UI for authenticated users to change their account password.
- * Performs client-side validation (minimum length and confirmation match)
- * and calls api.changePassword to update the password on the server.
+ * Proporciona una interfaz para que los usuarios autenticados cambien la contraseña de su cuenta.
+ * Realiza validaciones del lado del cliente (longitud mínima y coincidencia de confirmación)
+ * y llama a api.changePassword para actualizar la contraseña en el servidor.
  *
- * If the user is not authenticated (no token in localStorage) a message is shown.
+ * Si el usuario no está autenticado (no hay token en localStorage) se muestra un mensaje.
  *
- * @returns {JSX.Element} The change password page.
+ * @returns {JSX.Element} Página para cambiar la contraseña.
  */
 export default function ChangePassword() {
   /**
-   * Current password input value.
+   * Valor del campo de la contraseña actual.
    * @type {string}
    */
   const [currentPassword, setCurrentPassword] = useState("");
 
   /**
-   * New password input value.
+   * Valor del campo de la nueva contraseña.
    * @type {string}
    */
   const [newPassword, setNewPassword] = useState("");
 
   /**
-   * Confirmation for the new password.
+   * Confirmación de la nueva contraseña.
    * @type {string}
    */
   const [confirmPassword, setConfirmPassword] = useState("");
 
   /**
-   * Status / feedback message shown to the user.
+   * Mensaje de estado o retroalimentación mostrado al usuario.
    * @type {string}
    */
   const [msg, setMsg] = useState("");
 
   /**
-   * Add a page-level CSS class while the component is mounted for styling.
-   * Cleans up the class on unmount.
+   * Añade una clase CSS a nivel de página mientras el componente está montado para el estilo.
+   * Elimina la clase al desmontar el componente.
    */
   useEffect(() => {
     document.body.classList.add("login-page");
@@ -51,16 +51,16 @@ export default function ChangePassword() {
   }, []);
 
   /**
-   * Form submit handler.
+   * Manejador del envío del formulario.
    *
-   * Performs client-side validation:
-   *  - new password must have at least 6 characters
-   *  - new password and confirmation must match
+   * Realiza validaciones del lado del cliente:
+   *  - la nueva contraseña debe tener al menos 6 caracteres
+   *  - la nueva contraseña y la confirmación deben coincidir
    *
-   * On success calls api.changePassword(currentPassword, newPassword, confirmPassword)
-   * and clears the inputs. Errors from the API are shown in the status message.
+   * Si todo es correcto, llama a api.changePassword(currentPassword, newPassword, confirmPassword)
+   * y limpia los campos. Los errores de la API se muestran en el mensaje de estado.
    *
-   * @param {React.FormEvent} e - The form submit event.
+   * @param {React.FormEvent} e - Evento de envío del formulario.
    * @returns {Promise<void>}
    */
   async function onSubmit(e: React.FormEvent) {
@@ -80,7 +80,7 @@ export default function ChangePassword() {
     }
   }
 
-  // If not authenticated, prompt the user to log in first.
+  // Si el usuario no está autenticado, se le solicita iniciar sesión primero.
   if (!localStorage.getItem("token")) {
     return <div className="container">Inicia sesión para cambiar tu contraseña.</div>;
   }

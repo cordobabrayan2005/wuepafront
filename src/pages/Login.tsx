@@ -1,9 +1,11 @@
 /**
- * The `Login` component in TypeScript React handles user authentication by allowing users to input
- * their email and password to log in to their account.
- * @param e - In the code snippet you provided, the parameter `e` is used as an event object in the
- * `onSubmit` function. It represents the event that is being handled, specifically a `React.FormEvent`
- * in this case. This event object is used to prevent the default form submission behavior using `
+ * Componente Login
+ *
+ * Este componente maneja la autenticación de usuarios permitiendo ingresar correo y contraseña para iniciar sesión.
+ * Incluye autenticación social y muestra mensajes de estado según el resultado.
+ *
+ * @param e - En el código, el parámetro `e` es el objeto de evento en la función onSubmit, de tipo `React.FormEvent`.
+ * Se utiliza para prevenir el comportamiento por defecto del formulario.
  */
 
 // src/pages/Login.tsx
@@ -14,42 +16,43 @@ import { api } from "../services/api";
 import PasswordField from "../components/PasswordField";
 
 /**
- * Props for the Login component.
+ * Props para el componente Login.
  * @typedef {Object} Props
- * @property {Function} [onAuth] - Optional callback invoked after a successful authentication.
+ * @property {Function} [onAuth] - Callback opcional invocado tras autenticación exitosa.
  */
 
 /**
- * Login component.
+ * Componente Login.
  *
- * Renders an email/password form, social auth buttons and handles authentication via the `api` service and Zustand store.
+ * Renderiza un formulario de correo/contraseña, botones de autenticación social y maneja la autenticación
+ * usando el servicio `api` y el store Zustand.
  *
- * @param {Props} props - Component props.
- * @returns {JSX.Element} A login form UI.
+ * @param {Props} props - Props del componente.
+ * @returns {JSX.Element} Interfaz de formulario de inicio de sesión.
  */
 type Props = { onAuth?: () => void };
 
 export default function Login({ onAuth }: Props) {
   /**
-   * Email input state.
+   * Estado del campo de correo electrónico.
    * @type {string}
    */
   const [email, setEmail] = useState("");
 
   /**
-   * Password input state.
+   * Estado del campo de contraseña.
    * @type {string}
    */
   const [password, setPassword] = useState("");
 
   /**
-   * Status message shown to the user (success / error / info).
+   * Mensaje de estado mostrado al usuario (éxito / error / info).
    * @type {string}
    */
   const [msg, setMsg] = useState("");
 
   /**
-   * Message type used for styling: "success" | "error" | "info".
+   * Tipo de mensaje para el estilo: "success" | "error" | "info".
    * @type {"success" | "error" | "info"}
    */
   const [msgType, setMsgType] = useState<"success" | "error" | "info">("info");
@@ -59,13 +62,12 @@ export default function Login({ onAuth }: Props) {
   const { login, socialLogin, isLoading, error } = useAuthStore();  // Nuevo
 
   /**
-   * Form submit handler.
+   * Manejador del envío del formulario.
    *
-   * Calls store.login with the provided credentials. On success invokes the optional
-   * onAuth callback, shows a success message and navigates to the wuepa page.
-   * On failure displays an error message returned from the API.
+   * Llama a store.login con las credenciales proporcionadas. Si es exitoso, invoca el callback opcional
+   * onAuth, muestra un mensaje de éxito y navega a la página principal. Si falla, muestra el mensaje de error de la API.
    *
-   * @param {React.FormEvent} e - Form submit event.
+   * @param {React.FormEvent} e - Evento de envío del formulario.
    * @returns {Promise<void>}
    */
   async function onSubmit(e: React.FormEvent) {
@@ -83,11 +85,11 @@ export default function Login({ onAuth }: Props) {
   }
 
   /**
-   * Social login handler.
+   * Manejador de autenticación social.
    *
-   * Calls store.socialLogin with the provider. On success navigates to wuepa.
+   * Llama a store.socialLogin con el proveedor. Si es exitoso, navega a la página principal.
    *
-   * @param {string} provider - 'google' or 'facebook'
+   * @param {string} provider - 'google' o 'facebook'
    * @returns {Promise<void>}
    */
   const handleSocialLogin = async (provider: 'google' | 'facebook') => {
@@ -104,14 +106,14 @@ export default function Login({ onAuth }: Props) {
   };
 
   /**
-   * Add a page-level class while the component is mounted for styling.
+   * Añade una clase CSS a nivel de página mientras el componente está montado para el estilo.
    */
   useEffect(() => {
     document.body.classList.add("login-page");
     return () => document.body.classList.remove("login-page");
   }, []);
 
-  // Display success message if we are coming from a log
+  // Muestra mensaje de éxito si venimos de un registro o redirección
   useEffect(() => {
     const state = location.state as any;
     if (state?.flash) {

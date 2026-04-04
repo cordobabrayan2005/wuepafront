@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 /**
- * Represents a user object for local state management.
+ * Representa un objeto usuario para la gestión de estado local.
  */
 interface User {
   id: string;
@@ -12,7 +12,7 @@ interface User {
 }
 
 /**
- * Simplified authentication state for local development.
+ * Estado de autenticación simplificado para desarrollo local.
  */
 interface AuthState {
   user: User | null;
@@ -79,7 +79,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   checkAuth: () => {
-    // Check if user is stored in localStorage (for persistence)
+    // Verifica si el usuario está almacenado en localStorage (para persistencia)
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       try {

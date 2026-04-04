@@ -3,7 +3,22 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
-// Datos de productos por categoría
+/**
+ * Componente Products
+ *
+ * Página de productos de Joyería Wuepa. Permite navegar por categorías,
+ * buscar productos y ver detalles básicos. Muestra productos filtrados
+ * según la búsqueda y la categoría seleccionada.
+ *
+ * Estructura:
+ * - Header: Barra de navegación, buscador y enlaces principales.
+ * - Sección principal: Hero, navegación de categorías, productos.
+ * - Footer: Información y enlaces rápidos.
+ *
+ * @returns {JSX.Element} Página de productos con categorías y búsqueda.
+ */
+
+// Datos de productos organizados por categoría
 const productsData = {
   collares: [
     { id: 1, name: 'Collar Corazón', price: 25, image: '/collar.png', description: 'Elegante collar con diseño de corazón' },
@@ -28,13 +43,21 @@ const productsData = {
   ]
 };
 
+/**
+ * Componente funcional principal para la página de productos.
+ */
 export default function Products() {
+  // Categoría activa seleccionada
   const [activeCategory, setActiveCategory] = useState<'collares' | 'aretes' | 'pulseras'>('collares');
+  // Estado para la búsqueda de productos
   const [searchQuery, setSearchQuery] = useState('');
+  // Usuario autenticado (no se usa en la vista, pero disponible)
   const { user } = useAuthStore();
+  // Navegación y ubicación para manejo de rutas
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Cambia la categoría activa según el parámetro de la URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const category = params.get('category');
@@ -43,18 +66,22 @@ export default function Products() {
     }
   }, [location.search]);
 
+  // Definición de categorías disponibles
   const categories = [
     { key: 'collares', label: 'Collares', icon: '💎' },
     { key: 'aretes', label: 'Aretes', icon: '✨' },
     { key: 'pulseras', label: 'Pulseras', icon: '💍' }
   ];
 
+  // Productos de la categoría activa
   const currentProducts = productsData[activeCategory];
+  // Filtra productos según la búsqueda (nombre o descripción)
   const filteredProducts = currentProducts.filter(product =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     product.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Renderizado principal de la página de productos
   return (
     <div className="products-page">
       {/* Header */}

@@ -1,27 +1,27 @@
 /**
- * Sitemap component
+ * Componente Sitemap
  *
- * This React functional component renders the footer section of the wuepa demo application.
- * It provides a structured "site map" with navigation links to key pages and authentication flows.
+ * Este componente funcional de React renderiza la sección de pie de página de la aplicación demo de wuepa.
+ * Proporciona un "mapa del sitio" estructurado con enlaces de navegación a páginas clave y flujos de autenticación.
  *
- * ## Behavior
- * - Displays grouped navigation links for general pages and authentication-related routes.
- * - Uses semantic HTML (`<footer>`, `<h3>`, `<ul>`, `<li>`) to improve readability and accessibility.
- * - Includes ARIA attributes (`role="contentinfo"`, `aria-label="Mapa del sitio"`) for screen reader support.
+ * ## Comportamiento
+ * - Muestra enlaces de navegación agrupados para páginas generales y rutas relacionadas con autenticación.
+ * - Utiliza HTML semántico (`<footer>`, `<h3>`, `<ul>`, `<li>`) para mejorar la legibilidad y accesibilidad.
+ * - Incluye atributos ARIA (`role="contentinfo"`, `aria-label="Mapa del sitio"`) para soporte de lectores de pantalla.
  *
- * ## Structure
- * - **Title:** "Mapa del sitio" heading.
- * - **Columns:**
- *   - Pages: Links to main sections such as Home, About, User Manual, Videocall demo, and Profile.
- *   - Authentication: Links to login, signup, password recovery, reset, and change password flows.
- * - **Footer note:** Copyright notice.
+ * ## Estructura
+ * - **Título:** Encabezado "Mapa del sitio".
+ * - **Columnas:**
+ *   - Páginas: Enlaces a secciones principales como Inicio, Sobre nosotros, Manual de usuario, Videollamada demo y Perfil.
+ *   - Autenticación: Enlaces a inicio de sesión, registro, recuperación, restablecimiento y cambio de contraseña.
+ * - **Nota de pie:** Aviso de copyright.
  *
- * ## Accessibility
- * - `role="contentinfo"` identifies the footer as a landmark region.
- * - `aria-label="Mapa del sitio"` provides a descriptive label for assistive technologies.
+ * ## Accesibilidad
+ * - `role="contentinfo"` identifica el footer como una región de referencia.
+ * - `aria-label="Mapa del sitio"` proporciona una etiqueta descriptiva para tecnologías de asistencia.
  *
- * @function Sitemap
- * @returns {JSX.Element} The rendered footer component containing navigation links and copyright.
+ * @función Sitemap
+ * @returns {JSX.Element} Componente de pie de página renderizado con enlaces de navegación y copyright.
  *
  */
 import React from 'react';

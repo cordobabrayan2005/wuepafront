@@ -14,39 +14,40 @@ import { validatePasswordRules } from "../utils/passwordRules";
  * @property {number} id
  * @property {string} author
  * @property {string} text
+ *
+ * (Nota: Tipos no utilizados en este archivo, pueden eliminarse si no son necesarios)
  */
 
 /**
- * Reset page component.
+ * Componente de restablecimiento de contraseña (Reset).
  *
- * Renders a password reset form that reads a token from the URL search params,
- * validates the new password and confirmation locally and calls the API to
- * perform the reset. Shows status messages and redirects to the login page
- * on success.
+ * Renderiza un formulario para restablecer la contraseña, leyendo el token desde los parámetros de la URL.
+ * Valida la nueva contraseña y la confirmación localmente y llama a la API para realizar el restablecimiento.
+ * Muestra mensajes de estado y redirige a la página de inicio de sesión en caso de éxito.
  *
- * @returns {JSX.Element} The reset password page.
+ * @returns {JSX.Element} Página de restablecimiento de contraseña.
  */
 export default function Reset() {
   /**
-   * URL search params hook. The reset token is expected in the "token" param.
+   * Hook para obtener los parámetros de búsqueda de la URL. El token de restablecimiento se espera en el parámetro "token".
    * @type {[URLSearchParams]}
    */
   const [sp] = useSearchParams();
   const navigate = useNavigate();
   const token = sp.get("token") || ""; // token comes from the emailed link
 
-  /** New password input value. */
+  /** Valor del campo de nueva contraseña. */
   const [password, setPassword] = useState("");
-  /** Confirm password input value. */
+  /** Valor del campo de confirmación de contraseña. */
   const [confirm, setConfirm] = useState("");
-  /** Status / feedback message shown to the user. */
+  /** Mensaje de estado o retroalimentación mostrado al usuario. */
   const [msg, setMsg] = useState("");
-  /** Message type controls styling: "success" | "error" | "info". */
+  /** Tipo de mensaje para el estilo: "success" | "error" | "info". */
   const [msgType, setMsgType] = useState<"success" | "error" | "info">("info");
 
   /**
-   * Add a page class for styling while the component is mounted.
-   * Cleanup removes the class on unmount.
+   * Añade una clase CSS a nivel de página mientras el componente está montado para el estilo.
+   * Elimina la clase al desmontar el componente.
    */
   useEffect(() => {
     document.body.classList.add("login-page");
@@ -54,19 +55,19 @@ export default function Reset() {
   }, []);
 
   /**
-   * Form submit handler.
+   * Manejador del envío del formulario.
    *
-  * Performs client-side validation:
-  *  - ensures a token is present
-  *  - valida que la contraseña cumpla letras, dígitos y símbolos requeridos
-  *  - checks password and confirmation match
+   * Realiza validaciones del lado del cliente:
+   *  - asegura que el token esté presente
+   *  - valida que la contraseña cumpla letras, dígitos y símbolos requeridos
+   *  - verifica que la contraseña y la confirmación coincidan
    *
-   * On success it calls api.reset(token, password, confirm) and then redirects
-   * to the login page after a short delay.
+   * Si todo es correcto, llama a api.reset(token, password) y luego redirige
+   * a la página de inicio de sesión tras un breve retraso.
    *
-   * Errors from the API are displayed in the status message.
+   * Los errores de la API se muestran en el mensaje de estado.
    *
-   * @param {React.FormEvent} e - The form submit event.
+   * @param {React.FormEvent} e - Evento de envío del formulario.
    * @returns {Promise<void>}
    */
   async function onSubmit(e: React.FormEvent) {

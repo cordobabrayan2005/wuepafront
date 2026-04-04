@@ -8,8 +8,8 @@ const DIGIT_REGEX = /\d/g;
 const SPECIAL_REGEX = /[^A-Za-z0-9\s]/g;
 
 /**
- * Validates password against custom requirements.
- * Requires at least five letters, three digits, and one special symbol.
+ * Valida la contraseña según requisitos personalizados.
+ * Requiere al menos cinco letras, tres dígitos y un símbolo especial.
  */
 export function validatePasswordRules(password: string): PasswordValidationResult {
   const letters = password.match(LETTER_REGEX)?.length ?? 0;

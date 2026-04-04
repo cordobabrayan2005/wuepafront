@@ -4,7 +4,7 @@ import { api } from "../services/api";
 import { useAuthStore } from "../stores/authStore";
 
 /**
- * Shape of the profile data returned by the backend.
+ * Estructura de los datos de perfil devueltos por el backend.
  * @typedef {Object} ProfileData
  * @property {string} [name]
  * @property {string} [lastname]
@@ -13,28 +13,28 @@ import { useAuthStore } from "../stores/authStore";
  */
 
 /**
- * Profile page component.
+ * Componente de la página de perfil.
  *
- * Responsibilities:
- * - Fetches the authenticated user's data via `api.me()`.
- * - Shows a centered loading state with a spinner while contacting the backend.
- * - Allows editing and updating (PUT) the basic profile fields.
- * - Allows deleting the account and logging out.
- * - Uses the auth store (`useAuthStore`) to immediately show data if already in memory.
+ * Responsabilidades:
+ * - Obtiene los datos del usuario autenticado mediante `api.me()`.
+ * - Muestra un estado de carga centrado con spinner mientras contacta al backend.
+ * - Permite editar y actualizar (PUT) los campos básicos del perfil.
+ * - Permite eliminar la cuenta y cerrar sesión.
+ * - Usa el store de autenticación (`useAuthStore`) para mostrar datos inmediatos si ya están en memoria.
  *
- * State:
- * - `me`: Current profile data (or null while loading).
- * - `form`: Temporary values for editing.
- * - `editing`: Flag to enable edit mode.
- * - `msg`: Feedback message (success / error).
+ * Estado:
+ * - `me`: Datos actuales del perfil (o null mientras carga).
+ * - `form`: Valores temporales para edición.
+ * - `editing`: Bandera para habilitar modo edición.
+ * - `msg`: Mensaje de retroalimentación (éxito / error).
  *
- * Accessibility:
- * - Spinner with `role="status"` and `aria-live` for screen reader users.
- * - Visible labels associated with each editable field.
+ * Accesibilidad:
+ * - Spinner con `role="status"` y `aria-live` para usuarios de lector de pantalla.
+ * - Etiquetas visibles asociadas a cada campo editable.
  *
- * Errors:
- * - If the initial load fails, the error text is stored in `msg`.
- * - If there is no token, a sign-in prompt is shown.
+ * Errores:
+ * - Si la carga inicial falla, el texto de error se almacena en `msg`.
+ * - Si no hay token, se muestra un mensaje para iniciar sesión.
  */
 export default function Profile() {
   const [me, setMe] = useState<any>(null);
@@ -46,12 +46,12 @@ export default function Profile() {
     age: "",
     email: ""
   });
-  // Password is never editable or retrievable; only a masked display.
+  // La contraseña nunca es editable ni recuperable; solo se muestra enmascarada.
   const navigate = useNavigate();
   const { user, isAuthed, logout } = useAuthStore();
 
   /**
-   * Loads the profile data from the backend and syncs the form state.
+   * Carga los datos del perfil desde el backend y sincroniza el estado del formulario.
    * @async
    * @returns {Promise<void>}
    */
@@ -72,7 +72,7 @@ export default function Profile() {
   }
 
   useEffect(() => {
-    // If we already have the user in the store, show it immediately to avoid a flash.
+    // Si ya tenemos el usuario en el store, lo mostramos de inmediato para evitar parpadeo.
     if (user && !me) {
       setMe(user);
       setForm({
@@ -82,22 +82,22 @@ export default function Profile() {
         email: user.email || ""
       });
     }
-    // Always attempt to sync with the backend to avoid stale data.
+    // Siempre intentamos sincronizar con el backend para evitar datos desactualizados.
     load();
   }, []);
 
   /**
-   * Updates a specific field in the edit form.
+   * Actualiza un campo específico en el formulario de edición.
    * @template K
-   * @param {K} key Field key to update.
-   * @param {any} value New value for the field.
+   * @param {K} key Clave del campo a actualizar.
+   * @param {any} value Nuevo valor para el campo.
    */
   function set<K extends keyof typeof form>(key: K, value: any) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
   /**
-   * Submits form changes to the backend (PUT /profile).
+   * Envía los cambios del formulario al backend (PUT /profile).
    * @async
    * @returns {Promise<void>}
    */
@@ -121,8 +121,8 @@ export default function Profile() {
   }
 
   /**
-   * Deletes the current user's account (DELETE /profile) after confirmation.
-   * Clears the session and redirects to /login.
+   * Elimina la cuenta del usuario actual (DELETE /profile) tras confirmación.
+   * Limpia la sesión y redirige a /login.
    * @async
    * @returns {Promise<void>}
    */
@@ -140,25 +140,27 @@ export default function Profile() {
   }
 
 
-  /** Handle save button click (no email/password edits allowed). */
+  /** Maneja el clic en el botón de guardar (no se permite editar email/contraseña). */
   function handleSaveClick() {
     if (!editing) { setEditing(true); return; }
     save();
   }
 
+  // Verifica si hay token o sesión activa
   const hasToken = !!localStorage.getItem("user") || isAuthed;
   if (!hasToken && !isAuthed) {
-    console.warn('[Profile] No token found in localStorage or store');
+    console.warn('[Profile] No se encontró token en localStorage ni en el store');
     return (
       <div className="profile-loading">
-        <p>Please sign in first.</p>
+        <p>Por favor, inicia sesión primero.</p>
       </div>
     );
   }
+  // Estado de carga mientras se obtienen los datos
   if (!me) return (
     <div className="profile-loading" role="status" aria-live="polite" aria-label="Cargando perfil">
       <div className="spinner" aria-hidden="true" />
-      <p>Loading profile...</p>
+      <p>Cargando perfil...</p>
     </div>
   );
 

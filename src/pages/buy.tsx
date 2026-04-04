@@ -1,8 +1,22 @@
+/**
+ * Componente Buy
+ *
+ * Página principal de compra de Joyería Wuepa. Permite buscar productos, ver categorías,
+ * productos destacados y nuevos productos. Muestra información del usuario autenticado.
+ *
+ * Estructura:
+ * - Header: Barra de navegación, buscador y enlaces principales.
+ * - Sección principal: Banner, categorías, productos destacados.
+ * - Sidebar: Información del usuario y nuevos productos.
+ *
+ * @returns {JSX.Element} Página de compra con productos y categorías.
+ */
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
+// Lista de productos disponibles
 const products = [
   { id: 1, name: 'Collar Corazón', price: 25, image: '/collar.png' },
   { id: 2, name: 'Aretes Perla', price: 18, image: '/arete.png' },
@@ -18,6 +32,7 @@ const products = [
   { id: 12, name: 'Pulsera Plata', price: 30, image: '/pulsera-plata.png' }
 ];
 
+// Lista de productos más vendidos o nuevos
 const bestSellers = [
   { id: 101, name: 'Arete Flor', price: 16, image: '/arete-flor.png' },
   { id: 102, name: 'Pulsera Doble', price: 24, image: '/pulsera-doble.png' },
@@ -25,18 +40,26 @@ const bestSellers = [
   { id: 104, name: 'Anillo Perla', price: 27, image: '/anillo-perla.png' }
 ];
 
+/**
+ * Componente funcional principal para la página de compra.
+ */
 export default function Buy() {
+  // Estado para la búsqueda de productos
   const [searchQuery, setSearchQuery] = useState('');
+  // Usuario autenticado obtenido del store
   const { user } = useAuthStore();
 
+  // Filtra productos según la búsqueda
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Filtra productos destacados según la búsqueda
   const filteredBestSellers = bestSellers.filter(item =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Renderizado principal de la página
   return (
     <main className="buy-page">
       <header className="buy-header">

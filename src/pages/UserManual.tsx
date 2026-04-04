@@ -1,12 +1,12 @@
 /**
- * UserManual Component
- * 
- * A comprehensive user manual for the wuepa platform, providing step-by-step
- * instructions for all features and functionality. This component is accessible
- * to all users regardless of authentication status.
- * 
- * @component
- * @returns Complete user manual with navigation, feature explanations, and troubleshooting
+ * Componente UserManual
+ *
+ * Manual de usuario completo para la plataforma wuepa, proporcionando instrucciones paso a paso
+ * para todas las funciones y características. Este componente es accesible
+ * para todos los usuarios sin importar su estado de autenticación.
+ *
+ * @componente
+ * @returns Manual de usuario completo con navegación, explicación de funcionalidades y solución de problemas
  */
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
@@ -15,7 +15,7 @@ export default function UserManual() {
   const [activeSection, setActiveSection] = useState("getting-started");
 
   /**
-   * Navigation items for the user manual sections
+   * Elementos de navegación para las secciones del manual de usuario
    */
   const sections = [
     { id: "getting-started", title: "Primeros Pasos", icon: "🚀" },
@@ -28,8 +28,8 @@ export default function UserManual() {
   ];
 
   /**
-   * Handles section navigation
-   * @param sectionId - The ID of the section to navigate to
+   * Maneja la navegación entre secciones
+   * @param sectionId - El ID de la sección a la que navegar
    */
   const navigateToSection = (sectionId: string) => {
     setActiveSection(sectionId);

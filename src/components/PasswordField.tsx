@@ -1,25 +1,25 @@
 /**
- * PasswordField component that renders a password input with a visibility toggle.
+ * Componente PasswordField que renderiza un campo de contraseña con opción de mostrar/ocultar.
  *
- * This component provides a labeled password field with an eye-icon button
- * allowing the user to show or hide the password text. It supports customization
- * through props such as name, placeholder, class names, and autocomplete options.
+ * Este componente proporciona un campo de contraseña con etiqueta y un botón con ícono de ojo
+ * que permite al usuario mostrar u ocultar el texto de la contraseña. Soporta personalización
+ * mediante props como nombre, placeholder, clases y opciones de autocompletado.
  *
- * @component
- * @param {Object} props - Props for the PasswordField component.
- * @param {string} [props.id="password"] - The HTML `id` for the input element.
- * @param {string} [props.name="password"] - The input `name` attribute.
- * @param {string} [props.label="Contraseña"] - Label text displayed above the field.
- * @param {string} [props.placeholder="••••••••"] - Placeholder displayed inside the input.
- * @param {string} [props.value] - Current value of the password input.
- * @param {(e: React.ChangeEvent<HTMLInputElement>) => void} [props.onChange] - Change handler for the input.
- * @param {boolean} [props.required] - Whether the input is required.
- * @param {string} [props.className="login-input"] - Custom CSS class for the input element.
- * @param {string} [props.autoComplete="current-password"] - Autocomplete attribute for browser autofill.
+ * @componente
+ * @param {Object} props - Propiedades para el componente PasswordField.
+ * @param {string} [props.id="password"] - El atributo HTML `id` para el input.
+ * @param {string} [props.name="password"] - El atributo `name` del input.
+ * @param {string} [props.label="Contraseña"] - Texto de la etiqueta mostrado arriba del campo.
+ * @param {string} [props.placeholder="••••••••"] - Placeholder mostrado dentro del input.
+ * @param {string} [props.value] - Valor actual del campo de contraseña.
+ * @param {(e: React.ChangeEvent<HTMLInputElement>) => void} [props.onChange] - Manejador de cambio para el input.
+ * @param {boolean} [props.required] - Si el campo es obligatorio.
+ * @param {string} [props.className="login-input"] - Clase CSS personalizada para el input.
+ * @param {string} [props.autoComplete="current-password"] - Atributo de autocompletado para el navegador.
  *
- * @returns {JSX.Element} A password input field with a show/hide toggle button.
+ * @returns {JSX.Element} Campo de contraseña con botón para mostrar/ocultar.
  *
- * @example
+ * @ejemplo
  * <PasswordField
  *   value={password}
  *   onChange={(e) => setPassword(e.target.value)}

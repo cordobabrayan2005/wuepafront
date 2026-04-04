@@ -1,21 +1,21 @@
 /**
- * Sidebar component that provides a collapsible navigation panel.
+ * Componente Sidebar que proporciona un panel de navegación colapsable.
  *
- * This component displays a side menu containing navigation links, user actions,
- * and a logout button. It supports opening/closing behavior and overlays the rest
- * of the UI when active. The sidebar also closes automatically when navigating
- * to a different route or after logging out.
+ * Este componente muestra un menú lateral con enlaces de navegación, acciones de usuario
+ * y un botón para cerrar sesión. Soporta comportamiento de abrir/cerrar y superpone el resto
+ * de la interfaz cuando está activo. El sidebar también se cierra automáticamente al navegar
+ * a otra ruta o después de cerrar sesión.
  *
- * @component
- * @param {Object} SidebarProps - Props for the Sidebar component.
- * @param {boolean} SidebarProps.isOpen - Controls whether the sidebar is visible.
- * @param {() => void} SidebarProps.onClose - Callback executed when the sidebar should close.
- * @param {() => void} SidebarProps.onLogout - Callback triggered when the user logs out.
- * @param {boolean} [SidebarProps.isAuthed] - Optional flag indicating authentication status.
+ * @componente
+ * @param {Object} SidebarProps - Propiedades para el componente Sidebar.
+ * @param {boolean} SidebarProps.isOpen - Controla si el sidebar es visible.
+ * @param {() => void} SidebarProps.onClose - Callback ejecutado cuando se debe cerrar el sidebar.
+ * @param {() => void} SidebarProps.onLogout - Callback disparado cuando el usuario cierra sesión.
+ * @param {boolean} [SidebarProps.isAuthed] - Bandera opcional que indica el estado de autenticación.
  *
- * @returns {JSX.Element} A collapsible sidebar containing navigation links and user options.
+ * @returns {JSX.Element} Sidebar colapsable con enlaces de navegación y opciones de usuario.
  *
- * @example
+ * @ejemplo
  * <Sidebar
  *   isOpen={isSidebarOpen}
  *   onClose={() => setSidebarOpen(false)}
@@ -41,10 +41,10 @@ export default function Sidebar({ isOpen, onClose, onLogout, isAuthed }: Sidebar
 
   return (
     <>
-      {/* Overlay */}
+      {/* Capa de fondo (overlay) */}
       {isOpen && <div className="sidebar-overlay" onClick={onClose}></div>}
       
-      {/* Sidebar */}
+      {/* Sidebar (menú lateral) */}
       <div className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-header">
           <NavLink to="/" className="sidebar-brand" onClick={onClose}>

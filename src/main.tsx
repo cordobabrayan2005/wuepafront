@@ -1,12 +1,12 @@
-/* The code snippet you provided is importing necessary modules and components for a TypeScript React
-application. Here's a breakdown of each import statement: */
+/* Este fragmento de código importa los módulos y componentes necesarios para una aplicación React con TypeScript.
+A continuación se explica cada importación: */
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./styles.scss";
 
-/* This code snippet is using ReactDOM's experimental createRoot API to render the React application.
-Here's a breakdown of what it does: */
+/* Este fragmento utiliza la API experimental createRoot de ReactDOM para renderizar la aplicación React.
+Descripción de lo que realiza: */
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />

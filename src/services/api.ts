@@ -1,9 +1,9 @@
-// Simplified API service for offline/demo mode
-// All methods return mock data without making real network calls
+// Servicio API simplificado para modo offline/demostración
+// Todos los métodos retornan datos simulados sin realizar llamadas reales a la red
 
 export const api = {
   login: async (email: string, password: string) => {
-    // Simulate login delay
+    // Simula el retardo de inicio de sesión
     await new Promise(resolve => setTimeout(resolve, 500));
 
     if (email && password) {
@@ -22,7 +22,7 @@ export const api = {
   },
 
   register: async (userData: any) => {
-    // Simulate registration delay
+    // Simula el retardo de registro
     await new Promise(resolve => setTimeout(resolve, 500));
 
     return {
@@ -38,7 +38,7 @@ export const api = {
   },
 
   signup: async (userData: any) => {
-    // Alias for register to keep compatibility with Signup.tsx
+    // Alias de register para mantener compatibilidad con Signup.tsx
     return api.register(userData);
   },
 

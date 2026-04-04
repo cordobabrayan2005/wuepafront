@@ -1,41 +1,40 @@
-/* The code snippet is importing necessary modules and functions from the React library and a custom
-API service file. */
+/* Este fragmento importa los módulos y funciones necesarios de React y el servicio API personalizado. */
 // src/pages/Forgot.tsx
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../services/api";
 
 /**
- * Forgot password page component.
+ * Componente de recuperación de contraseña (Forgot).
  *
- * Renders a simple "forgot password" form where the user can enter their email
- * to receive a password reset link. Calls the api.forgot service and displays
- * success or error feedback. Adds a page-level CSS class while mounted.
+ * Renderiza un formulario simple donde el usuario puede ingresar su correo electrónico
+ * para recibir un enlace de restablecimiento de contraseña. Llama al servicio api.forgot
+ * y muestra mensajes de éxito o error. Añade una clase CSS a nivel de página mientras está montado.
  *
- * @returns {JSX.Element} The forgot password page.
+ * @returns {JSX.Element} Página de recuperación de contraseña.
  */
 export default function Forgot() {
   /**
-   * Email input value for the recovery request.
+   * Valor del campo de correo electrónico para la solicitud de recuperación.
    * @type {string}
    */
   const [email, setEmail] = useState("");
 
   /**
-   * Status message shown to the user after submitting the form.
+   * Mensaje de estado mostrado al usuario tras enviar el formulario.
    * @type {string}
    */
   const [msg, setMsg] = useState("");
 
   /**
-   * Message type used for styling: "success" | "error" | "info".
+   * Tipo de mensaje para el estilo: "success" | "error" | "info".
    * @type {"success" | "error" | "info"}
    */
   const [msgType, setMsgType] = useState<"success" | "error" | "info">("info");
 
   /**
-   * Add a page-level class while the component is mounted for styling purposes.
-   * Cleans up the class on unmount.
+   * Añade una clase CSS a nivel de página mientras el componente está montado para el estilo.
+   * Elimina la clase al desmontar el componente.
    */
   useEffect(() => {
     document.body.classList.add("login-page");
@@ -43,13 +42,13 @@ export default function Forgot() {
   }, []);
 
   /**
-   * Form submit handler.
+   * Manejador del envío del formulario.
    *
-   * Sends a password recovery request to the API using the provided email.
-   * On success shows a generic success message (to avoid leaking account existence).
-   * On failure displays the API error message if available.
+   * Envía una solicitud de recuperación de contraseña a la API usando el correo proporcionado.
+   * Si es exitoso, muestra un mensaje genérico de éxito (para no revelar la existencia de la cuenta).
+   * Si falla, muestra el mensaje de error de la API si está disponible.
    *
-   * @param {React.FormEvent} e - The form submit event.
+   * @param {React.FormEvent} e - Evento de envío del formulario.
    * @returns {Promise<void>}
    */
   async function submit(e: React.FormEvent) {
