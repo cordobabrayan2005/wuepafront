@@ -216,10 +216,6 @@ export default function Signup() {
                   <img src="/google.png" alt="Google" />
                   Google
                 </button>
-                <button type="button" className="social-button facebook-button" onClick={() => console.log('Facebook signup')}>
-                  <img src="/faceb.png" alt="Facebook" />
-                  Facebook
-                </button>
               </div>
             </div>
           </form>

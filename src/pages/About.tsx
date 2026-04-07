@@ -95,7 +95,7 @@ export default function About() {
         </div>
 
         <div style={{ marginTop: 28 }}>
-          <Link to="/wuepa" className="primary-btn">Volver al inicio</Link>
+          <Link to="/buy" className="primary-btn">Volver al inicio</Link>
         </div>
       </section>
     </main>

@@ -12,7 +12,7 @@
  * @returns {JSX.Element} Página de compra con productos y categorías.
  */
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
@@ -46,8 +46,13 @@ const bestSellers = [
 export default function Buy() {
   // Estado para la búsqueda de productos
   const [searchQuery, setSearchQuery] = useState('');
-  // Usuario autenticado obtenido del store
-  const { user } = useAuthStore();
+  // Usuario autenticado y logout obtenido del store
+  const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   // Filtra productos según la búsqueda
   const filteredProducts = products.filter(product =>
@@ -80,7 +85,7 @@ export default function Buy() {
           <Link to="/buy">Inicio</Link>
           <Link to="/products">Productos</Link>
           <Link to="/about">Nosotros</Link>
-          <Link to="/contact">Contacto</Link>
+          <button onClick={handleLogout} className="logout-btn" style={{marginLeft: 16, background: 'transparent', color: '#e74c3c', border: 'none', padding: '8px 16px', borderRadius: 4, cursor: 'pointer'}}>Cerrar sesión</button>
         </nav>
       </header>
 
@@ -151,3 +156,4 @@ export default function Buy() {
     </main>
   );
 }
+

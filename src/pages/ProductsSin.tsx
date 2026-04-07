@@ -46,7 +46,7 @@ const productsData = {
 /**
  * Componente funcional principal para la página de productos.
  */
-export default function Products() {
+export default function ProductsSin() {
   // Categoría activa seleccionada
   const [activeCategory, setActiveCategory] = useState<'collares' | 'aretes' | 'pulseras'>('collares');
   // Estado para la búsqueda de productos
@@ -100,7 +100,7 @@ export default function Products() {
           />
         </div>
         <nav className="header-right">
-          <Link to="/buy">Inicio</Link>
+          <Link to="/">Inicio</Link>
           <Link to="/products" className="active">Productos</Link>
           <Link to="/about">Nosotros</Link>
         </nav>
@@ -133,8 +133,24 @@ export default function Products() {
           <div className="products-grid">
             {filteredProducts.map((product) => (
               <article key={product.id} className="product-card-simple">
-                <button className="product-whatsapp-btn">
-                  WhatsApp
+                <button
+                  className="product-login-btn"
+                  onClick={() => navigate('/login')}
+                  style={{
+                    background: '#e67e22',
+                    color: 'white',
+                    borderRadius: '2rem',
+                    padding: '0.75rem 2rem',
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    textDecoration: 'none',
+                    fontSize: '1rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    width: '100%'
+                  }}
+                >
+                  Iniciar Sesión
                 </button>
               </article>
             ))}

@@ -126,35 +126,62 @@ export default function Home() {
           <p className="wuepa-hero-text">Descubre la colección más exclusiva de joyas y accesorios diseñados para realzar tu belleza única</p>
           <div className="wuepa-hero-actions">
             <button onClick={() => navigate('/products')} className="btn-primary">Comenzar Ahora →</button>
-            <button onClick={() => navigate('/products')} className="btn-secondary">Explorar Colección</button>
+            <button onClick={() => navigate('/productssin')} className="btn-secondary">Explorar Catálogo</button>
           </div>
         </section>
 
         <section className="wuepa-categories">
-          <div className="category-card">
-            <ImageWithFallback src="/W.png" alt="Collares" className="w-full h-full object-cover" />
+          <div className="category-card" onClick={() => navigate('/productssin?category=collares')} style={{ cursor: 'pointer' }}>
+            <ImageWithFallback src="/collarwue.png" alt="Collares" className="w-full h-full object-cover" />
             <div className="backdrop"></div>
             <div className="content">
               <h3>Collares</h3>
               <p>Elegancia atemporal</p>
             </div>
           </div>
-          <div className="category-card">
-            <ImageWithFallback src="/W.png" alt="Aretes" className="w-full h-full object-cover" />
+          <div className="category-card" onClick={() => navigate('/productssin?category=aretes')} style={{ cursor: 'pointer' }}>
+            <ImageWithFallback src="/areteswue.png" alt="Aretes" className="w-full h-full object-cover" />
             <div className="backdrop"></div>
             <div className="content">
               <h3>Aretes</h3>
               <p>Brillo perfecto</p>
             </div>
           </div>
-          <div className="category-card">
-            <ImageWithFallback src="/W.png" alt="Pulseras" className="w-full h-full object-cover" />
+          <div className="category-card" onClick={() => navigate('/productssin?category=pulseras')} style={{ cursor: 'pointer' }}>
+            <ImageWithFallback src="/pulseraswue.png" alt="Pulseras" className="w-full h-full object-cover" />
             <div className="backdrop"></div>
             <div className="content">
               <h3>Pulseras</h3>
               <p>Estilo único</p>
             </div>
           </div>
+        </section>
+
+        <section className="product-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', margin: '2rem 0' }}>
+          {[...Array(8)].map((_, i) => (
+            <article key={i} className="product-card">
+              <button
+                className="login-btn"
+                style={{
+                  display: 'inline-block',
+                  background: '#e67e22',
+                  color: 'white',
+                  borderRadius: '2rem',
+                  padding: '0.75rem 2rem',
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  textDecoration: 'none',
+                  fontSize: '1rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                  width: '100%'
+                }}
+                onClick={() => navigate('/login')}
+              >
+                INICIAR SESIÓN
+              </button>
+            </article>
+          ))}
         </section>
 
         <section className="wuepa-cta">
@@ -185,7 +212,6 @@ export default function Home() {
             <h3>Información</h3>
             <ul>
               <li><a href="#">Sobre Nosotros</a></li>
-              <li><a href="#">Contacto</a></li>
               <li><a href="#">FAQ</a></li>
             </ul>
           </div>

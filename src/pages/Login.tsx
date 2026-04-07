@@ -175,10 +175,6 @@ export default function Login({ onAuth }: Props) {
                   <img src="/google.png" alt="Google" />
                   Google
                 </button>
-                <button type="button" className="social-button facebook-button" onClick={() => handleSocialLogin('facebook')} disabled={isLoading}>
-                  <img src="/faceb.png" alt="Facebook" />
-                  Facebook
-                </button>
               </div>
             </div>
           </form>

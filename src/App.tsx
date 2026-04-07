@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import Home from "./pages/Home";
 import Buy from "./pages/buy";
 import Products from "./pages/Products";
+import ProductsSin from "./pages/ProductsSin";
 import { useAuthStore } from './stores/authStore';
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -73,6 +74,7 @@ function Shell() {
           <Route path="/user-manual" element={<UserManual />} />
           <Route path="/buy" element={<ProtectedRoute><Buy /></ProtectedRoute>} />
           <Route path="/products" element={<Products />} />
+          <Route path="/productssin" element={<ProductsSin />} />
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </main>
