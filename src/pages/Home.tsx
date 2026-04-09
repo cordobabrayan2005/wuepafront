@@ -132,7 +132,7 @@ export default function Home() {
 
         <section className="wuepa-categories">
           <div className="category-card" onClick={() => navigate('/productssin?category=collares')} style={{ cursor: 'pointer' }}>
-            <ImageWithFallback src="/collarwue.png" alt="Collares" className="w-full h-full object-cover" />
+            <ImageWithFallback src="/Collareswue.png" alt="Collares" className="w-full h-full object-cover" />
             <div className="backdrop"></div>
             <div className="content">
               <h3>Collares</h3>
@@ -140,7 +140,7 @@ export default function Home() {
             </div>
           </div>
           <div className="category-card" onClick={() => navigate('/productssin?category=aretes')} style={{ cursor: 'pointer' }}>
-            <ImageWithFallback src="/areteswue.png" alt="Aretes" className="w-full h-full object-cover" />
+            <ImageWithFallback src="/AretesWue.png" alt="Aretes" className="w-full h-full object-cover" />
             <div className="backdrop"></div>
             <div className="content">
               <h3>Aretes</h3>
@@ -148,7 +148,7 @@ export default function Home() {
             </div>
           </div>
           <div className="category-card" onClick={() => navigate('/productssin?category=pulseras')} style={{ cursor: 'pointer' }}>
-            <ImageWithFallback src="/pulseraswue.png" alt="Pulseras" className="w-full h-full object-cover" />
+            <ImageWithFallback src="/Pulseraswue.png" alt="Pulseras" className="w-full h-full object-cover" />
             <div className="backdrop"></div>
             <div className="content">
               <h3>Pulseras</h3>
