@@ -4,6 +4,7 @@ import { api } from "../services/api";
 import PasswordField from "../components/PasswordField";
 import { useNavigate } from "react-router-dom";
 import { validatePasswordRules } from "../utils/passwordRules";
+import { useAuthStore } from "../stores/authStore";
 
 /**
  * Componente Signup que renderiza un formulario de registro para nuevos usuarios.
@@ -45,6 +46,7 @@ export default function Signup() {
   const [msgType, setMsgType] = useState<"success" | "error" | "info">("info");
 
   const navigate = useNavigate();
+  const checkAuth = useAuthStore((state) => state.checkAuth);
 
   /**
    * Añade una clase CSS al body cuando el componente se monta,
@@ -103,6 +105,7 @@ export default function Signup() {
         confirmPassword: form.confirmPassword
       };
       await api.signup(formData);
+      checkAuth();
       setMsg("Cuenta creada sin problemas. Redirigiendo a compras...");
       setMsgType("success");
       navigate("/buy", {

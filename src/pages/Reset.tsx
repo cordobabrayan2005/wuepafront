@@ -34,7 +34,7 @@ export default function Reset() {
    */
   const [sp] = useSearchParams();
   const navigate = useNavigate();
-  const token = sp.get("token") || ""; // token comes from the emailed link
+  const token = sp.get("oobCode") || sp.get("token") || "";
 
   /** Valor del campo de nueva contraseña. */
   const [password, setPassword] = useState("");

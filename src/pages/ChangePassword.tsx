@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { api } from "../services/api";
 import PasswordField from "../components/PasswordField";
 import { validatePasswordRules } from "../utils/passwordRules";
+import { useAuthStore } from "../stores/authStore";
 
 /**
  * Componente ChangePassword.
@@ -17,6 +18,7 @@ import { validatePasswordRules } from "../utils/passwordRules";
  * @returns {JSX.Element} Página para cambiar la contraseña.
  */
 export default function ChangePassword() {
+  const isAuthed = useAuthStore((state) => state.isAuthed);
   /**
    * Valor del campo de la contraseña actual.
    * @type {string}
@@ -81,7 +83,7 @@ export default function ChangePassword() {
   }
 
   // Si el usuario no está autenticado, se le solicita iniciar sesión primero.
-  if (!localStorage.getItem("token")) {
+  if (!isAuthed && !localStorage.getItem("token")) {
     return <div className="container">Inicia sesión para cambiar tu contraseña.</div>;
   }
 

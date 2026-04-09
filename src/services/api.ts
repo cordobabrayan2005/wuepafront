@@ -1,78 +1,170 @@
-// Servicio API simplificado para modo offline/demostración
-// Todos los métodos retornan datos simulados sin realizar llamadas reales a la red
+import {
+  EmailAuthProvider,
+  confirmPasswordReset,
+  createUserWithEmailAndPassword,
+  reauthenticateWithCredential,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  updatePassword,
+} from 'firebase/auth';
+import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { auth, db, googleProvider } from '../config/firebase';
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  lastname: string;
+  age: number;
+}
+
+interface SignupPayload {
+  name: string;
+  lastname: string;
+  age: number;
+  email: string;
+  password: string;
+}
+
+const USERS_COLLECTION = 'users';
+
+function normalizeFirebaseError(error: unknown) {
+  if (typeof error === 'object' && error && 'code' in error) {
+    const code = String((error as { code?: string }).code);
+
+    switch (code) {
+      case 'auth/email-already-in-use':
+        return new Error('Ese correo ya está registrado.');
+      case 'auth/invalid-credential':
+      case 'auth/wrong-password':
+      case 'auth/user-not-found':
+        return new Error('Correo o contraseña inválidos.');
+      case 'auth/invalid-email':
+        return new Error('Debes ingresar un correo válido.');
+      case 'auth/popup-closed-by-user':
+        return new Error('Se cerró la ventana de inicio de sesión.');
+      case 'auth/requires-recent-login':
+        return new Error('Vuelve a iniciar sesión para completar esta acción.');
+      case 'auth/weak-password':
+        return new Error('La contraseña no cumple con los requisitos de seguridad.');
+      case 'auth/missing-password':
+        return new Error('Debes ingresar una contraseña válida.');
+      case 'auth/invalid-action-code':
+        return new Error('El enlace de recuperación es inválido o ya expiró.');
+      default:
+        break;
+    }
+  }
+
+  if (error instanceof Error) {
+    return error;
+  }
+
+  return new Error('Ocurrió un error inesperado.');
+}
+
+async function buildUserProfile(userId: string, emailFallback: string | null): Promise<AuthUser> {
+  const snapshot = await getDoc(doc(db, USERS_COLLECTION, userId));
+  const data = snapshot.data();
+
+  return {
+    id: userId,
+    email: data?.email ?? emailFallback ?? '',
+    name: data?.name ?? '',
+    lastname: data?.lastname ?? '',
+    age: typeof data?.age === 'number' ? data.age : Number(data?.age ?? 0),
+  };
+}
+
+async function persistUserProfile(user: AuthUser) {
+  await setDoc(
+    doc(db, USERS_COLLECTION, user.id),
+    {
+      email: user.email,
+      name: user.name,
+      lastname: user.lastname,
+      age: user.age,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true },
+  );
+}
 
 export const api = {
   login: async (email: string, password: string) => {
-    // Simula el retardo de inicio de sesión
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      const user = await buildUserProfile(credential.user.uid, credential.user.email);
+      const token = await credential.user.getIdToken();
 
-    if (email && password) {
-      return {
-        user: {
-          id: '1',
-          email,
-          name: 'Usuario',
-          lastname: 'Demo',
-          age: 25
-        },
-        token: 'mock-token-' + Date.now()
-      };
+      return { user, token };
+    } catch (error) {
+      throw normalizeFirebaseError(error);
     }
-    throw new Error('Credenciales inválidas');
   },
 
-  register: async (userData: any) => {
-    // Simula el retardo de registro
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    return {
-      user: {
-        id: '1',
-        email: userData.email,
+  register: async (userData: SignupPayload) => {
+    try {
+      const credential = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
+      const user: AuthUser = {
+        id: credential.user.uid,
+        email: credential.user.email ?? userData.email,
         name: userData.name,
         lastname: userData.lastname,
-        age: userData.age
-      },
-      token: 'mock-token-' + Date.now()
-    };
+        age: userData.age,
+      };
+
+      await setDoc(doc(db, USERS_COLLECTION, user.id), {
+        email: user.email,
+        name: user.name,
+        lastname: user.lastname,
+        age: user.age,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      const token = await credential.user.getIdToken();
+      return { user, token };
+    } catch (error) {
+      throw normalizeFirebaseError(error);
+    }
   },
 
-  signup: async (userData: any) => {
-    // Alias de register para mantener compatibilidad con Signup.tsx
-    return api.register(userData);
-  },
+  signup: async (userData: SignupPayload) => api.register(userData),
 
   me: async () => {
-    return {
-      id: '1',
-      email: 'usuario@demo.com',
-      name: 'Usuario',
-      lastname: 'Demo',
-      age: 25
-    };
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      throw new Error('No hay una sesión activa.');
+    }
+
+    try {
+      return await buildUserProfile(currentUser.uid, currentUser.email);
+    } catch (error) {
+      throw normalizeFirebaseError(error);
+    }
   },
 
   forgot: async (email: string) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    if (email) {
+    try {
+      await sendPasswordResetEmail(auth, email);
       return { message: 'Enlace de recuperación enviado.' };
+    } catch (error) {
+      throw normalizeFirebaseError(error);
     }
-    throw new Error('Debes ingresar un correo válido.');
   },
 
   reset: async (token: string, password: string) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    if (token && password) {
+    try {
+      await confirmPasswordReset(auth, token, password);
       return { message: 'Contraseña actualizada.' };
+    } catch (error) {
+      throw normalizeFirebaseError(error);
     }
-    throw new Error('Token o contraseña inválidos.');
   },
 
   changePassword: async (currentPassword: string, newPassword: string, confirmPassword: string) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-
     if (!currentPassword || !newPassword || !confirmPassword) {
       throw new Error('Todos los campos son obligatorios.');
     }
@@ -81,28 +173,44 @@ export const api = {
       throw new Error('Las contraseñas no coinciden.');
     }
 
-    if (newPassword.length < 6) {
-      throw new Error('La contraseña debe tener mínimo 6 caracteres.');
+    const currentUser = auth.currentUser;
+    if (!currentUser || !currentUser.email) {
+      throw new Error('No hay una sesión activa.');
     }
 
-    // Simulación de éxito
-    return {
-      message: 'Contraseña cambiada correctamente.'
-    };
+    try {
+      const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
+      await reauthenticateWithCredential(currentUser, credential);
+      await updatePassword(currentUser, newPassword);
+
+      return { message: 'Contraseña cambiada correctamente.' };
+    } catch (error) {
+      throw normalizeFirebaseError(error);
+    }
   },
 
-  socialLogin: async (idToken: string, provider: string) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
+  socialLogin: async (_idToken: string, provider: string) => {
+    if (provider !== 'google') {
+      throw new Error('Ese proveedor aún no está configurado.');
+    }
 
-    return {
-      user: {
-        id: '1',
-        email: 'social@demo.com',
-        name: 'Usuario',
-        lastname: 'Social',
-        age: 25
-      },
-      token: 'mock-token-' + Date.now()
-    };
-  }
+    try {
+      const credential = await signInWithPopup(auth, googleProvider);
+      const existingProfile = await buildUserProfile(credential.user.uid, credential.user.email);
+      const user: AuthUser = {
+        id: credential.user.uid,
+        email: credential.user.email ?? '',
+        name: existingProfile.name || credential.user.displayName?.split(' ')[0] || 'Usuario',
+        lastname: existingProfile.lastname || credential.user.displayName?.split(' ').slice(1).join(' ') || '',
+        age: existingProfile.age || 0,
+      };
+
+      await persistUserProfile(user);
+      const token = await credential.user.getIdToken();
+
+      return { user, token };
+    } catch (error) {
+      throw normalizeFirebaseError(error);
+    }
+  },
 };
