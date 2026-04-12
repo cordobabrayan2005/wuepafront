@@ -1,6 +1,6 @@
 // src/pages/Reset.tsx
 import { useState, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
 import PasswordField from "../components/PasswordField";
 import { validatePasswordRules } from "../utils/passwordRules";
@@ -100,63 +100,90 @@ export default function Reset() {
   }
 
   return (
-    <div className="login-layout">
-      <div className="login-image">
-        <img src="/contrawue.png" alt="Restablecer contraseña" />
-      </div>
-      <div className="login-form-section">
-        <div className="login-card">
-          <div className="login-logo">
-            <div className="logo-circle large">
-              {/* En Vite, /public se sirve desde la raíz */}
-            </div>
-            {/* brand text removed per request */}
-          </div>
-
-
-          <form onSubmit={onSubmit} className="login-form" aria-describedby="reset-status">
-            <div className="input-group">
-              <label htmlFor="password" className="label">Nueva contraseña</label>
-              <PasswordField
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Nueva contraseña"
-                required
-                className="login-input"
-              />
-            </div>
-
-            <div className="input-group">
-              <label htmlFor="confirm" className="label">Confirmar contraseña</label>
-              <PasswordField
-                id="confirm"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                placeholder="Confirmar contraseña"
-                required
-                className="login-input"
-              />
-            </div>
-
-            <button type="submit" className="login-button">
-              Cambiar contraseña
-            </button>
-          </form>
-
-          <div className="login-links">
-            <p className="signup-text">
-              <a href="/login" className="signup-link">Volver al inicio</a>
+    <main className="auth-wrapper login-page" role="main" aria-labelledby="reset-title">
+      <div className="login-layout" aria-label="Reset password split layout">
+        <aside className="login-left contrawue" aria-hidden="true">
+          <div className="login-image" />
+          <div className="login-overlay forgot-overlay reset-overlay">
+            <span className="forgot-overlay-badge">Nueva contraseña</span>
+            <h2>Actualiza tu acceso</h2>
+            <p>
+              Crea una contraseña segura para proteger tu cuenta y volver a comprar sin interrupciones.
             </p>
           </div>
+        </aside>
 
-          {msg && (
-            <p id="reset-status" role="status" className={`login-message ${msgType}`}>
-              {msg}
+        <section className="login-right" aria-describedby="reset-description">
+          <div className="forgot-panel reset-panel">
+            <a href="/login" className="back-link">← Volver al inicio</a>
+            <p className="forgot-kicker">Restablecer acceso</p>
+            <h1 id="reset-title" className="signup-title">Crea tu nueva contraseña</h1>
+            <p id="reset-description" className="signup-subtitle forgot-subtitle">
+              Elige una contraseña nueva, segura y fácil de recordar para ti. Debe cumplir los requisitos de seguridad del sistema.
             </p>
-          )}
-        </div>
+
+            <div className="forgot-card reset-card">
+              <div className="forgot-card-icon" aria-hidden="true">🔒</div>
+              <div>
+                <strong>Antes de continuar</strong>
+                <p>
+                  Usa una combinación robusta y confirma exactamente la misma contraseña en ambos campos para completar el cambio.
+                </p>
+              </div>
+            </div>
+
+            <div className="reset-requirements" aria-label="Requisitos de la contraseña">
+              <div className="reset-requirement">Incluye letras mayúsculas y minúsculas.</div>
+              <div className="reset-requirement">Agrega números y símbolos especiales.</div>
+              <div className="reset-requirement">Evita usar datos fáciles de adivinar.</div>
+            </div>
+
+            <form onSubmit={onSubmit} className="login-form reset-form" aria-describedby="reset-status">
+              <div className="form-group">
+                <label htmlFor="password" className="form-label">Nueva contraseña</label>
+                <PasswordField
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  label=""
+                  placeholder="Nueva contraseña"
+                  required
+                  className="login-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="confirm" className="form-label">Confirmar contraseña</label>
+                <PasswordField
+                  id="confirm"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  label=""
+                  placeholder="Confirmar contraseña"
+                  required
+                  className="login-input"
+                />
+              </div>
+
+              <button type="submit" className="login-button">
+                Cambiar contraseña
+              </button>
+            </form>
+
+            {msg && (
+              <p id="reset-status" role="status" className={`login-message ${msgType}`}>
+                {msg}
+              </p>
+            )}
+
+            <div className="login-links forgot-links">
+              <p className="signup-text">
+                <Link to="/login" className="signup-link">Volver al inicio de sesión</Link>
+              </p>
+            </div>
+          </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

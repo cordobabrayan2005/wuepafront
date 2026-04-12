@@ -98,15 +98,15 @@ export default function ChangePassword() {
         <form onSubmit={onSubmit} className="login-form" aria-describedby="changepw-status">
           <div className="input-group">
             <label htmlFor="current" className="label">Contraseña actual</label>
-            <PasswordField id="current" value={currentPassword} onChange={e=>setCurrentPassword(e.target.value)} required />
+            <PasswordField id="current" value={currentPassword} onChange={e=>setCurrentPassword(e.target.value)} label="" required />
           </div>
           <div className="input-group">
             <label htmlFor="pwd" className="label">Nueva contraseña</label>
-            <PasswordField id="pwd" value={newPassword} onChange={e=>setNewPassword(e.target.value)} required />
+            <PasswordField id="pwd" value={newPassword} onChange={e=>setNewPassword(e.target.value)} label="" required />
           </div>
           <div className="input-group">
             <label htmlFor="confirm" className="label">Confirmar contraseña</label>
-            <PasswordField id="confirm" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} required />
+            <PasswordField id="confirm" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} label="" required />
           </div>
           <button type="submit" className="login-button">Guardar</button>
         </form>
