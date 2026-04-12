@@ -168,7 +168,7 @@ export default function Profile() {
     <section className="profile-page" role="region" aria-labelledby="profile-title" lang="es">
       <div className="profile-card-new">
         <div className="profile-header-row">
-          <button className="profile-close" aria-label="Cerrar" onClick={() => navigate('/wuepa')}>×</button>
+          <button className="profile-close" aria-label="Cerrar" onClick={() => navigate('/buy')}>×</button>
           <button className="profile-logout-link" onClick={() => { logout(); navigate('/login'); }}>↪ Cerrar sesión</button>
         </div>
         <div className="profile-panel">
