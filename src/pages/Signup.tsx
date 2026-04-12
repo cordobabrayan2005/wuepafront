@@ -47,6 +47,8 @@ export default function Signup() {
 
   const navigate = useNavigate();
   const checkAuth = useAuthStore((state) => state.checkAuth);
+  const socialLogin = useAuthStore((state) => state.socialLogin);
+  const isLoading = useAuthStore((state) => state.isLoading);
 
   /**
    * Añade una clase CSS al body cuando el componente se monta,
@@ -119,6 +121,25 @@ export default function Signup() {
       });
     } catch (e: any) {
       setMsg(e.message || "Error al crear la cuenta.");
+      setMsgType("error");
+    }
+  }
+
+  async function onGoogleSignup() {
+    try {
+      await socialLogin("google");
+      setMsg("Inicio de sesión con Google exitoso.");
+      setMsgType("success");
+      navigate("/buy", {
+        state: {
+          flash: {
+            type: "success",
+            text: "Bienvenido a wuepa",
+          },
+        },
+      });
+    } catch (e: any) {
+      setMsg(e.message || "Error al registrarte con Google.");
       setMsgType("error");
     }
   }
@@ -210,12 +231,12 @@ export default function Signup() {
               />
             </div>
 
-            <button type="submit" className="login-button">Crear cuenta</button>
+            <button type="submit" className="login-button" disabled={isLoading}>Crear cuenta</button>
 
             <div className="social-signup-container">
               <p className="social-signup-text">O regístrate con</p>
               <div className="social-signup-buttons">
-                <button type="button" className="social-button google-button" onClick={() => console.log('Google signup')}>
+                <button type="button" className="social-button google-button" onClick={onGoogleSignup} disabled={isLoading}>
                   <img src="/google.png" alt="Google" />
                   Google
                 </button>

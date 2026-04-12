@@ -12,7 +12,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuthStore } from '../stores/authStore';  // Nuevo
-import { api } from "../services/api";
 import PasswordField from "../components/PasswordField";
 
 /**
@@ -59,7 +58,7 @@ export default function Login({ onAuth }: Props) {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, socialLogin, isLoading, error } = useAuthStore();  // Nuevo
+  const { login, socialLogin, isLoading } = useAuthStore();  // Nuevo
 
   /**
    * Manejador del envío del formulario.

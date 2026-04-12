@@ -27,7 +27,128 @@ interface SignupPayload {
   password: string;
 }
 
-const USERS_COLLECTION = 'users';
+interface BackendUser {
+  uid: string;
+  correo: string;
+  nombre: string;
+  rol?: string;
+  telefono?: string;
+  direccion?: string;
+}
+
+interface BackendResponse<T> {
+  success: boolean;
+  message?: string;
+  user?: T;
+}
+
+const USERS_COLLECTION = 'usuarios';
+const API_BASE_URL = (import.meta.env.VITE_API_URL ?? 'https://wuepa-jewerly-backend.onrender.com').replace(/\/+$/, '');
+
+function buildDisplayName(name: string, lastname: string) {
+  return [name, lastname].map((value) => value.trim()).filter(Boolean).join(' ');
+}
+
+function splitDisplayName(displayName: string | null | undefined) {
+  const fullName = (displayName ?? '').trim();
+
+  if (!fullName) {
+    return { name: 'Usuario', lastname: '' };
+  }
+
+  const [name, ...lastnameParts] = fullName.split(/\s+/);
+
+  return {
+    name,
+    lastname: lastnameParts.join(' '),
+  };
+}
+
+function mapBackendUserToAuthUser(backendUser: BackendUser, profile?: Partial<AuthUser>): AuthUser {
+  return {
+    id: backendUser.uid,
+    email: profile?.email ?? backendUser.correo ?? '',
+    name: profile?.name ?? backendUser.nombre ?? '',
+    lastname: profile?.lastname ?? '',
+    age: typeof profile?.age === 'number' ? profile.age : 0,
+  };
+}
+
+async function parseBackendResponse<T>(response: Response): Promise<BackendResponse<T>> {
+  const payload = (await response.json().catch(() => null)) as BackendResponse<T> | null;
+
+  if (!response.ok) {
+    throw new Error(payload?.message ?? 'No se pudo completar la solicitud al backend.');
+  }
+
+  if (!payload) {
+    throw new Error('El backend devolvió una respuesta vacía.');
+  }
+
+  return payload;
+}
+
+async function postToBackend<T>(path: string, body: Record<string, unknown>) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  return parseBackendResponse<T>(response);
+}
+
+async function verifyBackendSession(token: string) {
+  const payload = await postToBackend<BackendUser>('/api/auth/verify-token', { token });
+
+  if (!payload.user) {
+    throw new Error('El backend no devolvió información del usuario.');
+  }
+
+  return payload.user;
+}
+
+async function registerBackendUser(token: string, userData: SignupPayload) {
+  const payload = await postToBackend<BackendUser>('/api/auth/register', {
+    token,
+    nombre: buildDisplayName(userData.name, userData.lastname) || userData.name,
+    telefono: '',
+    direccion: '',
+  });
+
+  if (!payload.user) {
+    throw new Error('El backend no confirmó el registro del usuario.');
+  }
+
+  return payload.user;
+}
+
+async function verifyOrRegisterBackendUser(token: string, userData: SignupPayload) {
+  try {
+    return await verifyBackendSession(token);
+  } catch {
+    return registerBackendUser(token, userData);
+  }
+}
+
+async function getFirestoreProfile(userId: string) {
+  const snapshot = await getDoc(doc(db, USERS_COLLECTION, userId));
+  const data = snapshot.data();
+
+  if (!data) {
+    return null;
+  }
+
+  return {
+    id: userId,
+    email: data.email ?? '',
+    name: data.name ?? '',
+    lastname: data.lastname ?? '',
+    age: typeof data.age === 'number' ? data.age : Number(data.age ?? 0),
+  } satisfies AuthUser;
+}
 
 function normalizeFirebaseError(error: unknown) {
   if (typeof error === 'object' && error && 'code' in error) {
@@ -52,6 +173,8 @@ function normalizeFirebaseError(error: unknown) {
         return new Error('Debes ingresar una contraseña válida.');
       case 'auth/invalid-action-code':
         return new Error('El enlace de recuperación es inválido o ya expiró.');
+      case 'auth/too-many-requests':
+        return new Error('Demasiados intentos. Espera unos minutos y vuelve a intentarlo.');
       default:
         break;
     }
@@ -64,16 +187,26 @@ function normalizeFirebaseError(error: unknown) {
   return new Error('Ocurrió un error inesperado.');
 }
 
-async function buildUserProfile(userId: string, emailFallback: string | null): Promise<AuthUser> {
-  const snapshot = await getDoc(doc(db, USERS_COLLECTION, userId));
-  const data = snapshot.data();
+async function buildUserProfile(
+  userId: string,
+  emailFallback: string | null,
+  backendUser?: BackendUser,
+): Promise<AuthUser> {
+  const profile = await getFirestoreProfile(userId);
+
+  if (backendUser) {
+    return mapBackendUserToAuthUser(backendUser, {
+      ...profile,
+      email: profile?.email ?? emailFallback ?? backendUser.correo ?? '',
+    });
+  }
 
   return {
     id: userId,
-    email: data?.email ?? emailFallback ?? '',
-    name: data?.name ?? '',
-    lastname: data?.lastname ?? '',
-    age: typeof data?.age === 'number' ? data.age : Number(data?.age ?? 0),
+    email: profile?.email ?? emailFallback ?? '',
+    name: profile?.name ?? '',
+    lastname: profile?.lastname ?? '',
+    age: typeof profile?.age === 'number' ? profile.age : Number(profile?.age ?? 0),
   };
 }
 
@@ -95,10 +228,12 @@ export const api = {
   login: async (email: string, password: string) => {
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
-      const user = await buildUserProfile(credential.user.uid, credential.user.email);
       const token = await credential.user.getIdToken();
+      const backendUser = await verifyBackendSession(token);
+      const user = await buildUserProfile(credential.user.uid, credential.user.email);
+      const mergedUser = mapBackendUserToAuthUser(backendUser, user);
 
-      return { user, token };
+      return { user: mergedUser, token };
     } catch (error) {
       throw normalizeFirebaseError(error);
     }
@@ -125,7 +260,10 @@ export const api = {
       });
 
       const token = await credential.user.getIdToken();
-      return { user, token };
+
+      const backendUser = await verifyOrRegisterBackendUser(token, userData);
+
+      return { user: mapBackendUserToAuthUser(backendUser, user), token };
     } catch (error) {
       throw normalizeFirebaseError(error);
     }
@@ -140,7 +278,9 @@ export const api = {
     }
 
     try {
-      return await buildUserProfile(currentUser.uid, currentUser.email);
+      const token = await currentUser.getIdToken();
+      const backendUser = await verifyBackendSession(token);
+      return await buildUserProfile(currentUser.uid, currentUser.email, backendUser);
     } catch (error) {
       throw normalizeFirebaseError(error);
     }
@@ -148,7 +288,7 @@ export const api = {
 
   forgot: async (email: string) => {
     try {
-      await sendPasswordResetEmail(auth, email);
+      await postToBackend('/api/auth/forgot-password', { email });
       return { message: 'Enlace de recuperación enviado.' };
     } catch (error) {
       throw normalizeFirebaseError(error);
@@ -196,19 +336,27 @@ export const api = {
 
     try {
       const credential = await signInWithPopup(auth, googleProvider);
-      const existingProfile = await buildUserProfile(credential.user.uid, credential.user.email);
+      const googleProfile = splitDisplayName(credential.user.displayName);
+      const existingProfile = await getFirestoreProfile(credential.user.uid);
       const user: AuthUser = {
         id: credential.user.uid,
         email: credential.user.email ?? '',
-        name: existingProfile.name || credential.user.displayName?.split(' ')[0] || 'Usuario',
-        lastname: existingProfile.lastname || credential.user.displayName?.split(' ').slice(1).join(' ') || '',
-        age: existingProfile.age || 0,
+        name: existingProfile?.name || googleProfile.name,
+        lastname: existingProfile?.lastname || googleProfile.lastname,
+        age: existingProfile?.age || 0,
       };
 
       await persistUserProfile(user);
       const token = await credential.user.getIdToken();
+      const backendUser = await verifyOrRegisterBackendUser(token, {
+        name: user.name,
+        lastname: user.lastname,
+        age: user.age,
+        email: user.email,
+        password: '',
+      });
 
-      return { user, token };
+      return { user: mapBackendUserToAuthUser(backendUser, user), token };
     } catch (error) {
       throw normalizeFirebaseError(error);
     }

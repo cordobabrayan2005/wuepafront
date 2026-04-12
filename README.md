@@ -60,10 +60,11 @@ Este repositorio contiene el frontend de Wuepa, una tienda de accesorios con aut
 	 - `http://localhost:5173/products` — Catálogo
 	 - `http://localhost:5173/login` — Login
 
-## API simulada (modo offline)
+## API real
 
-- El archivo `src/services/api.ts` exporta funciones que simulan el backend (login, registro, perfil, productos, etc.).
-- No se requiere backend real para desarrollo y pruebas.
+- El frontend usa `src/services/api.ts` para conectarse al backend desplegado en `https://wuepa-jewerly-backend.onrender.com`.
+- La URL base se configura con `VITE_API_URL` en `.env`.
+- Firebase sigue gestionando autenticación y recuperación/cambio de contraseña, mientras que el backend valida el token y sincroniza el usuario.
 
 ## Estilos
 
