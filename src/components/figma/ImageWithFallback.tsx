@@ -1,6 +1,6 @@
 
-// Importa React y el hook useState
-import React, { useState } from 'react';
+// Importa React y los hooks necesarios
+import React, { useEffect, useState } from 'react';
 
 
 /**
@@ -36,6 +36,10 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 }) => {
   // Estado para la ruta de la imagen actual
   const [imgSrc, setImgSrc] = useState(src);
+
+  useEffect(() => {
+    setImgSrc(src);
+  }, [src]);
 
   return (
     <img

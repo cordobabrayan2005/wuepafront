@@ -14,6 +14,7 @@ import Products from "./pages/Products";
 import ProductsSin from "./pages/ProductsSin";
 import { useAuthStore } from './stores/authStore';
 import ProtectedRoute from "./components/ProtectedRoute";
+import AppErrorBoundary from "./components/AppErrorBoundary";
 
 /**
  * Componente raíz de la aplicación que monta la capa de rutas dentro de un router de navegador.
@@ -22,9 +23,11 @@ import ProtectedRoute from "./components/ProtectedRoute";
  */
 export default function App() {
   return (
-    <BrowserRouter>
-      <Shell />
-    </BrowserRouter>
+    <AppErrorBoundary>
+      <BrowserRouter>
+        <Shell />
+      </BrowserRouter>
+    </AppErrorBoundary>
   );
 }
 
@@ -75,6 +78,7 @@ function Shell() {
           <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
           <Route path="/user-manual" element={<UserManual />} />
           <Route path="/buy" element={<ProtectedRoute><Buy /></ProtectedRoute>} />
+          <Route path="/admin" element={<Navigate to="/products" replace />} />
           <Route path="/products" element={<Products />} />
           <Route path="/productssin" element={<ProductsSin />} />
           <Route path="*" element={<Navigate to="/login" />} />

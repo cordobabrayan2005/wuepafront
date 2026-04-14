@@ -36,12 +36,23 @@
  * }
  */
 import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function About() {
+  const navigate = useNavigate();
+
   useEffect(() => {
     document.body.classList.remove("login-page");
   }, []);
+
+  function handleGoBack() {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+
+    navigate('/products');
+  }
 
   return (
     <main className="about-page" role="main" aria-labelledby="about-title">
@@ -95,7 +106,7 @@ export default function About() {
         </div>
 
         <div style={{ marginTop: 28 }}>
-          <Link to="/buy" className="primary-btn">Volver al inicio</Link>
+          <button type="button" className="primary-btn" onClick={handleGoBack}>Volver</button>
         </div>
       </section>
     </main>

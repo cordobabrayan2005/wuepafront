@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuthStore } from '../stores/authStore';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { groupProductsByCategory, loadProductsCatalog, ProductCategory, ProductCatalogItem } from '../utils/productCatalog';
 
 /**
  * Componente Products
@@ -18,44 +18,27 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
  * @returns {JSX.Element} Página de productos con categorías y búsqueda.
  */
 
-// Datos de productos organizados por categoría
-const productsData = {
-  collares: [
-    { id: 1, name: 'Collar Corazón', price: 25, image: '/collar.png', description: 'Elegante collar con diseño de corazón' },
-    { id: 2, name: 'Collar Minimal', price: 22, image: '/collar-min.png', description: 'Collar minimalista y sofisticado' },
-    { id: 3, name: 'Collar Diamante', price: 35, image: '/collar-diamante.png', description: 'Collar con detalles en diamante' },
-    { id: 4, name: 'Collar Cadena', price: 23, image: '/collar-cadena.png', description: 'Collar de cadena delicada' },
-    { id: 5, name: 'Collar Oro', price: 29, image: '/collar-oro.png', description: 'Collar en tono dorado elegante' }
-  ],
-  aretes: [
-    { id: 6, name: 'Aretes Perla', price: 18, image: '/arete.png', description: 'Aretes con perlas delicadas' },
-    { id: 7, name: 'Aretes Gota', price: 21, image: '/aretes-gota.png', description: 'Aretes en forma de gota' },
-    { id: 8, name: 'Arete Flor', price: 16, image: '/arete-flor.png', description: 'Aretes con diseño floral' },
-    { id: 9, name: 'Arete Cristal', price: 24, image: '/arete-cristal.png', description: 'Aretes con cristales brillantes' },
-    { id: 10, name: 'Aretes Minimal', price: 19, image: '/aretes-minimal.png', description: 'Aretes minimalistas' }
-  ],
-  pulseras: [
-    { id: 11, name: 'Pulsera Clásica', price: 20, image: '/pulsera.png', description: 'Pulsera clásica y elegante' },
-    { id: 12, name: 'Pulsera Doble', price: 24, image: '/pulsera-doble.png', description: 'Pulsera con doble cadena' },
-    { id: 13, name: 'Pulsera Perlas', price: 26, image: '/pulsera-perlas.png', description: 'Pulsera con perlas' },
-    { id: 14, name: 'Pulsera Plata', price: 30, image: '/pulsera-plata.png', description: 'Pulsera en tono plata' },
-    { id: 15, name: 'Pulsera Oro', price: 28, image: '/pulsera-oro.png', description: 'Pulsera en tono dorado' }
-  ]
-};
-
 /**
  * Componente funcional principal para la página de productos.
  */
 export default function ProductsSin() {
   // Categoría activa seleccionada
-  const [activeCategory, setActiveCategory] = useState<'collares' | 'aretes' | 'pulseras'>('collares');
+  const [activeCategory, setActiveCategory] = useState<ProductCategory>('collares');
   // Estado para la búsqueda de productos
   const [searchQuery, setSearchQuery] = useState('');
-  // Usuario autenticado (no se usa en la vista, pero disponible)
-  const { user } = useAuthStore();
+  const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
   // Navegación y ubicación para manejo de rutas
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    function syncProducts() {
+      setProducts(loadProductsCatalog());
+    }
+
+    window.addEventListener('storage', syncProducts);
+    return () => window.removeEventListener('storage', syncProducts);
+  }, []);
 
   // Cambia la categoría activa según el parámetro de la URL
   useEffect(() => {
@@ -67,14 +50,14 @@ export default function ProductsSin() {
   }, [location.search]);
 
   // Definición de categorías disponibles
-  const categories = [
+  const categories: Array<{ key: ProductCategory; label: string; icon: string }> = [
     { key: 'collares', label: 'Collares', icon: '💎' },
     { key: 'aretes', label: 'Aretes', icon: '✨' },
     { key: 'pulseras', label: 'Pulseras', icon: '💍' }
   ];
 
   // Productos de la categoría activa
-  const currentProducts = productsData[activeCategory];
+  const currentProducts = groupProductsByCategory(products)[activeCategory];
   // Filtra productos según la búsqueda (nombre o descripción)
   const filteredProducts = currentProducts.filter(product =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -133,6 +116,23 @@ export default function ProductsSin() {
           <div className="products-grid">
             {filteredProducts.map((product) => (
               <article key={product.id} className="product-card-simple">
+                <ImageWithFallback
+                  src={product.image}
+                  alt={product.name}
+                  className="product-card-image"
+                />
+                <div className="product-card-content">
+                  <p className="product-card-category">{categories.find((category) => category.key === product.category)?.label}</p>
+                  <h4 className="product-card-title">{product.name}</h4>
+                  <p className="product-card-description">{product.description}</p>
+                  <div className="product-card-meta">
+                    <span>{product.units} unidades</span>
+                    <strong>${product.price.toFixed(2)}</strong>
+                  </div>
+                </div>
+                <div className="product-stock-pill-wrap">
+                  <span className="product-stock-badge static">{product.units} unidades disponibles</span>
+                </div>
                 <button
                   className="product-login-btn"
                   onClick={() => navigate('/login')}

@@ -165,6 +165,8 @@ function normalizeFirebaseError(error: unknown) {
         return new Error('Debes ingresar un correo válido.');
       case 'auth/popup-closed-by-user':
         return new Error('Se cerró la ventana de inicio de sesión.');
+      case 'auth/unauthorized-domain':
+        return new Error('Este inicio de sesión no está disponible en este momento.');
       case 'auth/requires-recent-login':
         return new Error('Vuelve a iniciar sesión para completar esta acción.');
       case 'auth/weak-password':
