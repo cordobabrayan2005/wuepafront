@@ -37,9 +37,11 @@ import { useAuthStore } from "../stores/authStore";
  * - Si no hay token, se muestra un mensaje para iniciar sesión.
  */
 export default function Profile() {
+  const FLASH_STORAGE_KEY = 'wuepa-auth-flash';
   const [me, setMe] = useState<any>(null);
   const [msg, setMsg] = useState("");
   const [editing, setEditing] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [form, setForm] = useState({
     name: "",
     lastname: "",
@@ -49,6 +51,21 @@ export default function Profile() {
   // La contraseña nunca es editable ni recuperable; solo se muestra enmascarada.
   const navigate = useNavigate();
   const { user, isAuthed, logout } = useAuthStore();
+
+  function redirectToLoginWithLogoutMessage() {
+    if (isLoggingOut) {
+      return;
+    }
+
+    setIsLoggingOut(true);
+    setMsg('Cerrando sesión...');
+
+    window.setTimeout(() => {
+      sessionStorage.setItem(FLASH_STORAGE_KEY, JSON.stringify({ type: 'info', text: 'Se cerró sesión correctamente.' }));
+      logout();
+      navigate('/login', { state: { flash: { type: 'info', text: 'Se cerró sesión correctamente.' } } });
+    }, 650);
+  }
 
   /**
    * Carga los datos del perfil desde el backend y sincroniza el estado del formulario.
@@ -131,9 +148,10 @@ export default function Profile() {
     if (!confirmDelete) return;
     try {
       localStorage.removeItem('user');
+      sessionStorage.setItem(FLASH_STORAGE_KEY, JSON.stringify({ type: 'info', text: 'Se cerró sesión correctamente.' }));
       logout();
       setMsg("Cuenta eliminada.");
-      navigate("/login");
+      navigate("/login", { state: { flash: { type: 'info', text: 'Se cerró sesión correctamente.' } } });
     } catch (e: any) {
       setMsg(e.message);
     }
@@ -169,7 +187,7 @@ export default function Profile() {
       <div className="profile-card-new">
         <div className="profile-header-row">
           <button className="profile-close" aria-label="Cerrar" onClick={() => navigate('/buy')}>×</button>
-          <button className="profile-logout-link" onClick={() => { logout(); navigate('/login'); }}>↪ Cerrar sesión</button>
+          <button className="profile-logout-link" onClick={redirectToLoginWithLogoutMessage} disabled={isLoggingOut}>{isLoggingOut ? '↪ Cerrando...' : '↪ Cerrar sesión'}</button>
         </div>
         <div className="profile-panel">
           <div className="profile-columns">
@@ -218,7 +236,7 @@ export default function Profile() {
             <div className="profile-col profile-col-right">
               <div className="profile-block">
                 <div className="mini-label">Correo electronico</div>
-                <div className="mini-value">{me.email}</div>
+                <div className="mini-value profile-email" title={me.email}>{me.email}</div>
               </div>
               <div className="profile-block">
                 <div className="mini-label">Contraseña (no editable)</div>

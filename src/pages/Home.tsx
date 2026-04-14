@@ -17,8 +17,10 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import { Search, Heart, User, Home as HomeIcon, Package, Star, Plus } from 'lucide-react';
+import { Heart, User, Home as HomeIcon, Package } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import MobileNavMenu from '../components/MobileNavMenu';
+import { loadProductsCatalog, ProductCatalogItem } from '../utils/productCatalog';
 
 // Componente de ícono de WhatsApp
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -35,6 +37,7 @@ export default function Home() {
   const navigate = useNavigate();
   // Estado para mostrar/ocultar la barra de navegación
   const [showNavbar, setShowNavbar] = useState(true);
+  const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
   // Referencia para el último scroll vertical
   const lastScrollY = useRef(0);
 
@@ -55,48 +58,27 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Productos destacados (mock)
-  const featuredProducts = [
-    {
-      id: 1,
-      name: 'Collar Corazón',
-      price: 25.00,
-      image: '/W.png'
-    },
-    {
-      id: 2,
-      name: 'Aretes Perla',
-      price: 18.00,
-      image: '/W.png'
-    },
-    {
-      id: 3,
-      name: 'Pulsera Clásica',
-      price: 20.00,
-      image: '/W.png'
-    },
-    {
-      id: 4,
-      name: 'Collar Minimal',
-      price: 22.00,
-      image: '/W.png'
+  useEffect(() => {
+    function syncProducts() {
+      setProducts(loadProductsCatalog());
     }
-  ];
 
-  // Nuevos productos (mock)
-  const newProducts = [
-    {
-      id: 1,
-      name: 'Aretes Flor',
-      price: 16.00,
-      image: '/W.png'
-    },
-    {
-      id: 2,
-      name: 'Pulsera Doble',
-      price: 24.00,
-      image: '/W.png'
-    }
+    window.addEventListener('storage', syncProducts);
+    return () => window.removeEventListener('storage', syncProducts);
+  }, []);
+
+  const featuredProducts = products.slice(0, 8);
+  const categoryLabels = {
+    collares: 'Collares',
+    aretes: 'Aretes',
+    pulseras: 'Pulseras',
+  } as const;
+  const mobileMenuItems = [
+    { label: 'Inicio', to: '/' },
+    { label: 'Catalogo', to: '/productssin' },
+    { label: 'Sobre nosotros', to: '/about' },
+    { label: 'Iniciar sesion', to: '/login', tone: 'default' as const },
+    { label: 'Registrarse', to: '/signup', tone: 'accent' as const },
   ];
 
   // Renderizado principal de la página de inicio
@@ -111,6 +93,7 @@ export default function Home() {
               <p>ACCESORIOS</p>
             </div>
           </div>
+          <MobileNavMenu title="WUEPA" items={mobileMenuItems} />
           <div className="wuepa-actions">
             <button onClick={() => navigate('/login')} className="btn-secondary">Iniciar Sesión</button>
             <button onClick={() => navigate('/signup')} className="btn-primary">Registrarse</button>
@@ -132,7 +115,7 @@ export default function Home() {
 
         <section className="wuepa-categories">
           <div className="category-card" onClick={() => navigate('/productssin?category=collares')} style={{ cursor: 'pointer' }}>
-            <ImageWithFallback src="/Collareswue.png" alt="Collares" className="w-full h-full object-cover" />
+            <ImageWithFallback src="/Collareswue.png" alt="Collares" className="w-full h-full object-cover" loading="eager" fetchPriority="high" />
             <div className="backdrop"></div>
             <div className="content">
               <h3>Collares</h3>
@@ -140,7 +123,7 @@ export default function Home() {
             </div>
           </div>
           <div className="category-card" onClick={() => navigate('/productssin?category=aretes')} style={{ cursor: 'pointer' }}>
-            <ImageWithFallback src="/AretesWue.png" alt="Aretes" className="w-full h-full object-cover" />
+            <ImageWithFallback src="/AretesWue.png" alt="Aretes" className="w-full h-full object-cover" loading="eager" />
             <div className="backdrop"></div>
             <div className="content">
               <h3>Aretes</h3>
@@ -148,7 +131,7 @@ export default function Home() {
             </div>
           </div>
           <div className="category-card" onClick={() => navigate('/productssin?category=pulseras')} style={{ cursor: 'pointer' }}>
-            <ImageWithFallback src="/Pulseraswue.png" alt="Pulseras" className="w-full h-full object-cover" />
+            <ImageWithFallback src="/Pulseraswue.png" alt="Pulseras" className="w-full h-full object-cover" loading="eager" />
             <div className="backdrop"></div>
             <div className="content">
               <h3>Pulseras</h3>
@@ -157,9 +140,26 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="product-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', margin: '2rem 0' }}>
-          {[...Array(8)].map((_, i) => (
-            <article key={i} className="product-card">
+        <section className="products-grid" style={{ margin: '2rem 0' }}>
+          {featuredProducts.map((product) => (
+            <article key={product.id} className="product-card-simple">
+              <ImageWithFallback
+                src={product.image}
+                alt={product.name}
+                className="product-card-image"
+                sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 25vw"
+              />
+              <div className="product-card-content">
+                <p className="product-card-category">{categoryLabels[product.category]}</p>
+                <h4>{product.name}</h4>
+                <div className="product-card-meta">
+                  <span>{product.units} unidades</span>
+                  <strong>${product.price.toFixed(2)}</strong>
+                </div>
+              </div>
+              <div className="product-stock-pill-wrap">
+                <span className="product-stock-badge static">{product.units} unidades disponibles</span>
+              </div>
               <button
                 className="login-btn"
                 style={{

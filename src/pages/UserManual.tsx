@@ -44,15 +44,15 @@ export default function UserManual() {
         
         {/* Header Section */}
         <header className="manual-header" role="banner">
-          <div style={{display: 'flex', alignItems: 'center', gap: 12}}>
-            <img src="/W.png" alt="wuepa" style={{width: 84, height: 'auto'}} />
+          <div className="manual-header-brand">
+            <img src="/W.png" alt="wuepa" className="manual-logo" />
             <div>
               <h1 id="manual-title">Manual de Usuario de wuepa</h1>
               <p className="manual-subtitle">Guía para las funcionalidades actuales (autenticación y mercado de accesorios)</p>
             </div>
           </div>
-          <div style={{marginTop: 10}}>
-            <Link to="/wuepa" className="back-home-link">Volver al inicio</Link>
+          <div className="manual-home-link-wrap">
+            <Link to="/" className="back-home-link">Volver al inicio</Link>
           </div>
         </header>
 

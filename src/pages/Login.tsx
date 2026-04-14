@@ -32,6 +32,8 @@ import PasswordField from "../components/PasswordField";
 type Props = { onAuth?: () => void };
 
 export default function Login({ onAuth }: Props) {
+  const FLASH_STORAGE_KEY = 'wuepa-auth-flash';
+  const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
   /**
    * Estado del campo de correo electrónico.
    * @type {string}
@@ -76,7 +78,7 @@ export default function Login({ onAuth }: Props) {
       onAuth?.();
       setMsg("Inicio de sesión exitoso.");
       setMsgType("success");
-      navigate("/buy", { state: { flash: { type: "success", text: "Bienvenido a wuepa" } } });
+      navigate("/buy", { state: { flash: { type: "success", text: "Has iniciado sesión correctamente." } } });
     } catch (e: any) {
       setMsg(e.message || "Error al iniciar sesión.");
       setMsgType("error");
@@ -97,7 +99,7 @@ export default function Login({ onAuth }: Props) {
       onAuth?.();
       setMsg("Inicio de sesión exitoso.");
       setMsgType("success");
-      navigate("/buy", { state: { flash: { type: "success", text: "Bienvenido a wuepa" } } });
+      navigate("/buy", { state: { flash: { type: "success", text: "Has iniciado sesión correctamente." } } });
     } catch (e: any) {
       setMsg(e.message || "Error en login social.");
       setMsgType("error");
@@ -115,16 +117,43 @@ export default function Login({ onAuth }: Props) {
   // Muestra mensaje de éxito si venimos de un registro o redirección
   useEffect(() => {
     const state = location.state as any;
-    if (state?.flash) {
-      setMsg(state.flash.text || "Cuenta creada sin problemas. Inicia sesión para continuar.");
-      setMsgType(state.flash.type || "success");
-      // Clear the navigation state to prevent it from re-displaying when going back.
-      navigate(location.pathname, { replace: true });
+    const persistedFlash = sessionStorage.getItem(FLASH_STORAGE_KEY);
+    const storedFlash = persistedFlash ? JSON.parse(persistedFlash) as { text?: string; type?: "success" | "error" | "info" } : null;
+    const flash = state?.flash ?? storedFlash;
+
+    if (!flash) {
+      return;
     }
+
+    setToast({
+      text: flash.text || "Cuenta creada sin problemas. Inicia sesión para continuar.",
+      type: flash.type || "success",
+    });
+    sessionStorage.removeItem(FLASH_STORAGE_KEY);
+    // Clear the navigation state to prevent it from re-displaying when going back.
+    navigate(location.pathname + location.search, { replace: true });
   }, [location, navigate]);
+
+  useEffect(() => {
+    if (!toast) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setToast(null);
+    }, 3200);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [toast]);
 
   return (
     <main className="auth-wrapper login-page" role="main" aria-labelledby="login-title">
+      {toast && (
+        <div role="status" aria-live="polite" className={`auth-toast ${toast.type}`}>
+          {toast.text}
+        </div>
+      )}
+
       <div className="login-layout" aria-label="Login split layout">
         <aside className="login-left wuepaini" aria-hidden="true">
           <div className="login-image" />

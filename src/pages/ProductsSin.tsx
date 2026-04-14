@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import MobileNavMenu from '../components/MobileNavMenu';
 import { groupProductsByCategory, loadProductsCatalog, ProductCategory, ProductCatalogItem } from '../utils/productCatalog';
 
 /**
@@ -55,6 +56,12 @@ export default function ProductsSin() {
     { key: 'aretes', label: 'Aretes', icon: '✨' },
     { key: 'pulseras', label: 'Pulseras', icon: '💍' }
   ];
+  const mobileMenuItems = [
+    { label: 'Inicio', to: '/' },
+    { label: 'Catalogo', to: '/productssin', isActive: true },
+    { label: 'Nosotros', to: '/about' },
+    { label: 'Iniciar sesion', to: '/login', tone: 'accent' as const },
+  ];
 
   // Productos de la categoría activa
   const currentProducts = groupProductsByCategory(products)[activeCategory];
@@ -73,6 +80,7 @@ export default function ProductsSin() {
           <h1>WUEPA</h1>
           <p>ACCESORIOS</p>
         </div>
+        <MobileNavMenu title="Catalogo publico" items={mobileMenuItems} />
         <div className="header-center">
           <input
             type="text"
@@ -120,11 +128,11 @@ export default function ProductsSin() {
                   src={product.image}
                   alt={product.name}
                   className="product-card-image"
+                  sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 25vw"
                 />
                 <div className="product-card-content">
                   <p className="product-card-category">{categories.find((category) => category.key === product.category)?.label}</p>
                   <h4 className="product-card-title">{product.name}</h4>
-                  <p className="product-card-description">{product.description}</p>
                   <div className="product-card-meta">
                     <span>{product.units} unidades</span>
                     <strong>${product.price.toFixed(2)}</strong>

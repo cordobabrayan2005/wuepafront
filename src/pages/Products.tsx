@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import MobileNavMenu from '../components/MobileNavMenu';
 import { groupProductsByCategory, loadProductsCatalog, ProductCategory, ProductCatalogItem } from '../utils/productCatalog';
 
 /**
@@ -58,6 +59,11 @@ export default function Products() {
     { key: 'aretes', label: 'Aretes', icon: '✨' },
     { key: 'pulseras', label: 'Pulseras', icon: '💍' }
   ];
+  const mobileMenuItems = [
+    { label: 'Inicio', to: '/buy' },
+    { label: 'Productos', to: '/products', isActive: true },
+    { label: 'Nosotros', to: '/about' },
+  ];
 
   // Productos de la categoría activa
   const productsByCategory = groupProductsByCategory(products);
@@ -77,6 +83,7 @@ export default function Products() {
           <h1>WUEPA</h1>
           <p>ACCESORIOS</p>
         </div>
+        <MobileNavMenu title="Menu de compra" items={mobileMenuItems} />
         <div className="header-center">
           <input
             type="text"
@@ -124,6 +131,7 @@ export default function Products() {
                   src={product.image}
                   alt={product.name}
                   className="product-card-image"
+                  sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 25vw"
                 />
                 <div className="product-card-content">
                   <p className="product-card-category">{categoryLabels[product.category]}</p>
