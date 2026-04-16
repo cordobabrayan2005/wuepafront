@@ -6,6 +6,7 @@ import Forgot from "./pages/Forgot";
 import Reset from "./pages/Reset";
 import UserManual from "./pages/UserManual";
 import About from "./pages/About";
+import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import ChangePassword from "./pages/ChangePassword";
 import Home from "./pages/Home";
@@ -78,7 +79,7 @@ function Shell() {
           <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
           <Route path="/user-manual" element={<UserManual />} />
           <Route path="/buy" element={<ProtectedRoute><Buy /></ProtectedRoute>} />
-          <Route path="/admin" element={<Navigate to="/products" replace />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/products" element={<Products />} />
           <Route path="/productssin" element={<ProductsSin />} />
           <Route path="*" element={<Navigate to="/login" />} />

@@ -2,6 +2,7 @@ export type ProductCategory = 'collares' | 'aretes' | 'pulseras';
 
 export interface ProductCatalogItem {
   id: number;
+  code: string;
   category: ProductCategory;
   name: string;
   description: string;
@@ -76,9 +77,31 @@ export function getDefaultProductImage(category: ProductCategory) {
   return accessoryImage('Collarcorazon.png');
 }
 
+function getCategoryCodePrefix(category: ProductCategory) {
+  if (category === 'aretes') {
+    return 'ARE';
+  }
+
+  if (category === 'pulseras') {
+    return 'PUL';
+  }
+
+  return 'COL';
+}
+
+export function generateProductCode(category: ProductCategory, id: number) {
+  return `WUE-${getCategoryCodePrefix(category)}-${String(id).padStart(3, '0')}`;
+}
+
+function normalizeProductCode(product: Pick<ProductCatalogItem, 'id' | 'category' | 'code'>) {
+  const normalizedCode = product.code.trim().toUpperCase();
+  return normalizedCode || generateProductCode(product.category, product.id);
+}
+
 export const initialProductsCatalog: ProductCatalogItem[] = [
   {
     id: 1,
+    code: generateProductCode('collares', 1),
     category: 'collares',
     name: 'Collar Corazon',
     description: 'Elegante collar con diseño central y acabado brillante.',
@@ -88,6 +111,7 @@ export const initialProductsCatalog: ProductCatalogItem[] = [
   },
   {
     id: 2,
+    code: generateProductCode('collares', 2),
     category: 'collares',
     name: 'Collar Minimal',
     description: 'Pieza ligera para uso diario con estilo sofisticado.',
@@ -97,6 +121,7 @@ export const initialProductsCatalog: ProductCatalogItem[] = [
   },
   {
     id: 3,
+    code: generateProductCode('collares', 3),
     category: 'collares',
     name: 'Collar Diamante',
     description: 'Cadena elegante con detalle protagonista de alto brillo.',
@@ -106,6 +131,7 @@ export const initialProductsCatalog: ProductCatalogItem[] = [
   },
   {
     id: 4,
+    code: generateProductCode('collares', 4),
     category: 'collares',
     name: 'Collar Cadena',
     description: 'Diseño delicado con presencia sutil y acabado dorado.',
@@ -115,6 +141,7 @@ export const initialProductsCatalog: ProductCatalogItem[] = [
   },
   {
     id: 5,
+    code: generateProductCode('collares', 5),
     category: 'collares',
     name: 'Collar Oro',
     description: 'Collar de presencia clasica con tono dorado elegante.',
@@ -124,6 +151,7 @@ export const initialProductsCatalog: ProductCatalogItem[] = [
   },
   {
     id: 6,
+    code: generateProductCode('aretes', 6),
     category: 'aretes',
     name: 'Aretes Perla',
     description: 'Aretes delicados con perla y silueta atemporal.',
@@ -133,6 +161,7 @@ export const initialProductsCatalog: ProductCatalogItem[] = [
   },
   {
     id: 7,
+    code: generateProductCode('aretes', 7),
     category: 'aretes',
     name: 'Aretes Gota',
     description: 'Modelo estilizado con caida suave y brillo elegante.',
@@ -142,6 +171,7 @@ export const initialProductsCatalog: ProductCatalogItem[] = [
   },
   {
     id: 8,
+    code: generateProductCode('aretes', 8),
     category: 'aretes',
     name: 'Arete Flor',
     description: 'Diseño floral para looks frescos y femeninos.',
@@ -151,6 +181,7 @@ export const initialProductsCatalog: ProductCatalogItem[] = [
   },
   {
     id: 9,
+    code: generateProductCode('aretes', 9),
     category: 'aretes',
     name: 'Arete Cristal',
     description: 'Acabado brillante con cristales que destacan la pieza.',
@@ -160,6 +191,7 @@ export const initialProductsCatalog: ProductCatalogItem[] = [
   },
   {
     id: 10,
+    code: generateProductCode('aretes', 10),
     category: 'aretes',
     name: 'Aretes Minimal',
     description: 'Par sobrio y combinable para cualquier ocasion.',
@@ -169,6 +201,7 @@ export const initialProductsCatalog: ProductCatalogItem[] = [
   },
   {
     id: 11,
+    code: generateProductCode('pulseras', 11),
     category: 'pulseras',
     name: 'Pulsera Clasica',
     description: 'Pulsera elegante con silueta limpia y versatil.',
@@ -178,6 +211,7 @@ export const initialProductsCatalog: ProductCatalogItem[] = [
   },
   {
     id: 12,
+    code: generateProductCode('pulseras', 12),
     category: 'pulseras',
     name: 'Pulsera Doble',
     description: 'Composicion de doble cadena para un look moderno.',
@@ -187,6 +221,7 @@ export const initialProductsCatalog: ProductCatalogItem[] = [
   },
   {
     id: 13,
+    code: generateProductCode('pulseras', 13),
     category: 'pulseras',
     name: 'Pulsera Perlas',
     description: 'Pulsera delicada con perlas y terminacion refinada.',
@@ -196,6 +231,7 @@ export const initialProductsCatalog: ProductCatalogItem[] = [
   },
   {
     id: 14,
+    code: generateProductCode('pulseras', 14),
     category: 'pulseras',
     name: 'Pulsera Plata',
     description: 'Diseño limpio en tono plata para uso diario.',
@@ -205,6 +241,7 @@ export const initialProductsCatalog: ProductCatalogItem[] = [
   },
   {
     id: 15,
+    code: generateProductCode('pulseras', 15),
     category: 'pulseras',
     name: 'Pulsera Oro',
     description: 'Pulsera con acabado dorado y presencia elegante.',
@@ -252,6 +289,7 @@ export function loadProductsCatalog(): ProductCatalogItem[] {
       .filter(isProductCatalogItem)
       .map((product) => ({
         ...product,
+        code: normalizeProductCode(product),
         image: normalizeProductImage(product),
       }));
 
@@ -287,6 +325,7 @@ export function createEmptyProduct(products: ProductCatalogItem[]): ProductCatal
 
   return {
     id: nextId,
+    code: generateProductCode('collares', nextId),
     category: 'collares',
     name: '',
     description: '',

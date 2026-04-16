@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import MobileNavMenu from '../components/MobileNavMenu';
+import { formatCopCurrency } from '../utils/currency';
 import { groupProductsByCategory, loadProductsCatalog, ProductCategory, ProductCatalogItem } from '../utils/productCatalog';
 
 /**
@@ -70,6 +71,7 @@ export default function Products() {
   const currentProducts = productsByCategory[activeCategory];
   // Filtra productos según la búsqueda (nombre o descripción)
   const filteredProducts = currentProducts.filter(product =>
+    product.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     product.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -127,21 +129,28 @@ export default function Products() {
           <div className="products-grid">
             {filteredProducts.map((product) => (
               <article key={product.id} className="product-card-simple">
-                <ImageWithFallback
-                  src={product.image}
-                  alt={product.name}
-                  className="product-card-image"
-                  sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 25vw"
-                />
-                <div className="product-card-content">
-                  <p className="product-card-category">{categoryLabels[product.category]}</p>
-                  <h4 className="product-card-title">{product.name}</h4>
-                  <p className="product-card-description">{product.description}</p>
-                  <div className="product-card-meta">
-                    <span>{product.units} unidades</span>
-                    <strong>${product.price.toFixed(2)}</strong>
-                  </div>
+                <div className="product-card-media product-card-media-simple">
+                  <ImageWithFallback
+                    src={product.image}
+                    alt={product.name}
+                    className="product-card-image"
+                    sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 25vw"
+                  />
+                  <span className="product-stock-badge">{product.units} disponibles</span>
                 </div>
+                <div className="product-card-content">
+                  <h4 className="product-card-title">{product.name}</h4>
+                  <p className="product-card-description products-page-description">{product.description}</p>
+                  <p className="product-card-price">{formatCopCurrency(product.price)}</p>
+                </div>
+                <a
+                  className="product-whatsapp-btn"
+                  href={`https://wa.me/?text=${encodeURIComponent(`Hola, me interesa ${product.name} (${product.code})`)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  WHATSAPP
+                </a>
               </article>
             ))}
           </div>

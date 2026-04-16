@@ -20,6 +20,7 @@ import { useNavigate } from 'react-router';
 import { Heart, User, Home as HomeIcon, Package } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import MobileNavMenu from '../components/MobileNavMenu';
+import { formatCopCurrency } from '../utils/currency';
 import { loadProductsCatalog, ProductCatalogItem } from '../utils/productCatalog';
 
 // Componente de ícono de WhatsApp
@@ -143,39 +144,21 @@ export default function Home() {
         <section className="products-grid" style={{ margin: '2rem 0' }}>
           {featuredProducts.map((product) => (
             <article key={product.id} className="product-card-simple">
-              <ImageWithFallback
-                src={product.image}
-                alt={product.name}
-                className="product-card-image"
-                sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 25vw"
-              />
-              <div className="product-card-content">
-                <p className="product-card-category">{categoryLabels[product.category]}</p>
-                <h4>{product.name}</h4>
-                <div className="product-card-meta">
-                  <span>{product.units} unidades</span>
-                  <strong>${product.price.toFixed(2)}</strong>
-                </div>
+              <div className="product-card-media product-card-media-simple">
+                <ImageWithFallback
+                  src={product.image}
+                  alt={product.name}
+                  className="product-card-image"
+                  sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 25vw"
+                />
+                <span className="product-stock-badge">{product.units} disponibles</span>
               </div>
-              <div className="product-stock-pill-wrap">
-                <span className="product-stock-badge static">{product.units} unidades disponibles</span>
+              <div className="product-card-content">
+                <h4 className="product-card-title">{product.name}</h4>
+                <p className="product-card-price">{formatCopCurrency(product.price)}</p>
               </div>
               <button
-                className="login-btn"
-                style={{
-                  display: 'inline-block',
-                  background: '#e67e22',
-                  color: 'white',
-                  borderRadius: '2rem',
-                  padding: '0.75rem 2rem',
-                  fontWeight: 'bold',
-                  textAlign: 'center',
-                  textDecoration: 'none',
-                  fontSize: '1rem',
-                  border: 'none',
-                  cursor: 'pointer',
-                  width: '100%'
-                }}
+                className="product-login-btn"
                 onClick={() => navigate('/login')}
               >
                 INICIAR SESIÓN

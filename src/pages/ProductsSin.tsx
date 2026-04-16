@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import MobileNavMenu from '../components/MobileNavMenu';
+import { formatCopCurrency } from '../utils/currency';
 import { groupProductsByCategory, loadProductsCatalog, ProductCategory, ProductCatalogItem } from '../utils/productCatalog';
 
 /**
@@ -67,6 +68,7 @@ export default function ProductsSin() {
   const currentProducts = groupProductsByCategory(products)[activeCategory];
   // Filtra productos según la búsqueda (nombre o descripción)
   const filteredProducts = currentProducts.filter(product =>
+    product.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     product.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -124,39 +126,22 @@ export default function ProductsSin() {
           <div className="products-grid">
             {filteredProducts.map((product) => (
               <article key={product.id} className="product-card-simple">
-                <ImageWithFallback
-                  src={product.image}
-                  alt={product.name}
-                  className="product-card-image"
-                  sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 25vw"
-                />
-                <div className="product-card-content">
-                  <p className="product-card-category">{categories.find((category) => category.key === product.category)?.label}</p>
-                  <h4 className="product-card-title">{product.name}</h4>
-                  <div className="product-card-meta">
-                    <span>{product.units} unidades</span>
-                    <strong>${product.price.toFixed(2)}</strong>
-                  </div>
+                <div className="product-card-media product-card-media-simple">
+                  <ImageWithFallback
+                    src={product.image}
+                    alt={product.name}
+                    className="product-card-image"
+                    sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 25vw"
+                  />
+                  <span className="product-stock-badge">{product.units} disponibles</span>
                 </div>
-                <div className="product-stock-pill-wrap">
-                  <span className="product-stock-badge static">{product.units} unidades disponibles</span>
+                <div className="product-card-content">
+                  <h4 className="product-card-title">{product.name}</h4>
+                  <p className="product-card-price">{formatCopCurrency(product.price)}</p>
                 </div>
                 <button
                   className="product-login-btn"
                   onClick={() => navigate('/login')}
-                  style={{
-                    background: '#e67e22',
-                    color: 'white',
-                    borderRadius: '2rem',
-                    padding: '0.75rem 2rem',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                    textDecoration: 'none',
-                    fontSize: '1rem',
-                    border: 'none',
-                    cursor: 'pointer',
-                    width: '100%'
-                  }}
                 >
                   Iniciar Sesión
                 </button>

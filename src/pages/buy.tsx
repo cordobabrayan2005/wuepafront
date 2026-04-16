@@ -16,6 +16,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import MobileNavMenu from '../components/MobileNavMenu';
 import { useAuthStore } from '../stores/authStore';
+import { formatCopCurrency } from '../utils/currency';
 import { loadProductsCatalog, ProductCatalogItem } from '../utils/productCatalog';
 
 /**
@@ -93,13 +94,15 @@ export default function Buy() {
 
   // Filtra productos según la búsqueda
   const filteredProducts = featuredProducts.filter((product) =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    product.code.toLowerCase().includes(searchQuery.toLowerCase())
+    || product.name.toLowerCase().includes(searchQuery.toLowerCase())
     || product.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Filtra productos destacados según la búsqueda
   const filteredBestSellers = newProducts.filter((item) =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+    item.code.toLowerCase().includes(searchQuery.toLowerCase())
+    || item.name.toLowerCase().includes(searchQuery.toLowerCase())
     || item.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -179,10 +182,11 @@ export default function Buy() {
                   <span className="product-stock-badge">{product.units} disponibles</span>
                 </div>
                 <h4 className="product-card-title">{product.name}</h4>
-                <p>${product.price.toFixed(2)}</p>
+                <p className="product-card-description buy-product-description">{product.description}</p>
+                <p className="product-card-price">{formatCopCurrency(product.price)}</p>
                 <a
                   className="whatsapp-btn"
-                  href={`https://wa.me/?text=${encodeURIComponent(`Hola, me interesa ${product.name}`)}`}
+                  href={`https://wa.me/?text=${encodeURIComponent(`Hola, me interesa ${product.name} (${product.code})`)}`}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -210,10 +214,11 @@ export default function Buy() {
                     <span className="product-stock-badge">{item.units} disponibles</span>
                   </div>
                   <h4 className="product-card-title">{item.name}</h4>
-                  <p>${item.price.toFixed(2)}</p>
+                  <p className="product-card-description buy-product-description">{item.description}</p>
+                  <p className="product-card-price">{formatCopCurrency(item.price)}</p>
                   <a
                     className="whatsapp-btn"
-                    href={`https://wa.me/?text=${encodeURIComponent(`Hola, me interesa ${item.name}`)}`}
+                    href={`https://wa.me/?text=${encodeURIComponent(`Hola, me interesa ${item.name} (${item.code})`)}`}
                     target="_blank"
                     rel="noreferrer"
                   >
