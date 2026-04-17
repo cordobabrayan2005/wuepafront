@@ -16,6 +16,7 @@ interface AuthState {
   isAuthed: boolean;
   isLoading: boolean;
   error: string | null;
+  setUser: (user: User | null) => void;
   login: (email: string, password: string) => Promise<void>;
   socialLogin: (provider: 'google' | 'facebook') => Promise<void>;
   logout: () => void;
@@ -27,6 +28,17 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthed: false,
   isLoading: false,
   error: null,
+
+  setUser: (user) => {
+    set({ user, isAuthed: Boolean(user), error: null });
+
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+      return;
+    }
+
+    localStorage.removeItem('user');
+  },
 
   login: async (email: string, password: string) => {
     set({ isLoading: true, error: null });

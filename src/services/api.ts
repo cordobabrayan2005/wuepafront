@@ -27,6 +27,12 @@ interface SignupPayload {
   password: string;
 }
 
+interface UpdateProfilePayload {
+  name: string;
+  lastname: string;
+  age: number;
+}
+
 interface BackendUser {
   uid: string;
   correo: string;
@@ -283,6 +289,29 @@ export const api = {
       const token = await currentUser.getIdToken();
       const backendUser = await verifyBackendSession(token);
       return await buildUserProfile(currentUser.uid, currentUser.email, backendUser);
+    } catch (error) {
+      throw normalizeFirebaseError(error);
+    }
+  },
+
+  updateProfile: async (profileData: UpdateProfilePayload) => {
+    const currentUser = auth.currentUser;
+
+    if (!currentUser) {
+      throw new Error('No hay una sesión activa.');
+    }
+
+    const normalizedUser: AuthUser = {
+      id: currentUser.uid,
+      email: currentUser.email ?? '',
+      name: profileData.name.trim(),
+      lastname: profileData.lastname.trim(),
+      age: Number.isFinite(profileData.age) ? Math.max(0, profileData.age) : 0,
+    };
+
+    try {
+      await persistUserProfile(normalizedUser);
+      return normalizedUser;
     } catch (error) {
       throw normalizeFirebaseError(error);
     }

@@ -42,6 +42,7 @@ export default function Profile() {
   const [msg, setMsg] = useState("");
   const [editing, setEditing] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState({
     name: "",
     lastname: "",
@@ -50,7 +51,7 @@ export default function Profile() {
   });
   // La contraseña nunca es editable ni recuperable; solo se muestra enmascarada.
   const navigate = useNavigate();
-  const { user, isAuthed, logout } = useAuthStore();
+  const { user, isAuthed, logout, setUser } = useAuthStore();
 
   function redirectToLoginWithLogoutMessage() {
     if (isLoggingOut) {
@@ -114,26 +115,58 @@ export default function Profile() {
   }
 
   /**
-   * Envía los cambios del formulario al backend (PUT /profile).
+   * Envía los cambios del formulario al almacenamiento real del perfil.
    * @async
    * @returns {Promise<void>}
    */
   async function save() {
+    const normalizedAge = Number(form.age);
+
+    if (!form.name.trim()) {
+      setMsg('Ingresa tu nombre antes de guardar.');
+      return;
+    }
+
+    if (!form.lastname.trim()) {
+      setMsg('Ingresa tus apellidos antes de guardar.');
+      return;
+    }
+
+    if (!Number.isFinite(normalizedAge) || normalizedAge < 0) {
+      setMsg('La edad debe ser un numero valido.');
+      return;
+    }
+
     try {
-      const updated = {
-        ...me,
+      setIsSaving(true);
+      setMsg('Guardando cambios...');
+
+      const updated = await api.updateProfile({
         name: form.name,
         lastname: form.lastname,
-        age: Number(form.age),
-        email: form.email,
+        age: normalizedAge,
+      });
+
+      const mergedUser = {
+        ...me,
+        ...updated,
+        email: me?.email || form.email,
       };
-      setMe(updated);
-      localStorage.setItem('user', JSON.stringify(updated));
+
+      setMe(mergedUser);
+      setUser(mergedUser);
+      setForm({
+        name: mergedUser.name || '',
+        lastname: mergedUser.lastname || '',
+        age: String(mergedUser.age || ''),
+        email: mergedUser.email || '',
+      });
       setMsg("Perfil actualizado correctamente ✅");
       setEditing(false);
-      // No password state to clear (password not editable).
     } catch (e: any) {
       setMsg(e.message);
+    } finally {
+      setIsSaving(false);
     }
   }
 
@@ -246,8 +279,8 @@ export default function Profile() {
           </div>
         </div>
         <div className="profile-actions-row">
-          <button className="btn primary profile-save-btn" onClick={editing ? handleSaveClick : () => setEditing(true)}>
-            {editing ? "Guardar cambios" : "Editar perfil"}
+          <button className="btn primary profile-save-btn" onClick={editing ? handleSaveClick : () => setEditing(true)} disabled={isSaving}>
+            {editing ? (isSaving ? "Guardando..." : "Guardar cambios") : "Editar perfil"}
           </button>
           <button className="profile-delete-btn" onClick={kill}>🗑 Eliminar cuenta</button>
         </div>
