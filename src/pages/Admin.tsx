@@ -14,6 +14,8 @@ import {
   saveProductsCatalog,
 } from '../utils/productCatalog';
 
+type AdminMobileView = 'inventory' | 'editor' | 'preview';
+
 const categoryLabels: Record<ProductCategory, string> = {
   collares: 'Collares',
   aretes: 'Aretes',
@@ -23,6 +25,7 @@ const categoryLabels: Record<ProductCategory, string> = {
 export default function Admin() {
   const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
   const [selectedProductId, setSelectedProductId] = useState<number | null>(() => loadProductsCatalog()[0]?.id ?? null);
+  const [mobileView, setMobileView] = useState<AdminMobileView>('inventory');
   const [isCreating, setIsCreating] = useState(false);
   const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<'code' | 'name' | 'price', string>>>({});
@@ -182,6 +185,7 @@ export default function Admin() {
     setDraft(product);
     setPriceInput(product.price > 0 ? String(product.price) : '');
     setIsCreating(false);
+    setMobileView('editor');
     setSelectedImageFile(null);
     setLocalPreviewUrl('');
     setFieldErrors({});
@@ -194,6 +198,7 @@ export default function Admin() {
     setPriceInput(newProduct.price > 0 ? String(newProduct.price) : '');
     setSelectedProductId(newProduct.id);
     setIsCreating(true);
+    setMobileView('editor');
     setSelectedImageFile(null);
     setLocalPreviewUrl('');
     setFieldErrors({});
@@ -255,6 +260,7 @@ export default function Admin() {
         URL.revokeObjectURL(localPreviewUrl);
       }
       setLocalPreviewUrl('');
+      setMobileView('preview');
       setToast({ text: 'Imagen subida correctamente. Ahora puedes guardar el producto.', type: 'success' });
     } catch (error) {
       console.error(error);
@@ -308,6 +314,7 @@ export default function Admin() {
     setSelectedProductId(normalizedDraft.id);
     setDraft(normalizedDraft);
     setIsCreating(false);
+    setMobileView('preview');
     setFieldErrors({});
     setToast({
       text: isCreating ? 'Producto creado correctamente.' : 'Producto guardado correctamente.',
@@ -322,6 +329,7 @@ export default function Admin() {
       setSelectedProductId(fallbackProduct.id);
       setDraft(fallbackProduct);
       setPriceInput(fallbackProduct.price > 0 ? String(fallbackProduct.price) : '');
+      setMobileView('inventory');
       setFieldErrors({});
       setToast({ text: 'Creacion cancelada.', type: 'info' });
       return;
@@ -343,10 +351,12 @@ export default function Admin() {
       setPriceInput(emptyProduct.price > 0 ? String(emptyProduct.price) : '');
       setSelectedProductId(emptyProduct.id);
       setIsCreating(true);
+      setMobileView('editor');
     } else {
       setSelectedProductId(updatedProducts[0].id);
       setDraft(updatedProducts[0]);
       setPriceInput(updatedProducts[0].price > 0 ? String(updatedProducts[0].price) : '');
+      setMobileView('inventory');
     }
 
     setFieldErrors({});
@@ -366,6 +376,7 @@ export default function Admin() {
     setDraft(restoredProducts[0] ?? createEmptyProduct(restoredProducts));
     setPriceInput(restoredProducts[0]?.price ? String(restoredProducts[0].price) : '');
     setIsCreating(false);
+    setMobileView('inventory');
     setFieldErrors({});
     setToast({ text: 'Catalogo restaurado.', type: 'success' });
   }
@@ -373,6 +384,7 @@ export default function Admin() {
   const totalUnits = products.reduce((total, product) => total + product.units, 0);
   const totalValue = products.reduce((total, product) => total + (product.units * product.price), 0);
   const selectedCategoryLabel = categoryLabels[draft.category];
+  const activeProductLabel = isCreating ? 'Nuevo producto' : draft.name || 'Producto sin nombre';
 
   return (
     <section className="admin-page">
@@ -416,8 +428,51 @@ export default function Admin() {
           </article>
         </section>
 
+        <section className="admin-mobile-toolbar" aria-label="Controles rapidos del admin">
+          <div className="admin-mobile-status">
+            <p className="admin-kicker">Control rapido</p>
+            <strong>{activeProductLabel}</strong>
+            <span>
+              {draft.code || 'Sin codigo'} · {selectedCategoryLabel}
+            </span>
+          </div>
+
+          <div className="admin-mobile-tabs" role="tablist" aria-label="Cambiar vista del panel admin">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mobileView === 'inventory'}
+              className={`admin-mobile-tab ${mobileView === 'inventory' ? 'active' : ''}`}
+              onClick={() => setMobileView('inventory')}
+            >
+              <span>Inventario</span>
+              <small>{visibleProducts.length} items</small>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mobileView === 'editor'}
+              className={`admin-mobile-tab ${mobileView === 'editor' ? 'active' : ''}`}
+              onClick={() => setMobileView('editor')}
+            >
+              <span>Editar</span>
+              <small>{activeProductLabel}</small>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mobileView === 'preview'}
+              className={`admin-mobile-tab ${mobileView === 'preview' ? 'active' : ''}`}
+              onClick={() => setMobileView('preview')}
+            >
+              <span>Vista previa</span>
+              <small>{draft.image || 'Sin imagen'}</small>
+            </button>
+          </div>
+        </section>
+
         <div className="admin-layout">
-          <aside className="admin-sidebar-panel">
+          <aside className={`admin-sidebar-panel ${mobileView === 'inventory' ? 'mobile-active' : 'mobile-hidden'}`}>
             <div className="admin-sidebar-header">
               <div>
                 <h2>Inventario</h2>
@@ -469,7 +524,7 @@ export default function Admin() {
             </button>
           </aside>
 
-          <div className="admin-editor-panel">
+          <div className={`admin-editor-panel ${mobileView === 'inventory' ? 'mobile-hidden' : 'mobile-active'}`}>
             <div className="admin-editor-header">
               <div>
                 <p className="admin-kicker">{isCreating ? 'Nuevo registro' : 'Edicion activa'}</p>
@@ -487,7 +542,7 @@ export default function Admin() {
             </div>
 
             <div className="admin-workspace-grid">
-              <div className="admin-form-stack">
+              <div className={`admin-form-stack ${mobileView === 'preview' ? 'mobile-hidden' : 'mobile-active'}`}>
                 <section className="admin-section-card">
                   <div className="admin-section-heading">
                     <p className="admin-kicker">Paso 1</p>
@@ -627,6 +682,12 @@ export default function Admin() {
                 </section>
 
                 <div className="admin-editor-actions">
+                  <button type="button" className="admin-secondary-btn admin-mobile-only-action" onClick={() => setMobileView('inventory')}>
+                    Ver inventario
+                  </button>
+                  <button type="button" className="admin-secondary-btn admin-mobile-only-action" onClick={() => setMobileView('preview')}>
+                    Ver vista previa
+                  </button>
                   <button type="button" className="admin-primary-btn" onClick={handleSaveProduct}>
                     Guardar producto
                   </button>
@@ -636,7 +697,7 @@ export default function Admin() {
                 </div>
               </div>
 
-              <aside className="admin-preview-stack">
+              <aside className={`admin-preview-stack ${mobileView === 'preview' ? 'mobile-active' : 'mobile-hidden'}`}>
                 <div className="admin-preview-card">
                   <div>
                     <p className="admin-preview-label">Vista previa</p>
@@ -649,6 +710,15 @@ export default function Admin() {
                     <span>{draft.units} unidades</span>
                     <span>{priceInput ? formatCopCurrency(Number(priceInput)) : 'Sin precio'}</span>
                   </div>
+                </div>
+
+                <div className="admin-preview-actions admin-mobile-only">
+                  <button type="button" className="admin-secondary-btn" onClick={() => setMobileView('editor')}>
+                    Volver a editar
+                  </button>
+                  <button type="button" className="admin-primary-btn" onClick={handleSaveProduct}>
+                    Guardar desde aqui
+                  </button>
                 </div>
 
                 <div className="admin-image-preview-card">
