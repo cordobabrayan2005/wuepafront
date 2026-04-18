@@ -3105,10 +3105,9 @@ button {
   }
 
   .admin-editor-actions {
-    position: sticky;
-    bottom: calc(0.6rem + env(safe-area-inset-bottom));
-    z-index: 5;
+    position: static;
     padding: 0.85rem;
+    margin-top: 0.5rem;
     border-radius: 1.25rem;
     background: rgba(255, 248, 236, 0.94);
     border: 1px solid rgba(241, 223, 189, 0.95);
