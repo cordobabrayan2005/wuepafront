@@ -446,6 +446,11 @@ button {
   margin: 0 auto;
 }
 
+.login-panel {
+  width: min(100%, 460px);
+  margin: 0 auto;
+}
+
 .forgot-kicker {
   margin: 0 0 0.5rem;
   color: #b37716;
@@ -725,6 +730,11 @@ button {
   outline: none;
 }
 
+.login-form .form-group input.login-input:focus {
+  border-color: #ffa635;
+  box-shadow: 0 0 0 4px rgba(255, 138, 5, 0.14);
+}
+
 .signup-form .form-group input.login-input:focus,
 .signup-left .form-group input.login-input:focus {
   border-color: #ffa635;
@@ -769,6 +779,16 @@ button {
   margin: 1rem auto 0;
   text-align: center;
   font-weight: 700;
+}
+
+.login-links {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.login-links p {
+  margin: 0;
 }
 
 .login-message.error {
@@ -938,6 +958,10 @@ button {
     grid-template-columns: 1fr;
   }
 
+  .login-layout-no-mobile-art .login-left {
+    display: none;
+  }
+
   .auth-toast {
     top: 1rem;
     right: 1rem;
@@ -952,7 +976,21 @@ button {
   }
 
   .login-right {
-    display: block;
+    display: flex;
+    align-items: stretch;
+    padding: 1.5rem;
+  }
+
+  .login-panel {
+    width: 100%;
+  }
+
+  .login-button {
+    min-height: 54px;
+  }
+
+  .social-button {
+    width: 100%;
   }
 
   .forgot-panel {
@@ -1010,6 +1048,91 @@ button {
   .profile-header-row {
     flex-wrap: wrap;
     gap: 0.75rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .login-page,
+  .signup-page {
+    padding: 1rem 0.75rem;
+    align-items: flex-start;
+  }
+
+  .login-layout,
+  .signup-layout {
+    width: 100%;
+    border-radius: 1.5rem;
+  }
+
+  .login-right,
+  .signup-left {
+    padding: 1rem;
+  }
+
+  .login-panel .back-link {
+    margin-bottom: 0.9rem;
+  }
+
+  .signup-title {
+    font-size: 1.85rem;
+  }
+
+  .signup-subtitle {
+    margin-bottom: 1.15rem;
+    line-height: 1.5;
+  }
+
+  .login-form .form-group,
+  .signup-form .form-group {
+    margin-bottom: 0.9rem;
+  }
+
+  .login-form .form-group input.login-input,
+  .signup-left .form-group input.login-input,
+  .signup-form .form-group input.login-input,
+  .password-wrap input.login-input {
+    min-height: 48px;
+    font-size: 0.96rem;
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
+  }
+
+  .password-wrap {
+    padding: 0.65rem;
+    border-radius: 14px;
+  }
+
+  .password-wrap input.login-input {
+    padding-right: 3.7rem;
+  }
+
+  .eye-btn {
+    right: 0.75rem;
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .login-button {
+    min-height: 52px;
+    font-size: 1rem;
+  }
+
+  .social-signup-container {
+    margin-bottom: 0;
+  }
+
+  .social-signup-buttons {
+    gap: 0.65rem;
+  }
+
+  .login-links {
+    gap: 0.6rem;
+  }
+
+  .forgot-text,
+  .signup-text {
+    text-align: center;
+    line-height: 1.45;
   }
 }
 

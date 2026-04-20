@@ -154,74 +154,77 @@ export default function Login({ onAuth }: Props) {
         </div>
       )}
 
-      <div className="login-layout" aria-label="Login split layout">
+      <div className="login-layout login-layout-no-mobile-art" aria-label="Login split layout">
         <aside className="login-left wuepaini" aria-hidden="true">
           <div className="login-image" />
         </aside>
 
         <section className="login-right" aria-describedby="login-description">
-          <a href="/" className="back-link">← Volver al inicio</a>
-          <h1 id="login-title" className="signup-title">WUEPA</h1>
-          <p id="login-description" className="signup-subtitle">Iniciar sesión en tu cuenta</p>
+          <div className="login-panel">
+            <a href="/" className="back-link">← Volver al inicio</a>
 
-          <form onSubmit={onSubmit} className="login-form" aria-label="Formulario de inicio de sesión">
-            <div className="form-group">
-              <label htmlFor="email" className="form-label">Correo electrónico</label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu@email.com"
-                required
-                className="login-input"
-                aria-required="true"
-              />
-            </div>
+            <h1 id="login-title" className="signup-title">WUEPA</h1>
+            <p id="login-description" className="signup-subtitle">Iniciar sesión en tu cuenta</p>
 
-            <div className="form-group">
-              <label htmlFor="password" className="form-label">Contraseña</label>
-              <PasswordField
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                label=""
-                placeholder="********"
-                required
-                className="login-input"
-              />
-            </div>
-
-            <button type="submit" className="login-button" disabled={isLoading} aria-label="Ingresar a tu cuenta">
-              Iniciar sesión
-            </button>
-
-            <div className="social-signup-container">
-              <p className="social-signup-text">O continúa con</p>
-              <div className="social-signup-buttons">
-                <button type="button" className="social-button google-button" onClick={() => handleSocialLogin('google')} disabled={isLoading}>
-                  <img src="/google.png" alt="Google" />
-                  Google
-                </button>
+            <form onSubmit={onSubmit} className="login-form" aria-label="Formulario de inicio de sesión">
+              <div className="form-group">
+                <label htmlFor="email" className="form-label">Correo electrónico</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="tu@email.com"
+                  required
+                  className="login-input"
+                  aria-required="true"
+                />
               </div>
-            </div>
-          </form>
 
-          <nav className="login-links" aria-label="Enlaces de ayuda">
-            <p className="forgot-text">
-              <Link to="/forgot" className="forgot-link">¿Olvidaste tu contraseña?</Link>
-            </p>
+              <div className="form-group">
+                <label htmlFor="password" className="form-label">Contraseña</label>
+                <PasswordField
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  label=""
+                  placeholder="********"
+                  required
+                  className="login-input"
+                />
+              </div>
 
-            <p className="signup-text">
-              ¿No tienes cuenta? <Link to="/signup" className="signup-link">Regístrate aquí</Link>
-            </p>
-          </nav>
+              <button type="submit" className="login-button" disabled={isLoading} aria-label="Ingresar a tu cuenta">
+                Iniciar sesión
+              </button>
 
-          {msg && (
-            <p role="status" aria-live="polite" className={`login-message ${msgType}`}>
-              {msg}
-            </p>
-          )}
+              <div className="social-signup-container">
+                <p className="social-signup-text">O continúa con</p>
+                <div className="social-signup-buttons">
+                  <button type="button" className="social-button google-button" onClick={() => handleSocialLogin('google')} disabled={isLoading}>
+                    <img src="/google.png" alt="Google" />
+                    Google
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <nav className="login-links" aria-label="Enlaces de ayuda">
+              <p className="forgot-text">
+                <Link to="/forgot" className="forgot-link">¿Olvidaste tu contraseña?</Link>
+              </p>
+
+              <p className="signup-text">
+                ¿No tienes cuenta? <Link to="/signup" className="signup-link">Regístrate aquí</Link>
+              </p>
+            </nav>
+
+            {msg && (
+              <p role="status" aria-live="polite" className={`login-message ${msgType}`}>
+                {msg}
+              </p>
+            )}
+          </div>
         </section>
       </div>
     </main>
