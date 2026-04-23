@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 import ChangePassword from "./pages/ChangePassword";
 import Home from "./pages/Home";
 import Buy from "./pages/buy";
+import Cart from "./pages/Cart";
 import Products from "./pages/Products";
 import ProductsSin from "./pages/ProductsSin";
 import { useAuthStore } from './stores/authStore';
@@ -80,6 +81,7 @@ function Shell() {
           <Route path="/user-manual" element={<UserManual />} />
           <Route path="/buy" element={<ProtectedRoute><Buy /></ProtectedRoute>} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
           <Route path="/products" element={<Products />} />
           <Route path="/productssin" element={<ProductsSin />} />
           <Route path="*" element={<Navigate to="/login" />} />

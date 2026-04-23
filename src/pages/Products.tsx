@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import MobileNavMenu from '../components/MobileNavMenu';
+import { addProductToCart, getCartItemsCount, loadCartItems } from '../utils/cart';
 import { formatCopCurrency } from '../utils/currency';
 import { groupProductsByCategory, loadProductsCatalog, ProductCategory, ProductCatalogItem } from '../utils/productCatalog';
 
@@ -28,6 +29,8 @@ export default function Products() {
   const [activeCategory, setActiveCategory] = useState<ProductCategory>('collares');
   // Estado para la búsqueda de productos
   const [searchQuery, setSearchQuery] = useState('');
+  const [cartCount, setCartCount] = useState(() => getCartItemsCount(loadCartItems()));
+  const [feedback, setFeedback] = useState('');
   const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
   const location = useLocation();
   const categoryLabels: Record<ProductCategory, string> = {
@@ -44,6 +47,28 @@ export default function Products() {
     window.addEventListener('storage', syncProducts);
     return () => window.removeEventListener('storage', syncProducts);
   }, []);
+
+  useEffect(() => {
+    function syncCartCount() {
+      setCartCount(getCartItemsCount(loadCartItems()));
+    }
+
+    window.addEventListener('storage', syncCartCount);
+    window.addEventListener('wuepa-cart-updated', syncCartCount as EventListener);
+    return () => {
+      window.removeEventListener('storage', syncCartCount);
+      window.removeEventListener('wuepa-cart-updated', syncCartCount as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!feedback) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => setFeedback(''), 2800);
+    return () => window.clearTimeout(timeoutId);
+  }, [feedback]);
 
   // Cambia la categoría activa según el parámetro de la URL
   useEffect(() => {
@@ -63,8 +88,15 @@ export default function Products() {
   const mobileMenuItems = [
     { label: 'Inicio', to: '/buy' },
     { label: 'Productos', to: '/products', isActive: true },
+    { label: `Carrito (${cartCount})`, to: '/cart' },
     { label: 'Nosotros', to: '/about' },
   ];
+
+  const handleAddToCart = (product: ProductCatalogItem) => {
+    const nextItems = addProductToCart(product);
+    setCartCount(getCartItemsCount(nextItems));
+    setFeedback(`${product.name} se agrego al carrito.`);
+  };
 
   // Productos de la categoría activa
   const productsByCategory = groupProductsByCategory(products);
@@ -98,9 +130,16 @@ export default function Products() {
         <nav className="header-right">
           <Link to="/buy">Inicio</Link>
           <Link to="/products" className="active">Productos</Link>
+          <Link to="/cart" className="cart-link-inline">Carrito <span className="cart-link-count">{cartCount}</span></Link>
           <Link to="/about">Nosotros</Link>
         </nav>
       </header>
+
+      {feedback && (
+        <div role="status" aria-live="polite" className="auth-toast success">
+          {feedback}
+        </div>
+      )}
 
       <div className="products-container">
         {/* Hero Section */}
@@ -143,14 +182,9 @@ export default function Products() {
                   <p className="product-card-description products-page-description">{product.description}</p>
                   <p className="product-card-price">{formatCopCurrency(product.price)}</p>
                 </div>
-                <a
-                  className="product-whatsapp-btn"
-                  href={`https://wa.me/?text=${encodeURIComponent(`Hola, me interesa ${product.name} (${product.code})`)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  WHATSAPP
-                </a>
+                <button type="button" className="add-cart-btn add-cart-btn-secondary" onClick={() => handleAddToCart(product)}>
+                  Agregar al carrito
+                </button>
               </article>
             ))}
           </div>

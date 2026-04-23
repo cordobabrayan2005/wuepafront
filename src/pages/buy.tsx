@@ -16,6 +16,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import MobileNavMenu from '../components/MobileNavMenu';
 import { useAuthStore } from '../stores/authStore';
+import { addProductToCart, getCartItemsCount, loadCartItems } from '../utils/cart';
 import { formatCopCurrency } from '../utils/currency';
 import { loadProductsCatalog, ProductCatalogItem } from '../utils/productCatalog';
 
@@ -29,6 +30,7 @@ export default function Buy() {
   const [msg, setMsg] = useState('');
   const [msgType, setMsgType] = useState<'success' | 'error' | 'info'>('info');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [cartCount, setCartCount] = useState(() => getCartItemsCount(loadCartItems()));
   const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
   // Usuario autenticado y logout obtenido del store
   const { user, logout } = useAuthStore();
@@ -42,6 +44,19 @@ export default function Buy() {
 
     window.addEventListener('storage', syncProducts);
     return () => window.removeEventListener('storage', syncProducts);
+  }, []);
+
+  useEffect(() => {
+    function syncCartCount() {
+      setCartCount(getCartItemsCount(loadCartItems()));
+    }
+
+    window.addEventListener('storage', syncCartCount);
+    window.addEventListener('wuepa-cart-updated', syncCartCount as EventListener);
+    return () => {
+      window.removeEventListener('storage', syncCartCount);
+      window.removeEventListener('wuepa-cart-updated', syncCartCount as EventListener);
+    };
   }, []);
 
   useEffect(() => {
@@ -88,9 +103,17 @@ export default function Buy() {
   const mobileMenuItems = [
     { label: 'Inicio', to: '/buy', isActive: true },
     { label: 'Productos', to: '/products' },
+    { label: `Carrito (${cartCount})`, to: '/cart' },
     { label: 'Nosotros', to: '/about' },
     { label: isLoggingOut ? 'Cerrando...' : 'Cerrar sesion', onClick: handleLogout, tone: 'danger' as const },
   ];
+
+  const handleAddToCart = (product: ProductCatalogItem) => {
+    const nextItems = addProductToCart(product);
+    setCartCount(getCartItemsCount(nextItems));
+    setMsg(`${product.name} se agrego al carrito.`);
+    setMsgType('success');
+  };
 
   // Filtra productos según la búsqueda
   const filteredProducts = featuredProducts.filter((product) =>
@@ -127,6 +150,7 @@ export default function Buy() {
         <nav className="header-right">
           <Link to="/buy">Inicio</Link>
           <Link to="/products">Productos</Link>
+          <Link to="/cart" className="cart-link-inline">Carrito <span className="cart-link-count">{cartCount}</span></Link>
           <Link to="/about">Nosotros</Link>
           <button onClick={handleLogout} disabled={isLoggingOut} className="logout-btn" style={{marginLeft: 16, background: 'transparent', color: '#e74c3c', border: 'none', padding: '8px 16px', borderRadius: 4, cursor: isLoggingOut ? 'wait' : 'pointer', opacity: isLoggingOut ? 0.7 : 1}}>{isLoggingOut ? 'Cerrando...' : 'Cerrar sesión'}</button>
         </nav>
@@ -184,14 +208,9 @@ export default function Buy() {
                 <h4 className="product-card-title">{product.name}</h4>
                 <p className="product-card-description buy-product-description">{product.description}</p>
                 <p className="product-card-price">{formatCopCurrency(product.price)}</p>
-                <a
-                  className="whatsapp-btn"
-                  href={`https://wa.me/?text=${encodeURIComponent(`Hola, me interesa ${product.name} (${product.code})`)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  WHATSAPP
-                </a>
+                <div className="product-card-actions">
+                  <button type="button" className="add-cart-btn" onClick={() => handleAddToCart(product)}>Agregar al carrito</button>
+                </div>
               </article>
             ))}
           </div>
@@ -216,14 +235,9 @@ export default function Buy() {
                   <h4 className="product-card-title">{item.name}</h4>
                   <p className="product-card-description buy-product-description">{item.description}</p>
                   <p className="product-card-price">{formatCopCurrency(item.price)}</p>
-                  <a
-                    className="whatsapp-btn"
-                    href={`https://wa.me/?text=${encodeURIComponent(`Hola, me interesa ${item.name} (${item.code})`)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    WHATSAPP
-                  </a>
+                  <div className="product-card-actions">
+                    <button type="button" className="add-cart-btn" onClick={() => handleAddToCart(item)}>Agregar al carrito</button>
+                  </div>
                 </article>
               ))}
             </div>
