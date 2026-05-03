@@ -1,18 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { storage } from '../config/firebase';
 import { formatCopCurrency } from '../utils/currency';
+import { api, type Product } from '../services/api';
 import {
   createEmptyProduct,
   generateProductCode,
-  loadProductsCatalog,
   ProductCatalogItem,
   ProductCategory,
-  resetProductsCatalog,
-  saveProductsCatalog,
 } from '../utils/productCatalog';
+
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../config/firebase';
 
 type AdminMobileView = 'inventory' | 'editor' | 'preview';
 
@@ -23,14 +22,14 @@ const categoryLabels: Record<ProductCategory, string> = {
 };
 
 export default function Admin() {
-  const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(() => loadProductsCatalog()[0]?.id ?? null);
+  const [products, setProducts] = useState<ProductCatalogItem[]>([]);
+  const [selectedProductId, setSelectedProductId] = useState<string | number | null>(null);
   const [mobileView, setMobileView] = useState<AdminMobileView>('inventory');
   const [isCreating, setIsCreating] = useState(false);
   const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<'code' | 'name' | 'price', string>>>({});
   const [filter, setFilter] = useState('');
-  const initialDraft = createEmptyProduct(loadProductsCatalog());
+  const initialDraft = createEmptyProduct([]);
   const [draft, setDraft] = useState<ProductCatalogItem>(() => initialDraft);
   const [priceInput, setPriceInput] = useState(() => (initialDraft.price > 0 ? String(initialDraft.price) : ''));
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
@@ -80,6 +79,36 @@ export default function Admin() {
       }
     };
   }, [localPreviewUrl]);
+
+  useEffect(() => {
+    api.getProducts()
+      .then((backendProducts) => {
+        const mappedProducts: ProductCatalogItem[] = backendProducts.map((product) => ({
+          id: Number(product.id),
+          code: product.codigo || '',
+          category: product.categoria as ProductCategory,
+          name: product.nombre,
+          description: product.descripcion || '',
+          units: product.stock || 0,
+          price: product.precio || 0,
+          image: product.imagenUrl || '/collar.png',
+        }));
+
+        setProducts(mappedProducts);
+        setSelectedProductId(mappedProducts[0]?.id ?? null);
+
+        if (mappedProducts[0]) {
+          setDraft(mappedProducts[0]);
+          setPriceInput(String(mappedProducts[0].price));
+        }
+      })
+      .catch(() => {
+        setToast({
+          text: 'No se pudieron cargar los productos.',
+          type: 'error',
+        });
+      });
+  }, []);
 
   useEffect(() => {
     if (!toast) {
@@ -270,115 +299,101 @@ export default function Admin() {
     }
   }
 
-  function handleSaveProduct() {
+  async function handleSaveProduct() {
     if (!validateDraft()) {
-      setToast({ text: 'Faltan campos obligatorios. Revisa el codigo, el nombre y el precio.', type: 'error' });
-      return;
-    }
-
-    const code = draft.code.trim().toUpperCase();
-    const name = draft.name.trim();
-    const description = draft.description.trim();
-    const image = draft.image.trim() || '/collar.png';
-    const parsedPrice = Number(priceInput);
-
-    if (draft.units < 0 || parsedPrice < 0) {
-      setToast({ text: 'Las unidades y el precio no pueden ser negativos.', type: 'error' });
-      return;
-    }
-
-    const duplicateCodeMessage = getDuplicateCodeMessage(code);
-
-    if (duplicateCodeMessage) {
-      setFieldErrors((currentErrors) => ({ ...currentErrors, code: duplicateCodeMessage }));
-      setToast({ text: 'El codigo del producto ya existe. Usa un codigo unico.', type: 'error' });
+      setToast({ text: 'Faltan campos obligatorios.', type: 'error' });
       return;
     }
 
     const normalizedDraft: ProductCatalogItem = {
       ...draft,
-      code,
-      name,
-      description,
-      price: parsedPrice,
-      image,
+      code: draft.code.trim().toUpperCase(),
+      name: draft.name.trim(),
+      description: draft.description.trim(),
+      price: Number(priceInput),
+      image: draft.image.trim() || '/collar.png',
     };
 
-    const updatedProducts = isCreating
-      ? [...products, normalizedDraft]
-      : products.map((product) => (product.id === normalizedDraft.id ? normalizedDraft : product));
+    try {
+      if (isCreating) {
+        await api.createProduct({
+          nombre: normalizedDraft.name,
+          descripcion: normalizedDraft.description,
+          precio: normalizedDraft.price,
+          categoria: normalizedDraft.category,
+          imagenUrl: normalizedDraft.image,
+          codigo: normalizedDraft.code,
+          stock: normalizedDraft.units,
+        });
+      } else {
+        await api.updateProduct(String(normalizedDraft.id), {
+          nombre: normalizedDraft.name,
+          descripcion: normalizedDraft.description,
+          precio: normalizedDraft.price,
+          categoria: normalizedDraft.category,
+          imagenUrl: normalizedDraft.image,
+          codigo: normalizedDraft.code,
+          stock: normalizedDraft.units,
+        });
+      }
 
-    updatedProducts.sort((leftProduct, rightProduct) => leftProduct.id - rightProduct.id);
-    saveProductsCatalog(updatedProducts);
-    setProducts(updatedProducts);
-    setSelectedProductId(normalizedDraft.id);
-    setDraft(normalizedDraft);
-    setIsCreating(false);
-    setMobileView('preview');
-    setFieldErrors({});
-    setToast({
-      text: isCreating ? 'Producto creado correctamente.' : 'Producto guardado correctamente.',
-      type: 'success',
-    });
+      const refreshed = await api.getProducts();
+
+      const mappedProducts: ProductCatalogItem[] = refreshed.map((product) => ({
+        id: Number(product.id),
+        code: product.codigo || '',
+        category: product.categoria as ProductCategory,
+        name: product.nombre,
+        description: product.descripcion || '',
+        units: product.stock || 0,
+        price: product.precio || 0,
+        image: product.imagenUrl || '/collar.png',
+      }));
+
+      setProducts(mappedProducts);
+      setIsCreating(false);
+
+    } catch (error) {
+      console.error(error);
+      setToast({ text: 'Error guardando producto', type: 'error' });
+    }
   }
 
-  function handleDeleteProduct() {
+  async function handleDeleteProduct() {
     if (isCreating) {
       setIsCreating(false);
-      const fallbackProduct = products[0] ?? createEmptyProduct([]);
-      setSelectedProductId(fallbackProduct.id);
-      setDraft(fallbackProduct);
-      setPriceInput(fallbackProduct.price > 0 ? String(fallbackProduct.price) : '');
-      setMobileView('inventory');
-      setFieldErrors({});
-      setToast({ text: 'Creacion cancelada.', type: 'info' });
       return;
     }
 
-    const confirmDelete = window.confirm(`¿Eliminar ${draft.name || 'este producto'}?`);
+    const confirmDelete = window.confirm(`¿Eliminar ${draft.name}?`);
+    if (!confirmDelete) return;
 
-    if (!confirmDelete) {
-      return;
+    try {
+      await api.deleteProduct(String(draft.id));
+
+      const refreshed = await api.getProducts();
+
+      const mappedProducts: ProductCatalogItem[] = refreshed.map((product) => ({
+        id: Number(product.id),
+        code: product.codigo || '',
+        category: product.categoria as ProductCategory,
+        name: product.nombre,
+        description: product.descripcion || '',
+        units: product.stock || 0,
+        price: product.precio || 0,
+        image: product.imagenUrl || '/collar.png',
+      }));
+
+      setProducts(mappedProducts);
+
+    } catch (error) {
+      console.error(error);
+      setToast({ text: 'Error eliminando producto', type: 'error' });
     }
-
-    const updatedProducts = products.filter((product) => product.id !== draft.id);
-    saveProductsCatalog(updatedProducts);
-    setProducts(updatedProducts);
-
-    if (updatedProducts.length === 0) {
-      const emptyProduct = createEmptyProduct([]);
-      setDraft(emptyProduct);
-      setPriceInput(emptyProduct.price > 0 ? String(emptyProduct.price) : '');
-      setSelectedProductId(emptyProduct.id);
-      setIsCreating(true);
-      setMobileView('editor');
-    } else {
-      setSelectedProductId(updatedProducts[0].id);
-      setDraft(updatedProducts[0]);
-      setPriceInput(updatedProducts[0].price > 0 ? String(updatedProducts[0].price) : '');
-      setMobileView('inventory');
-    }
-
-    setFieldErrors({});
-    setToast({ text: 'Producto eliminado.', type: 'success' });
   }
 
-  function handleResetCatalog() {
-    const confirmReset = window.confirm('¿Restaurar el catalogo inicial? Se perderan los cambios guardados en esta pagina.');
-
-    if (!confirmReset) {
-      return;
-    }
-
-    const restoredProducts = resetProductsCatalog();
-    setProducts(restoredProducts);
-    setSelectedProductId(restoredProducts[0]?.id ?? null);
-    setDraft(restoredProducts[0] ?? createEmptyProduct(restoredProducts));
-    setPriceInput(restoredProducts[0]?.price ? String(restoredProducts[0].price) : '');
-    setIsCreating(false);
-    setMobileView('inventory');
-    setFieldErrors({});
-    setToast({ text: 'Catalogo restaurado.', type: 'success' });
+  async function handleResetCatalog() {
+    setToast({ text: 'Esta función ahora depende del backend.', type: 'info' });
   }
 
   const totalUnits = products.reduce((total, product) => total + product.units, 0);

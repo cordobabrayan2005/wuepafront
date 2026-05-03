@@ -8,8 +8,9 @@ import {
   signInWithPopup,
   updatePassword,
 } from 'firebase/auth';
-import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
-import { auth, db, googleProvider } from '../config/firebase';
+import { auth, googleProvider } from '../config/firebase';
+
+console.log('🟢 [API] Firebase cargado sin Firestore (modo backend)');
 
 export interface AuthUser {
   id: string;
@@ -17,6 +18,7 @@ export interface AuthUser {
   name: string;
   lastname: string;
   age: number;
+  rol: 'cliente' | 'admin';
 }
 
 interface SignupPayload {
@@ -31,6 +33,20 @@ interface UpdateProfilePayload {
   name: string;
   lastname: string;
   age: number;
+}
+
+export interface ProductPayload {
+  nombre: string;
+  descripcion?: string;
+  precio: number;
+  categoria: string;
+  imagenUrl?: string;
+  codigo?: string;
+  stock?: number;
+}
+
+export interface Product extends ProductPayload {
+  id: string;
 }
 
 interface BackendUser {
@@ -77,6 +93,7 @@ function mapBackendUserToAuthUser(backendUser: BackendUser, profile?: Partial<Au
     name: profile?.name ?? backendUser.nombre ?? '',
     lastname: profile?.lastname ?? '',
     age: typeof profile?.age === 'number' ? profile.age : 0,
+    rol: backendUser.rol === 'admin' ? 'admin' : 'cliente',
   };
 }
 
@@ -139,22 +156,6 @@ async function verifyOrRegisterBackendUser(token: string, userData: SignupPayloa
   }
 }
 
-async function getFirestoreProfile(userId: string) {
-  const snapshot = await getDoc(doc(db, USERS_COLLECTION, userId));
-  const data = snapshot.data();
-
-  if (!data) {
-    return null;
-  }
-
-  return {
-    id: userId,
-    email: data.email ?? '',
-    name: data.name ?? '',
-    lastname: data.lastname ?? '',
-    age: typeof data.age === 'number' ? data.age : Number(data.age ?? 0),
-  } satisfies AuthUser;
-}
 
 function normalizeFirebaseError(error: unknown) {
   if (typeof error === 'object' && error && 'code' in error) {
@@ -200,36 +201,63 @@ async function buildUserProfile(
   emailFallback: string | null,
   backendUser?: BackendUser,
 ): Promise<AuthUser> {
-  const profile = await getFirestoreProfile(userId);
+
+  console.log('🧠 [PROFILE] Construyendo perfil...');
+  console.log('🧠 [PROFILE] UID:', userId);
 
   if (backendUser) {
+    console.log('🟢 [PROFILE] Usando datos del backend');
+
     return mapBackendUserToAuthUser(backendUser, {
-      ...profile,
-      email: profile?.email ?? emailFallback ?? backendUser.correo ?? '',
+      email: emailFallback ?? backendUser.correo ?? '',
     });
   }
 
+  console.log('🟡 [PROFILE] Sin backend, usando fallback');
+
   return {
     id: userId,
-    email: profile?.email ?? emailFallback ?? '',
-    name: profile?.name ?? '',
-    lastname: profile?.lastname ?? '',
-    age: typeof profile?.age === 'number' ? profile.age : Number(profile?.age ?? 0),
+    email: emailFallback ?? '',
+    name: '',
+    lastname: '',
+    age: 0,
+    rol: 'cliente'
   };
 }
 
-async function persistUserProfile(user: AuthUser) {
-  await setDoc(
-    doc(db, USERS_COLLECTION, user.id),
-    {
-      email: user.email,
-      name: user.name,
-      lastname: user.lastname,
-      age: user.age,
-      updatedAt: serverTimestamp(),
+async function getFirebaseToken() {
+  const currentUser = auth.currentUser;
+
+  if (!currentUser) {
+    throw new Error('No hay una sesión activa.');
+  }
+
+  return currentUser.getIdToken();
+}
+
+async function requestBackend<T>(
+  path: string,
+  options: RequestInit = {},
+  withAuth = false
+): Promise<T> {
+  const token = withAuth ? await getFirebaseToken() : null;
+
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
     },
-    { merge: true },
-  );
+  });
+
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(payload?.message ?? 'Error en la solicitud al backend.');
+  }
+
+  return payload;
 }
 
 export const api = {
@@ -255,17 +283,9 @@ export const api = {
         email: credential.user.email ?? userData.email,
         name: userData.name,
         lastname: userData.lastname,
+        rol: 'cliente',
         age: userData.age,
       };
-
-      await setDoc(doc(db, USERS_COLLECTION, user.id), {
-        email: user.email,
-        name: user.name,
-        lastname: user.lastname,
-        age: user.age,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
 
       const token = await credential.user.getIdToken();
 
@@ -306,11 +326,11 @@ export const api = {
       email: currentUser.email ?? '',
       name: profileData.name.trim(),
       lastname: profileData.lastname.trim(),
+      rol: 'cliente',
       age: Number.isFinite(profileData.age) ? Math.max(0, profileData.age) : 0,
     };
 
     try {
-      await persistUserProfile(normalizedUser);
       return normalizedUser;
     } catch (error) {
       throw normalizeFirebaseError(error);
@@ -368,16 +388,16 @@ export const api = {
     try {
       const credential = await signInWithPopup(auth, googleProvider);
       const googleProfile = splitDisplayName(credential.user.displayName);
-      const existingProfile = await getFirestoreProfile(credential.user.uid);
       const user: AuthUser = {
         id: credential.user.uid,
         email: credential.user.email ?? '',
-        name: existingProfile?.name || googleProfile.name,
-        lastname: existingProfile?.lastname || googleProfile.lastname,
-        age: existingProfile?.age || 0,
+        name: googleProfile.name,
+        lastname: googleProfile.lastname,
+        rol: 'cliente',
+        age: 0,
       };
 
-      await persistUserProfile(user);
+      console.log('🟡 [PROFILE] Persistencia omitida (ahora maneja backend)');
       const token = await credential.user.getIdToken();
       const backendUser = await verifyOrRegisterBackendUser(token, {
         name: user.name,
@@ -392,4 +412,43 @@ export const api = {
       throw normalizeFirebaseError(error);
     }
   },
+
+    getProducts: async (): Promise<Product[]> => {
+    return requestBackend<Product[]>('/api/products', {
+      method: 'GET',
+    });
+  },
+
+  createProduct: async (productData: ProductPayload) => {
+    return requestBackend<{ success: boolean; id: string }>(
+      '/api/products',
+      {
+        method: 'POST',
+        body: JSON.stringify(productData),
+      },
+      true
+    );
+  },
+
+  updateProduct: async (id: string, productData: Partial<ProductPayload>) => {
+    return requestBackend<{ success: boolean; message: string }>(
+      `/api/products/${id}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(productData),
+      },
+      true
+    );
+  },
+
+  deleteProduct: async (id: string) => {
+    return requestBackend<{ success: boolean; message: string }>(
+      `/api/products/${id}`,
+      {
+        method: 'DELETE',
+      },
+      true
+    );
+  },
+
 };
