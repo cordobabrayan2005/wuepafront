@@ -80,7 +80,7 @@ function Shell() {
           <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
           <Route path="/user-manual" element={<UserManual />} />
           <Route path="/buy" element={<ProtectedRoute><Buy /></ProtectedRoute>} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Admin /></ProtectedRoute>}/>
           <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
           <Route path="/products" element={<Products />} />
           <Route path="/productssin" element={<ProductsSin />} />

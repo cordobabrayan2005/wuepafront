@@ -1,6 +1,6 @@
-import React from "react";
-import { Navigate, useLocation } from "react-router-dom";
-import { useAuthStore } from "../stores/authStore";
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuthStore } from '../stores/authStore';
 
 /**
  * Componente simple de protección de rutas.
@@ -9,13 +9,25 @@ import { useAuthStore } from "../stores/authStore";
  * De lo contrario, redirige a `/login` preservando el destino original
  * en el query string `redirectTo` para un posible redireccionamiento tras iniciar sesión.
  */
-export default function ProtectedRoute({ children }: { children: React.ReactElement }) {
-  const { isAuthed } = useAuthStore();
-  const location = useLocation();
+type Props = {
+  children: React.ReactNode;
+  requiredRole?: 'cliente' | 'admin';
+};
 
-  if (!isAuthed) {
-    const redirectTo = encodeURIComponent(location.pathname + location.search);
-    return <Navigate to={`/login?redirectTo=${redirectTo}`} replace />;
+export default function ProtectedRoute({ children, requiredRole }: Props) {
+  const { isAuthed, user, isLoading } = useAuthStore();
+
+  if (isLoading) {
+    return <p>Cargando...</p>;
   }
-  return children;
+
+  if (!isAuthed || !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (requiredRole && user.rol !== requiredRole) {
+    return <Navigate to="/buy" replace />;
+  }
+
+  return <>{children}</>;
 }
