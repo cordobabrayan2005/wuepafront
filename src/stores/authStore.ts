@@ -3,14 +3,8 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { api, type AuthUser } from '../services/api';
 
-/**
- * Representa un objeto usuario para la gestión de estado local.
- */
 type User = AuthUser;
 
-/**
- * Estado de autenticación simplificado para desarrollo local.
- */
 interface AuthState {
   user: User | null;
   isAuthed: boolean;
@@ -26,7 +20,10 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthed: false,
-  isLoading: false,
+
+  // 🔥 IMPORTANTE: empieza en true
+  isLoading: true,
+
   error: null,
 
   setUser: (user) => {
@@ -44,11 +41,20 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const { user, token } = await api.login(email, password);
-      set({ user, isAuthed: true, error: null });
+
+      set({
+        user,
+        isAuthed: true,
+        error: null,
+      });
+
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('token', token);
+
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'No se pudo iniciar sesión' });
+      set({
+        error: error instanceof Error ? error.message : 'No se pudo iniciar sesión'
+      });
       throw error;
     } finally {
       set({ isLoading: false });
@@ -59,11 +65,20 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const { user, token } = await api.socialLogin('', provider);
-      set({ user, isAuthed: true, error: null });
+
+      set({
+        user,
+        isAuthed: true,
+        error: null,
+      });
+
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('token', token);
+
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : `Error en login social con ${provider}` });
+      set({
+        error: error instanceof Error ? error.message : `Error en login social con ${provider}`
+      });
       throw error;
     } finally {
       set({ isLoading: false });
@@ -72,15 +87,30 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: () => {
     void signOut(auth);
-    set({ user: null, isAuthed: false, error: null });
+
+    set({
+      user: null,
+      isAuthed: false,
+      error: null,
+    });
+
     localStorage.removeItem('user');
     localStorage.removeItem('token');
   },
 
+  // 🔥 CORREGIDO COMPLETAMENTE
   checkAuth: () => {
+    set({ isLoading: true });
+
     const currentUser = auth.currentUser;
+
     if (!currentUser) {
-      set({ user: null, isAuthed: false });
+      set({
+        user: null,
+        isAuthed: false,
+        isLoading: false
+      });
+
       localStorage.removeItem('user');
       localStorage.removeItem('token');
       return;
@@ -88,20 +118,45 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     void api.me()
       .then((user) => {
-        set({ user, isAuthed: true, error: null });
+        set({
+          user,
+          isAuthed: true,
+          error: null
+        });
+
         localStorage.setItem('user', JSON.stringify(user));
       })
       .catch(() => {
-        set({ user: null, isAuthed: false, error: 'No se pudo validar la sesión' });
+        set({
+          user: null,
+          isAuthed: false,
+          error: 'No se pudo validar la sesión'
+        });
+
         localStorage.removeItem('user');
         localStorage.removeItem('token');
+      })
+      .finally(() => {
+        set({ isLoading: false });
       });
   }
 }));
 
+
+// 🔥 ESTE ES EL CORE REAL DE TU AUTENTICACIÓN
 onAuthStateChanged(auth, async (firebaseUser) => {
+
+  // 🔥 siempre entrar en loading al detectar cambio
+  useAuthStore.setState({ isLoading: true });
+
   if (!firebaseUser) {
-    useAuthStore.setState({ user: null, isAuthed: false, isLoading: false, error: null });
+    useAuthStore.setState({
+      user: null,
+      isAuthed: false,
+      isLoading: false,
+      error: null,
+    });
+
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     return;
@@ -110,15 +165,28 @@ onAuthStateChanged(auth, async (firebaseUser) => {
   try {
     const user = await api.me();
     const token = await firebaseUser.getIdToken();
-    useAuthStore.setState({ user, isAuthed: true, isLoading: false, error: null });
+
+    useAuthStore.setState({
+      user,
+      isAuthed: true,
+      isLoading: false,
+      error: null,
+    });
+
     localStorage.setItem('user', JSON.stringify(user));
     localStorage.setItem('token', token);
+
   } catch (error) {
     useAuthStore.setState({
       user: null,
       isAuthed: false,
       isLoading: false,
-      error: error instanceof Error ? error.message : 'No se pudo sincronizar la sesión',
+      error: error instanceof Error
+        ? error.message
+        : 'No se pudo sincronizar la sesión',
     });
+
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
   }
 });
