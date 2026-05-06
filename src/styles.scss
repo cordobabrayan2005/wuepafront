@@ -1,3 +1,8 @@
+/* ==========================================================================
+   Variables globales y estilos base
+   Define la paleta principal, tipografias, box model y elementos HTML comunes.
+   ========================================================================== */
+
 :root {
   color-scheme: light;
   --bg-primary: #fff8ec;
@@ -25,6 +30,11 @@ body {
   background: linear-gradient(135deg, #fff8ec, #f7f0dd 47%, #fdf0bd);
   color: var(--text);
 }
+
+/* ==========================================================================
+   Estados globales de carga y error
+   Pantallas compartidas para errores de ruta y estados de espera.
+   ========================================================================== */
 
 .app-error-state,
 .route-loading-state {
@@ -73,6 +83,11 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Bebas Neue', 'Inter', sans-serif;
 }
 
+/* ==========================================================================
+   Animaciones compartidas
+   Efectos de entrada reutilizados en secciones hero y bloques destacados.
+   ========================================================================== */
+
 .wuepa-hero-title,
 .wuepa-hero-subtitle {
   animation: fadeInUp 0.8s ease both;
@@ -104,6 +119,11 @@ button {
   font-family: inherit;
 }
 
+/* ==========================================================================
+   Utilidades visuales
+   Clases auxiliares para colores y bordes usados por componentes puntuales.
+   ========================================================================== */
+
 /* punto de estilo adicional para las cards */
 .bg-white {
   background-color: var(--card) !important;
@@ -116,6 +136,11 @@ button {
 .border-amber-100 {
   border-color: #f8d8a6 !important;
 }
+
+/* ==========================================================================
+   Pagina de inicio y navegacion principal
+   Layout base del home, barra superior, menu movil y botones principales.
+   ========================================================================== */
 
 .home-page {
   min-height: 100vh;
@@ -336,6 +361,11 @@ button {
 }
 
 /* Signup page split layout */
+/* ==========================================================================
+   Autenticacion
+   Pantallas de registro, inicio de sesion, recuperacion y restablecimiento.
+   ========================================================================== */
+
 .signup-page,
 .login-page {
   min-height: 100vh;
@@ -1016,6 +1046,11 @@ main.auth-wrapper.login-page .login-panel {
   box-shadow: 0 10px 22px rgba(95, 79, 50, 0.12);
 }
 
+/* ==========================================================================
+   Ajustes responsive de autenticacion
+   Reorganiza paneles, formularios y acciones para tablet y movil.
+   ========================================================================== */
+
 @media (min-width: 921px) and (orientation: portrait) {
   main.auth-wrapper.login-page {
     padding: 1.25rem;
@@ -1248,6 +1283,11 @@ main.auth-wrapper.login-page .login-panel {
   }
 }
 
+/* ==========================================================================
+   Pagina Nosotros
+   Hero, contenido institucional, tarjetas de caracteristicas y version.
+   ========================================================================== */
+
 .about-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #fff8ec 0%, #fdf0bd 40%, #fff2c6 100%);
@@ -1470,6 +1510,11 @@ main.auth-wrapper.login-page .login-panel {
   }
 }
 
+
+/* ==========================================================================
+   Pagina de compra
+   Cabecera, buscador, sidebar, hero comercial y tarjetas de producto.
+   ========================================================================== */
 
 .buy-page {
   min-height: 100vh;
@@ -1908,6 +1953,11 @@ main.auth-wrapper.login-page .login-panel {
 }
 
 
+/* ==========================================================================
+   Bloques comerciales del home
+   Hero publico, categorias, llamada a la accion y footer principal.
+   ========================================================================== */
+
 .wuepa-container {
   max-width: 1120px;
   margin: auto;
@@ -2100,6 +2150,11 @@ main.auth-wrapper.login-page .login-panel {
 }
 
 /* Profile Page Styles */
+/* ==========================================================================
+   Perfil de usuario
+   Vista de informacion personal, estados de carga y tarjetas de datos.
+   ========================================================================== */
+
 .profile-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #fff8ec 0%, #fef5dc 50%, #fff2c6 100%);
@@ -2234,6 +2289,11 @@ main.auth-wrapper.login-page .login-panel {
 }
 
 /* Products Page Styles */
+/* ==========================================================================
+   Catalogo publico de productos
+   Cabecera, filtros por categoria, grilla y tarjetas para usuarios sin compra.
+   ========================================================================== */
+
 .products-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #fff8ec 0%, #fef5dc 50%, #fff2c6 100%);
@@ -2508,6 +2568,11 @@ main.auth-wrapper.login-page .login-panel {
   filter: brightness(1.05);
 }
 
+/* ==========================================================================
+   Manual de usuario
+   Layout de documentacion interna con navegacion lateral y secciones FAQ.
+   ========================================================================== */
+
 .user-manual {
   min-height: 100vh;
   background: linear-gradient(135deg, #fff8ec 0%, #fef5dc 50%, #fff2c6 100%);
@@ -2697,6 +2762,11 @@ main.auth-wrapper.login-page .login-panel {
   font-size: 0.95rem;
 }
 
+/* ==========================================================================
+   Panel de administracion
+   Gestion de productos: resumen, listado, formulario, previsualizacion y acciones.
+   ========================================================================== */
+
 .admin-page {
   min-height: 100vh;
   background:
@@ -2789,9 +2859,9 @@ main.auth-wrapper.login-page .login-panel {
 }
 
 .admin-danger-btn {
-  background: #fff;
-  color: #b44732;
-  box-shadow: 0 10px 20px rgba(180, 71, 50, 0.12);
+  background: #d93025;
+  color: #fff;
+  box-shadow: 0 10px 20px rgba(217, 48, 37, 0.24);
 }
 
 .admin-reset-btn {
@@ -3388,6 +3458,11 @@ main.auth-wrapper.login-page .login-panel {
   }
 }
 
+/* ==========================================================================
+   Footer de productos y ajustes responsive generales
+   Cierra paginas de catalogo y adapta layouts compartidos en pantallas pequenas.
+   ========================================================================== */
+
 .no-results {
   text-align: center;
   padding: 3rem;
@@ -3573,6 +3648,11 @@ main.auth-wrapper.login-page .login-panel {
   }
 }
 
+/* ==========================================================================
+   Edicion de perfil
+   Inputs editables, acciones de guardado/eliminacion y mensajes del perfil.
+   ========================================================================== */
+
 .password-obfuscated {
   letter-spacing: 0.2em;
   font-family: monospace;
@@ -3702,6 +3782,11 @@ main.auth-wrapper.login-page .login-panel {
     transform: translateY(0);
   }
 }
+
+/* ==========================================================================
+   Carrito de compras
+   Indicadores, acciones de producto, layout del carrito, resumen y responsive.
+   ========================================================================== */
 
 .cart-link-inline {
   display: inline-flex;
