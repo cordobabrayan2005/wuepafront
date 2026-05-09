@@ -105,14 +105,17 @@ export const useAuthStore = create<AuthState>((set) => ({
     const currentUser = auth.currentUser;
 
     if (!currentUser) {
-      set({
-        user: null,
-        isAuthed: false,
-        isLoading: false
-      });
 
       localStorage.removeItem('user');
       localStorage.removeItem('token');
+
+      set({
+        user: null,
+        isAuthed: false,
+        isLoading: false,
+        error: null,
+      });
+
       return;
     }
 

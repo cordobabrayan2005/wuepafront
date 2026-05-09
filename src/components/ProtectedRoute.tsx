@@ -14,29 +14,34 @@ type Props = {
   requiredRole?: 'cliente' | 'admin';
 };
 
-export default function ProtectedRoute({ children, requiredRole }: Props) {
-  const { isAuthed, user, isLoading } = useAuthStore();
+export default function ProtectedRoute({
+  children,
+  requiredRole
+}: Props) {
 
-  // 🔥 1. Esperar a que termine la validación inicial
+  const {
+    isAuthed,
+    user,
+    isLoading
+  } = useAuthStore();
+
+  // Esperar validación Firebase
   if (isLoading) {
     return <p>Cargando...</p>;
   }
 
-  // 🔥 2. Evitar redirección prematura mientras se hidrata el user
-  if (!user) {
-    return <p>Cargando sesión...</p>;
-  }
-
-  // 🔐 3. Validar autenticación
-  if (!isAuthed) {
+  // 🔥 NO autenticado
+  if (!isAuthed || !user) {
     return <Navigate to="/login" replace />;
   }
 
-  // 👑 4. Validar rol (solo si la ruta lo requiere)
-  if (requiredRole && user.rol !== requiredRole) {
+  // 🔥 Usuario autenticado pero NO admin
+  if (
+    requiredRole &&
+    user.rol !== requiredRole
+  ) {
     return <Navigate to="/buy" replace />;
   }
 
-  // ✅ 5. Acceso permitido
   return <>{children}</>;
 }
