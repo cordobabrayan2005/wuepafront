@@ -78,7 +78,31 @@ export default function Login({ onAuth }: Props) {
       onAuth?.();
       setMsg("Inicio de sesión exitoso.");
       setMsgType("success");
-      navigate("/buy", { state: { flash: { type: "success", text: "Has iniciado sesión correctamente." } } });
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+
+      if (userData.rol === 'admin') {
+
+        navigate("/admin", {
+          state: {
+            flash: {
+              type: "success",
+              text: "Bienvenido administrador."
+            }
+          }
+        });
+
+      } else {
+
+        navigate("/buy", {
+          state: {
+            flash: {
+              type: "success",
+              text: "Has iniciado sesión correctamente."
+            }
+          }
+        });
+
+      }
     } catch (e: any) {
       setMsg(e.message || "Error al iniciar sesión.");
       setMsgType("error");
@@ -99,7 +123,31 @@ export default function Login({ onAuth }: Props) {
       onAuth?.();
       setMsg("Inicio de sesión exitoso.");
       setMsgType("success");
-      navigate("/buy", { state: { flash: { type: "success", text: "Has iniciado sesión correctamente." } } });
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+
+      if (userData.rol === 'admin') {
+
+        navigate("/admin", {
+          state: {
+            flash: {
+              type: "success",
+              text: "Bienvenido administrador."
+            }
+          }
+        });
+
+      } else {
+
+        navigate("/buy", {
+          state: {
+            flash: {
+              type: "success",
+              text: "Has iniciado sesión correctamente."
+            }
+          }
+        });
+
+      }
     } catch (e: any) {
       setMsg(e.message || "Error en login social.");
       setMsgType("error");
