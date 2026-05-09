@@ -46,8 +46,8 @@ export default function Profile() {
   const [form, setForm] = useState({
     name: "",
     lastname: "",
-    age: "",
-    email: ""
+    email: "",
+    birthdate: ""
   });
   // La contraseña nunca es editable ni recuperable; solo se muestra enmascarada.
   const navigate = useNavigate();
@@ -76,13 +76,18 @@ export default function Profile() {
   async function load() {
     try {
       const data = await api.me();
+
       console.log("Datos recibidos:", data);
       setMe(data);
       setForm({
         name: data.name || "",
         lastname: data.lastname || "",
-        age: String(data.age || ""),
-        email: data.email || ""
+        email: data.email || "",
+        birthdate: data.birthdate
+          ? new Date(data.birthdate)
+            .toISOString()
+            .split('T')[0]
+          : ""
       });
     } catch (e: any) {
       setMsg(e.message);
@@ -96,8 +101,12 @@ export default function Profile() {
       setForm({
         name: user.name || "",
         lastname: user.lastname || "",
-        age: String(user.age || ""),
-        email: user.email || ""
+        email: user.email || "",
+        birthdate: user.birthdate
+          ? new Date(user.birthdate)
+            .toISOString()
+            .split('T')[0]
+          : ""
       });
     }
     // Siempre intentamos sincronizar con el backend para evitar datos desactualizados.
@@ -120,7 +129,6 @@ export default function Profile() {
    * @returns {Promise<void>}
    */
   async function save() {
-    const normalizedAge = Number(form.age);
 
     if (!form.name.trim()) {
       setMsg('Ingresa tu nombre antes de guardar.');
@@ -132,11 +140,6 @@ export default function Profile() {
       return;
     }
 
-    if (!Number.isFinite(normalizedAge) || normalizedAge < 0) {
-      setMsg('La edad debe ser un numero valido.');
-      return;
-    }
-
     try {
       setIsSaving(true);
       setMsg('Guardando cambios...');
@@ -144,7 +147,7 @@ export default function Profile() {
       const updated = await api.updateProfile({
         name: form.name,
         lastname: form.lastname,
-        age: normalizedAge,
+        birthdate: form.birthdate,
       });
 
       const mergedUser = {
@@ -158,8 +161,12 @@ export default function Profile() {
       setForm({
         name: mergedUser.name || '',
         lastname: mergedUser.lastname || '',
-        age: String(mergedUser.age || ''),
         email: mergedUser.email || '',
+        birthdate: mergedUser.birthdate
+          ? new Date(mergedUser.birthdate)
+            .toISOString()
+            .split('T')[0]
+          : '',
       });
       setMsg("Perfil actualizado correctamente ✅");
       setEditing(false);
@@ -240,40 +247,77 @@ export default function Profile() {
                 )}
               </div>
               <div className="profile-block">
-                <div className="mini-label">apellidos</div>
+                <div className="mini-label">Apellidos</div>
                 {editing ? (
                   <input
                     type="text"
                     value={form.lastname}
-                    onChange={(e) => set("lastname", e.target.value)}
+                    onChange={(e) =>
+                      set("lastname", e.target.value)
+                    }
                     className="profile-edit-input"
                   />
                 ) : (
-                  <div className="mini-value">{me.lastname}</div>
+                  <div className="mini-value">
+                    {me.lastname}
+                  </div>
                 )}
               </div>
               <div className="profile-block">
-                <div className="mini-label">Edad</div>
+
+                <div className="mini-label">
+                  Fecha nacimiento
+                </div>
+
                 {editing ? (
                   <input
-                    type="number"
-                    value={form.age}
-                    onChange={(e) => set("age", e.target.value)}
+                    type="date"
+                    value={form.birthdate}
+                    onChange={(e) =>
+                      set("birthdate", e.target.value)
+                    }
                     className="profile-edit-input"
                   />
                 ) : (
-                  <div className="mini-value">{me.age}</div>
+                  <div className="mini-value">
+                    {
+                      form.birthdate || 'No registrada'
+                    }
+                  </div>
                 )}
               </div>
-            </div>
-            <div className="profile-col profile-col-right">
               <div className="profile-block">
-                <div className="mini-label">Correo electronico</div>
-                <div className="mini-value profile-email" title={me.email}>{me.email}</div>
+                <div className="mini-label">
+                  Edad
+                </div>
+                <div className="mini-value">
+                  {
+                    me.age ?? 'Sin fecha'
+                  }
+                </div>
               </div>
-              <div className="profile-block">
-                <div className="mini-label">Contraseña (no editable)</div>
-                <div className="mini-value password-obfuscated">********</div>
+              <div className="profile-col profile-col-right">
+                <div className="profile-block">
+                  <div className="mini-label">Correo electronico</div>
+                  <div className="mini-value profile-email" title={me.email}>{me.email}</div>
+                </div>
+                {
+                  me.rol === 'admin' && (
+                    <div className="profile-block">
+                      <div className="mini-label">
+                        Rol
+                      </div>
+
+                      <div className="mini-value">
+                        Administrador
+                      </div>
+                    </div>
+                  )
+                }
+                <div className="profile-block">
+                  <div className="mini-label">Contraseña (no editable)</div>
+                  <div className="mini-value password-obfuscated">********</div>
+                </div>
               </div>
             </div>
           </div>

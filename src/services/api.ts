@@ -17,8 +17,9 @@ export interface AuthUser {
   email: string;
   name: string;
   lastname: string;
-  age: number;
   rol: 'cliente' | 'admin';
+  birthdate?: string;
+  age?: number | null;
 }
 
 interface SignupPayload {
@@ -32,7 +33,7 @@ interface SignupPayload {
 interface UpdateProfilePayload {
   name: string;
   lastname: string;
-  age: number;
+  birthdate?: string;
 }
 
 export interface ProductPayload {
@@ -327,7 +328,7 @@ export const api = {
       name: profileData.name.trim(),
       lastname: profileData.lastname.trim(),
       rol: 'cliente',
-      age: Number.isFinite(profileData.age) ? Math.max(0, profileData.age) : 0,
+      birthdate: profileData.birthdate,
     };
 
     try {
@@ -402,7 +403,7 @@ export const api = {
       const backendUser = await verifyOrRegisterBackendUser(token, {
         name: user.name,
         lastname: user.lastname,
-        age: user.age,
+        age: user.age ?? 0,
         email: user.email,
         password: '',
       });
@@ -413,7 +414,7 @@ export const api = {
     }
   },
 
-    getProducts: async (): Promise<Product[]> => {
+  getProducts: async (): Promise<Product[]> => {
     return requestBackend<Product[]>('/api/products', {
       method: 'GET',
     });
