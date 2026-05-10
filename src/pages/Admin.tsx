@@ -14,6 +14,11 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../config/firebase';
 
 type AdminMobileView = 'inventory' | 'editor' | 'preview';
+type AdminToast = {
+  text: string;
+  type: 'success' | 'error' | 'info';
+  persistent?: boolean;
+};
 
 const categoryLabels: Record<ProductCategory, string> = {
   collares: 'Collares',
@@ -26,7 +31,7 @@ export default function Admin() {
   const [selectedProductId, setSelectedProductId] = useState<string | number | null>(null);
   const [mobileView, setMobileView] = useState<AdminMobileView>('inventory');
   const [isCreating, setIsCreating] = useState(false);
-  const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [toast, setToast] = useState<AdminToast | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<'code' | 'name' | 'price', string>>>({});
   const [filter, setFilter] = useState('');
   const initialDraft = createEmptyProduct([]);
@@ -35,6 +40,7 @@ export default function Admin() {
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [localPreviewUrl, setLocalPreviewUrl] = useState('');
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isSavingProduct, setIsSavingProduct] = useState(false);
 
   const visibleProducts = useMemo(() => {
     const normalizedFilter = filter.trim().toLowerCase();
@@ -111,7 +117,7 @@ export default function Admin() {
   }, []);
 
   useEffect(() => {
-    if (!toast) {
+    if (!toast || toast.persistent) {
       return;
     }
 
@@ -277,10 +283,12 @@ export default function Admin() {
 
     try {
       setIsUploadingImage(true);
+      setToast({ text: 'Subiendo imagen...', type: 'info', persistent: true });
       const safeFileName = selectedImageFile.name.replace(/\s+/g, '-').toLowerCase();
       const storageRef = ref(storage, `products/${draft.id}-${Date.now()}-${safeFileName}`);
 
       await uploadBytes(storageRef, selectedImageFile);
+      setToast({ text: 'Imagen subida. Preparando vista previa...', type: 'info', persistent: true });
       const downloadUrl = await getDownloadURL(storageRef);
 
       updateDraft('image', downloadUrl);
@@ -300,6 +308,10 @@ export default function Admin() {
   }
 
   async function handleSaveProduct() {
+    if (isSavingProduct) {
+      return;
+    }
+
     if (!validateDraft()) {
       setToast({ text: 'Faltan campos obligatorios.', type: 'error' });
       return;
@@ -315,6 +327,13 @@ export default function Admin() {
     };
 
     try {
+      setIsSavingProduct(true);
+      setToast({
+        text: isCreating ? 'Subiendo producto...' : 'Guardando cambios del producto...',
+        type: 'info',
+        persistent: true,
+      });
+
       if (isCreating) {
         await api.createProduct({
           nombre: normalizedDraft.name,
@@ -337,6 +356,7 @@ export default function Admin() {
         });
       }
 
+      setToast({ text: 'Actualizando inventario...', type: 'info', persistent: true });
       const refreshed = await api.getProducts();
 
       const mappedProducts: ProductCatalogItem[] = refreshed.map((product) => ({
@@ -352,16 +372,27 @@ export default function Admin() {
 
       setProducts(mappedProducts);
       setIsCreating(false);
+      const savedProduct = mappedProducts.find((product) => product.code === normalizedDraft.code) ?? mappedProducts[0];
+      setSelectedProductId(savedProduct?.id ?? null);
+      setDraft(savedProduct ?? normalizedDraft);
+      setPriceInput(savedProduct ? String(savedProduct.price) : String(normalizedDraft.price));
+      setToast({
+        text: isCreating ? 'Producto subido correctamente.' : 'Producto actualizado correctamente.',
+        type: 'success',
+      });
 
     } catch (error) {
       console.error(error);
       setToast({ text: 'Error guardando producto', type: 'error' });
+    } finally {
+      setIsSavingProduct(false);
     }
   }
 
   async function handleDeleteProduct() {
     if (isCreating) {
       setIsCreating(false);
+      setToast({ text: 'Creacion de producto cancelada.', type: 'info' });
       return;
     }
 
@@ -369,8 +400,10 @@ export default function Admin() {
     if (!confirmDelete) return;
 
     try {
+      setToast({ text: 'Eliminando producto...', type: 'info', persistent: true });
       await api.deleteProduct(String(draft.id));
 
+      setToast({ text: 'Actualizando inventario...', type: 'info', persistent: true });
       const refreshed = await api.getProducts();
 
       const mappedProducts: ProductCatalogItem[] = refreshed.map((product) => ({
@@ -385,6 +418,7 @@ export default function Admin() {
       }));
 
       setProducts(mappedProducts);
+      setToast({ text: 'Producto eliminado correctamente.', type: 'success' });
 
     } catch (error) {
       console.error(error);
@@ -703,8 +737,8 @@ export default function Admin() {
                   <button type="button" className="admin-secondary-btn admin-mobile-only-action" onClick={() => setMobileView('preview')}>
                     Ver vista previa
                   </button>
-                  <button type="button" className="admin-primary-btn" onClick={handleSaveProduct}>
-                    Guardar producto
+                  <button type="button" className="admin-primary-btn" onClick={handleSaveProduct} disabled={isSavingProduct}>
+                    {isSavingProduct ? 'Guardando producto...' : 'Guardar producto'}
                   </button>
                   <button type="button" className="admin-danger-btn" onClick={handleDeleteProduct}>
                     {isCreating ? 'Cancelar' : 'Eliminar'}
@@ -731,8 +765,8 @@ export default function Admin() {
                   <button type="button" className="admin-secondary-btn" onClick={() => setMobileView('editor')}>
                     Volver a editar
                   </button>
-                  <button type="button" className="admin-primary-btn" onClick={handleSaveProduct}>
-                    Guardar desde aqui
+                  <button type="button" className="admin-primary-btn" onClick={handleSaveProduct} disabled={isSavingProduct}>
+                    {isSavingProduct ? 'Guardando producto...' : 'Guardar desde aqui'}
                   </button>
                 </div>
 
