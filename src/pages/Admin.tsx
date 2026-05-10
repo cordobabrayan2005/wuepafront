@@ -28,6 +28,7 @@ const categoryLabels: Record<ProductCategory, string> = {
 
 export default function Admin() {
   const [products, setProducts] = useState<ProductCatalogItem[]>([]);
+<<<<<<< HEAD
   const [selectedProductId, setSelectedProductId] = useState<string | number | null>(null);
   const [mobileView, setMobileView] = useState<AdminMobileView>('inventory');
   const [isCreating, setIsCreating] = useState(false);
@@ -35,6 +36,15 @@ export default function Admin() {
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<'code' | 'name' | 'price', string>>>({});
   const [filter, setFilter] = useState('');
   const initialDraft = createEmptyProduct([]);
+=======
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [mobileView, setMobileView] = useState<AdminMobileView>('inventory');
+  const [isCreating, setIsCreating] = useState(false);
+  const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<'code' | 'name' | 'price', string>>>({});
+  const [filter, setFilter] = useState('');
+  const initialDraft = createEmptyProduct();
+>>>>>>> d6cb2b2d81a2b3af4e59e6f7756efa441d3809a9
   const [draft, setDraft] = useState<ProductCatalogItem>(() => initialDraft);
   const [priceInput, setPriceInput] = useState(() => (initialDraft.price > 0 ? String(initialDraft.price) : ''));
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
@@ -59,7 +69,7 @@ export default function Admin() {
 
   useEffect(() => {
     if (products.length === 0) {
-      const freshDraft = createEmptyProduct([]);
+      const freshDraft = createEmptyProduct();
       setDraft(freshDraft);
       setSelectedProductId(freshDraft.id);
       setIsCreating(true);
@@ -90,7 +100,7 @@ export default function Admin() {
     api.getProducts()
       .then((backendProducts) => {
         const mappedProducts: ProductCatalogItem[] = backendProducts.map((product) => ({
-          id: Number(product.id),
+          id: product.id,
           code: product.codigo || '',
           category: product.categoria as ProductCategory,
           name: product.nombre,
@@ -228,7 +238,7 @@ export default function Admin() {
   }
 
   function handleCreateProduct() {
-    const newProduct = createEmptyProduct(products);
+    const newProduct = createEmptyProduct();
     setDraft(newProduct);
     setPriceInput(newProduct.price > 0 ? String(newProduct.price) : '');
     setSelectedProductId(newProduct.id);
@@ -360,7 +370,7 @@ export default function Admin() {
       const refreshed = await api.getProducts();
 
       const mappedProducts: ProductCatalogItem[] = refreshed.map((product) => ({
-        id: Number(product.id),
+        id: product.id,
         code: product.codigo || '',
         category: product.categoria as ProductCategory,
         name: product.nombre,
@@ -407,7 +417,7 @@ export default function Admin() {
       const refreshed = await api.getProducts();
 
       const mappedProducts: ProductCatalogItem[] = refreshed.map((product) => ({
-        id: Number(product.id),
+        id: product.id,
         code: product.codigo || '',
         category: product.categoria as ProductCategory,
         name: product.nombre,

@@ -34,6 +34,7 @@ export default function Buy() {
   const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
   // Usuario autenticado y logout obtenido del store
   const { user, logout } = useAuthStore();
+  const isAdmin = user?.rol === 'admin';
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -99,13 +100,37 @@ export default function Buy() {
   };
 
   const featuredProducts = useMemo(() => products.slice(0, 6), [products]);
-  const newProducts = useMemo(() => [...products].sort((leftProduct, rightProduct) => rightProduct.id - leftProduct.id).slice(0, 4), [products]);
+  const newProducts = useMemo(() => {
+
+    return [...products]
+      .sort((a, b) =>
+        String(b.id).localeCompare(String(a.id))
+      )
+      .slice(0, 4);
+
+  }, [products]);
   const mobileMenuItems = [
     { label: 'Inicio', to: '/buy', isActive: true },
+
     { label: 'Productos', to: '/products' },
+
     { label: `Carrito (${cartCount})`, to: '/cart' },
+
     { label: 'Nosotros', to: '/about' },
-    { label: isLoggingOut ? 'Cerrando...' : 'Cerrar sesion', onClick: handleLogout, tone: 'danger' as const },
+
+    ...(isAdmin
+      ? [{ label: 'Admin', to: '/admin' }]
+      : []),
+
+    {
+      label: isLoggingOut
+        ? 'Cerrando...'
+        : 'Cerrar sesion',
+
+      onClick: handleLogout,
+
+      tone: 'danger' as const
+    },
   ];
 
   const handleAddToCart = (product: ProductCatalogItem) => {
@@ -152,7 +177,12 @@ export default function Buy() {
           <Link to="/products">Productos</Link>
           <Link to="/cart" className="cart-link-inline">Carrito <span className="cart-link-count">{cartCount}</span></Link>
           <Link to="/about">Nosotros</Link>
-          <button onClick={handleLogout} disabled={isLoggingOut} className="logout-btn" style={{marginLeft: 16, background: 'transparent', color: '#e74c3c', border: 'none', padding: '8px 16px', borderRadius: 4, cursor: isLoggingOut ? 'wait' : 'pointer', opacity: isLoggingOut ? 0.7 : 1}}>{isLoggingOut ? 'Cerrando...' : 'Cerrar sesión'}</button>
+          {
+            isAdmin && (
+              <Link to="/admin">Admin</Link>
+            )
+          }
+          <button onClick={handleLogout} disabled={isLoggingOut} className="logout-btn" style={{ marginLeft: 16, background: 'transparent', color: '#e74c3c', border: 'none', padding: '8px 16px', borderRadius: 4, cursor: isLoggingOut ? 'wait' : 'pointer', opacity: isLoggingOut ? 0.7 : 1 }}>{isLoggingOut ? 'Cerrando...' : 'Cerrar sesión'}</button>
         </nav>
       </header>
 

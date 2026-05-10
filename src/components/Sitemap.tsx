@@ -37,7 +37,7 @@ const Sitemap: React.FC = () => {
           <div className="sitemap-col">
             <h4>Páginas</h4>
             <ul>
-              <li><Link to="/wuepa">Inicio</Link></li>
+              <li><Link to="/">Inicio</Link></li>
               <li><Link to="/about">Sobre nosotros</Link></li>
               <li><Link to="/user-manual">Manual de usuario</Link></li>
               {/* Enlace a videollamada eliminado */}
