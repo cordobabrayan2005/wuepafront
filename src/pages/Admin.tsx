@@ -28,29 +28,41 @@ const categoryLabels: Record<ProductCategory, string> = {
 
 export default function Admin() {
   const [products, setProducts] = useState<ProductCatalogItem[]>([]);
-<<<<<<< HEAD
-  const [selectedProductId, setSelectedProductId] = useState<string | number | null>(null);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<AdminMobileView>('inventory');
   const [isCreating, setIsCreating] = useState(false);
   const [toast, setToast] = useState<AdminToast | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<'code' | 'name' | 'price', string>>>({});
   const [filter, setFilter] = useState('');
-  const initialDraft = createEmptyProduct([]);
-=======
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
-  const [mobileView, setMobileView] = useState<AdminMobileView>('inventory');
-  const [isCreating, setIsCreating] = useState(false);
-  const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Partial<Record<'code' | 'name' | 'price', string>>>({});
-  const [filter, setFilter] = useState('');
   const initialDraft = createEmptyProduct();
->>>>>>> d6cb2b2d81a2b3af4e59e6f7756efa441d3809a9
   const [draft, setDraft] = useState<ProductCatalogItem>(() => initialDraft);
   const [priceInput, setPriceInput] = useState(() => (initialDraft.price > 0 ? String(initialDraft.price) : ''));
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [localPreviewUrl, setLocalPreviewUrl] = useState('');
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isSavingProduct, setIsSavingProduct] = useState(false);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+
+  function showToast(nextToast: AdminToast) {
+    setToast(nextToast);
+  }
+
+  function getErrorMessage(error: unknown, fallback: string) {
+    return error instanceof Error && error.message ? error.message : fallback;
+  }
+
+  function mapBackendProduct(product: Product): ProductCatalogItem {
+    return {
+      id: product.id,
+      code: product.codigo || '',
+      category: product.categoria as ProductCategory,
+      name: product.nombre,
+      description: product.descripcion || '',
+      units: product.stock || 0,
+      price: product.precio || 0,
+      image: product.imagenUrl || '/collar.png',
+    };
+  }
 
   const visibleProducts = useMemo(() => {
     const normalizedFilter = filter.trim().toLowerCase();
@@ -97,32 +109,40 @@ export default function Admin() {
   }, [localPreviewUrl]);
 
   useEffect(() => {
+    showToast({ text: 'Cargando inventario desde el backend...', type: 'info', persistent: true });
+    setIsLoadingProducts(true);
+
     api.getProducts()
       .then((backendProducts) => {
-        const mappedProducts: ProductCatalogItem[] = backendProducts.map((product) => ({
-          id: product.id,
-          code: product.codigo || '',
-          category: product.categoria as ProductCategory,
-          name: product.nombre,
-          description: product.descripcion || '',
-          units: product.stock || 0,
-          price: product.precio || 0,
-          image: product.imagenUrl || '/collar.png',
-        }));
+        const mappedProducts = backendProducts.map(mapBackendProduct);
 
         setProducts(mappedProducts);
         setSelectedProductId(mappedProducts[0]?.id ?? null);
 
         if (mappedProducts[0]) {
+          setIsCreating(false);
           setDraft(mappedProducts[0]);
           setPriceInput(String(mappedProducts[0].price));
+          showToast({
+            text: `Inventario cargado: ${mappedProducts.length} producto${mappedProducts.length === 1 ? '' : 's'} disponibles.`,
+            type: 'success',
+          });
+        } else {
+          setIsCreating(true);
+          showToast({
+            text: 'No hay productos registrados. Puedes crear el primero desde el panel.',
+            type: 'info',
+          });
         }
       })
-      .catch(() => {
-        setToast({
-          text: 'No se pudieron cargar los productos.',
+      .catch((error) => {
+        showToast({
+          text: getErrorMessage(error, 'No se pudieron cargar los productos.'),
           type: 'error',
         });
+      })
+      .finally(() => {
+        setIsLoadingProducts(false);
       });
   }, []);
 
@@ -198,6 +218,11 @@ export default function Admin() {
     }
   }
 
+  function handleUnitsChange(value: string) {
+    const numericValue = value.replace(/\D/g, '');
+    updateDraft('units', numericValue ? Number(numericValue) : 0);
+  }
+
   function validateDraft() {
     const nextErrors: Partial<Record<'code' | 'name' | 'price', string>> = {};
 
@@ -234,7 +259,7 @@ export default function Admin() {
     setSelectedImageFile(null);
     setLocalPreviewUrl('');
     setFieldErrors({});
-    setToast(null);
+    showToast({ text: `Editando ${product.name}. Los cambios se aplicaran cuando guardes.`, type: 'info' });
   }
 
   function handleCreateProduct() {
@@ -247,7 +272,7 @@ export default function Admin() {
     setSelectedImageFile(null);
     setLocalPreviewUrl('');
     setFieldErrors({});
-    setToast({ text: 'Nuevo producto listo para completar.', type: 'info' });
+    showToast({ text: 'Nuevo producto listo para completar. Guardalo para subirlo al backend.', type: 'info' });
   }
 
   function handleCategoryChange(category: ProductCategory) {
@@ -271,7 +296,7 @@ export default function Admin() {
     }
 
     if (!file.type.startsWith('image/')) {
-      setToast({ text: 'Selecciona un archivo de imagen valido.', type: 'error' });
+      showToast({ text: 'Selecciona un archivo de imagen valido.', type: 'error' });
       return;
     }
 
@@ -282,23 +307,23 @@ export default function Admin() {
     const previewUrl = URL.createObjectURL(file);
     setSelectedImageFile(file);
     setLocalPreviewUrl(previewUrl);
-    setToast({ text: 'Imagen lista para subir.', type: 'info' });
+    showToast({ text: `Imagen "${file.name}" lista para subir.`, type: 'info' });
   }
 
   async function handleImageUpload() {
     if (!selectedImageFile) {
-      setToast({ text: 'Primero selecciona una imagen desde tu computadora.', type: 'error' });
+      showToast({ text: 'Primero selecciona una imagen desde tu computadora.', type: 'error' });
       return;
     }
 
     try {
       setIsUploadingImage(true);
-      setToast({ text: 'Subiendo imagen...', type: 'info', persistent: true });
+      showToast({ text: `Subiendo imagen "${selectedImageFile.name}"...`, type: 'info', persistent: true });
       const safeFileName = selectedImageFile.name.replace(/\s+/g, '-').toLowerCase();
       const storageRef = ref(storage, `products/${draft.id}-${Date.now()}-${safeFileName}`);
 
       await uploadBytes(storageRef, selectedImageFile);
-      setToast({ text: 'Imagen subida. Preparando vista previa...', type: 'info', persistent: true });
+      showToast({ text: 'Imagen subida. Preparando vista previa...', type: 'info', persistent: true });
       const downloadUrl = await getDownloadURL(storageRef);
 
       updateDraft('image', downloadUrl);
@@ -308,10 +333,13 @@ export default function Admin() {
       }
       setLocalPreviewUrl('');
       setMobileView('preview');
-      setToast({ text: 'Imagen subida correctamente. Ahora puedes guardar el producto.', type: 'success' });
+      showToast({ text: 'Imagen subida correctamente. Ahora guarda el producto para publicar el cambio.', type: 'success' });
     } catch (error) {
       console.error(error);
-      setToast({ text: 'No se pudo subir la imagen. Revisa la configuracion de Firebase Storage.', type: 'error' });
+      showToast({
+        text: getErrorMessage(error, 'No se pudo subir la imagen. Revisa la configuracion de Firebase Storage.'),
+        type: 'error',
+      });
     } finally {
       setIsUploadingImage(false);
     }
@@ -323,7 +351,7 @@ export default function Admin() {
     }
 
     if (!validateDraft()) {
-      setToast({ text: 'Faltan campos obligatorios.', type: 'error' });
+      showToast({ text: 'Faltan campos obligatorios. Revisa los campos marcados antes de guardar.', type: 'error' });
       return;
     }
 
@@ -338,8 +366,10 @@ export default function Admin() {
 
     try {
       setIsSavingProduct(true);
-      setToast({
-        text: isCreating ? 'Subiendo producto...' : 'Guardando cambios del producto...',
+      showToast({
+        text: isCreating
+          ? `Creando producto "${normalizedDraft.name}" en el backend...`
+          : `Guardando modificaciones de "${normalizedDraft.name}"...`,
         type: 'info',
         persistent: true,
       });
@@ -366,19 +396,10 @@ export default function Admin() {
         });
       }
 
-      setToast({ text: 'Actualizando inventario...', type: 'info', persistent: true });
+      showToast({ text: 'Cambios recibidos. Actualizando inventario...', type: 'info', persistent: true });
       const refreshed = await api.getProducts();
 
-      const mappedProducts: ProductCatalogItem[] = refreshed.map((product) => ({
-        id: product.id,
-        code: product.codigo || '',
-        category: product.categoria as ProductCategory,
-        name: product.nombre,
-        description: product.descripcion || '',
-        units: product.stock || 0,
-        price: product.precio || 0,
-        image: product.imagenUrl || '/collar.png',
-      }));
+      const mappedProducts = refreshed.map(mapBackendProduct);
 
       setProducts(mappedProducts);
       setIsCreating(false);
@@ -386,14 +407,19 @@ export default function Admin() {
       setSelectedProductId(savedProduct?.id ?? null);
       setDraft(savedProduct ?? normalizedDraft);
       setPriceInput(savedProduct ? String(savedProduct.price) : String(normalizedDraft.price));
-      setToast({
-        text: isCreating ? 'Producto subido correctamente.' : 'Producto actualizado correctamente.',
+      showToast({
+        text: isCreating
+          ? `Producto "${normalizedDraft.name}" creado correctamente.`
+          : `Producto "${normalizedDraft.name}" actualizado correctamente.`,
         type: 'success',
       });
 
     } catch (error) {
       console.error(error);
-      setToast({ text: 'Error guardando producto', type: 'error' });
+      showToast({
+        text: getErrorMessage(error, 'Error guardando producto.'),
+        type: 'error',
+      });
     } finally {
       setIsSavingProduct(false);
     }
@@ -402,7 +428,7 @@ export default function Admin() {
   async function handleDeleteProduct() {
     if (isCreating) {
       setIsCreating(false);
-      setToast({ text: 'Creacion de producto cancelada.', type: 'info' });
+      showToast({ text: 'Creacion de producto cancelada.', type: 'info' });
       return;
     }
 
@@ -410,29 +436,23 @@ export default function Admin() {
     if (!confirmDelete) return;
 
     try {
-      setToast({ text: 'Eliminando producto...', type: 'info', persistent: true });
+      showToast({ text: `Eliminando "${draft.name}" del inventario...`, type: 'info', persistent: true });
       await api.deleteProduct(String(draft.id));
 
-      setToast({ text: 'Actualizando inventario...', type: 'info', persistent: true });
+      showToast({ text: 'Producto eliminado. Actualizando inventario...', type: 'info', persistent: true });
       const refreshed = await api.getProducts();
 
-      const mappedProducts: ProductCatalogItem[] = refreshed.map((product) => ({
-        id: product.id,
-        code: product.codigo || '',
-        category: product.categoria as ProductCategory,
-        name: product.nombre,
-        description: product.descripcion || '',
-        units: product.stock || 0,
-        price: product.precio || 0,
-        image: product.imagenUrl || '/collar.png',
-      }));
+      const mappedProducts = refreshed.map(mapBackendProduct);
 
       setProducts(mappedProducts);
-      setToast({ text: 'Producto eliminado correctamente.', type: 'success' });
+      showToast({ text: 'Producto eliminado correctamente.', type: 'success' });
 
     } catch (error) {
       console.error(error);
-      setToast({ text: 'Error eliminando producto', type: 'error' });
+      showToast({
+        text: getErrorMessage(error, 'Error eliminando producto.'),
+        type: 'error',
+      });
     }
   }
 
@@ -537,8 +557,8 @@ export default function Admin() {
                 <h2>Inventario</h2>
                 <p>Selecciona un producto o crea uno nuevo.</p>
               </div>
-              <button type="button" className="admin-primary-btn" onClick={handleCreateProduct}>
-                Nuevo producto
+              <button type="button" className="admin-primary-btn" onClick={handleCreateProduct} disabled={isLoadingProducts}>
+                {isLoadingProducts ? 'Cargando...' : 'Nuevo producto'}
               </button>
             </div>
 
@@ -573,7 +593,10 @@ export default function Admin() {
                   <small>{categoryLabels[product.category]} · {product.units} unidades</small>
                 </button>
               ))}
-              {visibleProducts.length === 0 && (
+              {isLoadingProducts && (
+                <p className="admin-empty-list">Cargando inventario...</p>
+              )}
+              {!isLoadingProducts && visibleProducts.length === 0 && (
                 <p className="admin-empty-list">No hay productos que coincidan con el filtro.</p>
               )}
             </div>
@@ -675,10 +698,11 @@ export default function Admin() {
                     <label className="admin-field">
                       <span>Unidades disponibles</span>
                       <input
-                        type="number"
-                        min="0"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         value={draft.units}
-                        onChange={(event) => updateDraft('units', Number(event.target.value))}
+                        onChange={(event) => handleUnitsChange(event.target.value)}
                       />
                     </label>
 
