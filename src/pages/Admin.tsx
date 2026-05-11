@@ -10,6 +10,9 @@ import {
   ProductCategory,
 } from '../utils/productCatalog';
 
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../config/firebase';
+
 type AdminMobileView = 'inventory' | 'editor' | 'preview';
 type AdminToast = {
   text: string;
@@ -307,17 +310,24 @@ export default function Admin() {
     showToast({ text: `Imagen "${file.name}" lista para subir.`, type: 'info' });
   }
 
-  async function handleImageUpload() {
+  async function uploadSelectedImageToStorage() {
     if (!selectedImageFile) {
       showToast({ text: 'Primero selecciona una imagen desde tu computadora.', type: 'error' });
-      return;
+      return null;
     }
 
     try {
       setIsUploadingImage(true);
       showToast({ text: `Subiendo imagen "${selectedImageFile.name}"...`, type: 'info', persistent: true });
-      const downloadUrl = await api.uploadProductImage(selectedImageFile, String(draft.id));
-      showToast({ text: 'Imagen recibida por el backend. Preparando vista previa...', type: 'info', persistent: true });
+      const safeFileName = selectedImageFile.name
+        .replace(/\s+/g, '-')
+        .replace(/[^a-zA-Z0-9._-]/g, '')
+        .toLowerCase();
+      const storageRef = ref(storage, `products/${draft.id}-${Date.now()}-${safeFileName}`);
+
+      await uploadBytes(storageRef, selectedImageFile);
+      showToast({ text: 'Imagen subida. Preparando vista previa...', type: 'info', persistent: true });
+      const downloadUrl = await getDownloadURL(storageRef);
 
       updateDraft('image', downloadUrl);
       setSelectedImageFile(null);
@@ -327,24 +337,35 @@ export default function Admin() {
       setLocalPreviewUrl('');
       setMobileView('preview');
       showToast({ text: 'Imagen subida correctamente. Ahora guarda el producto para publicar el cambio.', type: 'success' });
+      return downloadUrl;
     } catch (error) {
       console.error(error);
       showToast({
-        text: getErrorMessage(error, 'No se pudo subir la imagen. Revisa el endpoint de carga del backend.'),
+        text: getErrorMessage(error, 'No se pudo subir la imagen. Revisa la configuracion de Firebase Storage.'),
         type: 'error',
       });
+      return null;
     } finally {
       setIsUploadingImage(false);
     }
   }
 
+  async function handleImageUpload() {
+    await uploadSelectedImageToStorage();
+  }
+
   async function handleSaveProduct() {
-    if (isSavingProduct) {
+    if (isSavingProduct || isUploadingImage) {
       return;
     }
 
     if (!validateDraft()) {
       showToast({ text: 'Faltan campos obligatorios. Revisa los campos marcados antes de guardar.', type: 'error' });
+      return;
+    }
+
+    if (draft.image.trim().startsWith('blob:')) {
+      showToast({ text: 'La vista previa local no se puede guardar. Sube la imagen o escribe una URL valida.', type: 'error' });
       return;
     }
 
@@ -359,6 +380,19 @@ export default function Admin() {
 
     try {
       setIsSavingProduct(true);
+
+      if (selectedImageFile) {
+        showToast({ text: 'Hay una imagen pendiente. La subiremos antes de guardar el producto.', type: 'info', persistent: true });
+        const uploadedImageUrl = await uploadSelectedImageToStorage();
+
+        if (!uploadedImageUrl) {
+          showToast({ text: 'No se guardo el producto porque la imagen no pudo subirse.', type: 'error' });
+          return;
+        }
+
+        normalizedDraft.image = uploadedImageUrl;
+      }
+
       showToast({
         text: isCreating
           ? `Creando producto "${normalizedDraft.name}" en el backend...`
@@ -764,8 +798,8 @@ export default function Admin() {
                   <button type="button" className="admin-secondary-btn admin-mobile-only-action" onClick={() => setMobileView('preview')}>
                     Ver vista previa
                   </button>
-                  <button type="button" className="admin-primary-btn" onClick={handleSaveProduct} disabled={isSavingProduct}>
-                    {isSavingProduct ? 'Guardando producto...' : 'Guardar producto'}
+                  <button type="button" className="admin-primary-btn" onClick={handleSaveProduct} disabled={isSavingProduct || isUploadingImage}>
+                    {isUploadingImage ? 'Subiendo imagen...' : isSavingProduct ? 'Guardando producto...' : 'Guardar producto'}
                   </button>
                   <button type="button" className="admin-danger-btn" onClick={handleDeleteProduct}>
                     {isCreating ? 'Cancelar' : 'Eliminar'}
@@ -792,8 +826,8 @@ export default function Admin() {
                   <button type="button" className="admin-secondary-btn" onClick={() => setMobileView('editor')}>
                     Volver a editar
                   </button>
-                  <button type="button" className="admin-primary-btn" onClick={handleSaveProduct} disabled={isSavingProduct}>
-                    {isSavingProduct ? 'Guardando producto...' : 'Guardar desde aqui'}
+                  <button type="button" className="admin-primary-btn" onClick={handleSaveProduct} disabled={isSavingProduct || isUploadingImage}>
+                    {isUploadingImage ? 'Subiendo imagen...' : isSavingProduct ? 'Guardando producto...' : 'Guardar desde aqui'}
                   </button>
                 </div>
 
