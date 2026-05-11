@@ -50,6 +50,12 @@ export interface Product extends ProductPayload {
   id: string;
 }
 
+interface ProductImageUploadResponse {
+  imagenUrl?: string;
+  imageUrl?: string;
+  url?: string;
+}
+
 interface BackendUser {
   uid: string;
   correo: string;
@@ -242,11 +248,12 @@ async function requestBackend<T>(
   withAuth = false
 ): Promise<T> {
   const token = withAuth ? await getFirebaseToken() : null;
+  const isFormData = options.body instanceof FormData;
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {}),
     },
@@ -450,6 +457,29 @@ export const api = {
       },
       true
     );
+  },
+
+  uploadProductImage: async (file: File, productId: string) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('productId', productId);
+
+    const payload = await requestBackend<ProductImageUploadResponse>(
+      '/api/products/upload-image',
+      {
+        method: 'POST',
+        body: formData,
+      },
+      true
+    );
+
+    const imageUrl = payload.imagenUrl ?? payload.imageUrl ?? payload.url;
+
+    if (!imageUrl) {
+      throw new Error('El backend no devolvio la URL de la imagen.');
+    }
+
+    return imageUrl;
   },
 
 };

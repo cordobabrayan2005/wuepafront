@@ -10,9 +10,6 @@ import {
   ProductCategory,
 } from '../utils/productCatalog';
 
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../config/firebase';
-
 type AdminMobileView = 'inventory' | 'editor' | 'preview';
 type AdminToast = {
   text: string;
@@ -319,12 +316,8 @@ export default function Admin() {
     try {
       setIsUploadingImage(true);
       showToast({ text: `Subiendo imagen "${selectedImageFile.name}"...`, type: 'info', persistent: true });
-      const safeFileName = selectedImageFile.name.replace(/\s+/g, '-').toLowerCase();
-      const storageRef = ref(storage, `products/${draft.id}-${Date.now()}-${safeFileName}`);
-
-      await uploadBytes(storageRef, selectedImageFile);
-      showToast({ text: 'Imagen subida. Preparando vista previa...', type: 'info', persistent: true });
-      const downloadUrl = await getDownloadURL(storageRef);
+      const downloadUrl = await api.uploadProductImage(selectedImageFile, String(draft.id));
+      showToast({ text: 'Imagen recibida por el backend. Preparando vista previa...', type: 'info', persistent: true });
 
       updateDraft('image', downloadUrl);
       setSelectedImageFile(null);
@@ -337,7 +330,7 @@ export default function Admin() {
     } catch (error) {
       console.error(error);
       showToast({
-        text: getErrorMessage(error, 'No se pudo subir la imagen. Revisa la configuracion de Firebase Storage.'),
+        text: getErrorMessage(error, 'No se pudo subir la imagen. Revisa el endpoint de carga del backend.'),
         type: 'error',
       });
     } finally {
