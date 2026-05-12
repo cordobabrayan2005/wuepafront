@@ -10,7 +10,8 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 
 function renderBootstrapError(error: unknown) {
-  const message = error instanceof Error ? error.message : "Error desconocido al iniciar la aplicacion.";
+  console.error("Bootstrap render error:", error);
+  const message = "No pudimos iniciar la aplicacion en este momento. Intenta recargar la pagina o vuelve a intentarlo mas tarde.";
 
   root.render(
     <React.StrictMode>
