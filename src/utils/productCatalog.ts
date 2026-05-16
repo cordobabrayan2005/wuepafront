@@ -11,6 +11,8 @@ export interface ProductCatalogItem {
   image: string;
 }
 
+export type ProductSortOrder = 'az' | 'za' | 'recent';
+
 export const PRODUCT_STORAGE_KEY = 'wuepa-admin-products';
 
 const accessoryImage = (fileName: string) => new URL(`../../ejemplosaccesorios/${fileName}`, import.meta.url).href;
@@ -323,6 +325,39 @@ export function groupProductsByCategory(products: ProductCatalogItem[]) {
     aretes: products.filter((product) => product.category === 'aretes'),
     pulseras: products.filter((product) => product.category === 'pulseras'),
   } as const;
+}
+
+function getProductRecencyValue(product: ProductCatalogItem) {
+  const numericId = Number(product.id);
+
+  if (Number.isFinite(numericId)) {
+    return numericId;
+  }
+
+  return 0;
+}
+
+export function sortProductsCatalog(
+  products: ProductCatalogItem[],
+  sortOrder: ProductSortOrder
+) {
+  return [...products].sort((a, b) => {
+    if (sortOrder === 'az') {
+      return a.name.localeCompare(b.name, 'es', { sensitivity: 'base' });
+    }
+
+    if (sortOrder === 'za') {
+      return b.name.localeCompare(a.name, 'es', { sensitivity: 'base' });
+    }
+
+    const recencyDifference = getProductRecencyValue(b) - getProductRecencyValue(a);
+
+    if (recencyDifference !== 0) {
+      return recencyDifference;
+    }
+
+    return String(b.id).localeCompare(String(a.id), 'es', { sensitivity: 'base' });
+  });
 }
 
 export function createEmptyProduct(): ProductCatalogItem {

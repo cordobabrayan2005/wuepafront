@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import MobileNavMenu from '../components/MobileNavMenu';
+import ScrollToTopButton from '../components/ScrollToTopButton';
 import { formatCopCurrency } from '../utils/currency';
-import { groupProductsByCategory, loadProductsCatalog, ProductCategory, ProductCatalogItem } from '../utils/productCatalog';
+import { groupProductsByCategory, loadProductsCatalog, ProductCategory, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
 
 /**
  * Componente Products
@@ -29,6 +30,7 @@ export default function ProductsSin() {
   // Estado para la búsqueda de productos
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
+  const [sortOrder, setSortOrder] = useState<ProductSortOrder>('recent');
   // Navegación y ubicación para manejo de rutas
   const navigate = useNavigate();
   const location = useLocation();
@@ -67,11 +69,15 @@ export default function ProductsSin() {
   // Productos de la categoría activa
   const currentProducts = groupProductsByCategory(products)[activeCategory];
   // Filtra productos según la búsqueda (nombre o descripción)
-  const filteredProducts = currentProducts.filter(product =>
-    product.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProducts = useMemo(() => {
+    const normalizedSearch = searchQuery.toLowerCase();
+
+    return sortProductsCatalog(currentProducts, sortOrder).filter(product =>
+      product.code.toLowerCase().includes(normalizedSearch) ||
+      product.name.toLowerCase().includes(normalizedSearch) ||
+      product.description.toLowerCase().includes(normalizedSearch)
+    );
+  }, [currentProducts, searchQuery, sortOrder]);
 
   // Renderizado principal de la página de productos
   return (
@@ -119,6 +125,26 @@ export default function ProductsSin() {
             </button>
           ))}
         </section>
+
+        <div className="products-toolbar">
+          <span className="products-toolbar-label">Ordenar por</span>
+          <div className="products-sort-options" role="group" aria-label="Ordenar productos">
+            {[
+              { value: 'az', label: 'A-Z' },
+              { value: 'za', label: 'Z-A' },
+              { value: 'recent', label: 'Mas reciente' },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={`products-sort-option ${sortOrder === option.value ? 'active' : ''}`}
+                onClick={() => setSortOrder(option.value as ProductSortOrder)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Products Grid */}
         <section className="products-section">
@@ -173,6 +199,7 @@ export default function ProductsSin() {
           © 2026 wuepa. Todos los derechos reservados.
         </div>
       </footer>
+      <ScrollToTopButton />
     </div>
   );
 }

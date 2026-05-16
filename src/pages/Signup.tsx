@@ -48,6 +48,7 @@ export default function Signup() {
   const navigate = useNavigate();
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const socialLogin = useAuthStore((state) => state.socialLogin);
+  const logout = useAuthStore((state) => state.logout);
   const isLoading = useAuthStore((state) => state.isLoading);
 
   /**
@@ -128,15 +129,17 @@ export default function Signup() {
   async function onGoogleSignup() {
     try {
       await socialLogin("google");
+      logout();
       setMsg("Inicio de sesión con Google exitoso.");
       setMsgType("success");
-      navigate("/buy", {
+      navigate("/login", {
         state: {
           flash: {
             type: "success",
-            text: "Bienvenido a wuepa",
+            text: "Cuenta creada con Google. Inicia sesion para continuar.",
           },
         },
+        replace: true,
       });
     } catch (e: any) {
       setMsg(e.message || "Error al registrarte con Google.");

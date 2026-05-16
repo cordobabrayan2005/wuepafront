@@ -1,41 +1,42 @@
 ﻿/**
  * Componente Home
  *
- * PÃ¡gina principal de JoyerÃa Wuepa. Muestra el hero, categorÃas, productos destacados,
- * nuevos productos, navegaciÃ³n y footer. Incluye barra de navegaciÃ³n que se oculta al hacer scroll.
+ * Página principal de Joyería Wuepa. Muestra el hero, categorías, productos destacados,
+ * nuevos productos, navegación y footer. Incluye barra de navegación que se oculta al hacer scroll.
  *
  * Estructura:
  * - Navbar: Barra superior con marca y acciones de usuario.
  * - Hero: Mensaje principal y acciones destacadas.
- * - CategorÃas: Acceso rÃ¡pido a tipos de productos.
- * - CTA: Llamado a la acciÃ³n para crear cuenta.
- * - Footer: InformaciÃ³n y enlaces rÃ¡pidos.
- * - NavegaciÃ³n inferior mÃ³vil.
+ * - Categorías: Acceso rápido a tipos de productos.
+ * - CTA: Llamado a la acción para crear cuenta.
+ * - Footer: Información y enlaces rápidos.
+ * - Navegación fácil.
  *
- * @returns {JSX.Element} PÃ¡gina principal de la tienda.
+ * @returns {JSX.Element} Página principal de la tienda.
  */
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { Heart, User, Home as HomeIcon, Package } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import MobileNavMenu from '../components/MobileNavMenu';
 import { formatCopCurrency } from '../utils/currency';
-import { loadProductsCatalog, ProductCatalogItem } from '../utils/productCatalog';
+import { loadProductsCatalog, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
 
 /**
- * Componente funcional principal para la pÃ¡gina de inicio.
+ * Componente funcional principal para la página de inicio.
  */
 export default function Home() {
-  // Hook de navegaciÃ³n
+  // Hook de navegación
   const navigate = useNavigate();
-  // Estado para mostrar/ocultar la barra de navegaciÃ³n
+  // Estado para mostrar/ocultar la barra de navegación
   const [showNavbar, setShowNavbar] = useState(true);
   const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
-  // Referencia para el Ãºltimo scroll vertical
+  const [sortOrder, setSortOrder] = useState<ProductSortOrder>('recent');
+  // Referencia para el último scroll vertical
   const lastScrollY = useRef(0);
 
-  // Efecto para cambiar el tÃtulo y manejar la visibilidad de la navbar al hacer scroll
+  // Efecto para cambiar el título y manejar la visibilidad de la navbar al hacer scroll
   useEffect(() => {
     document.title = 'wuepa';
 
@@ -61,7 +62,10 @@ export default function Home() {
     return () => window.removeEventListener('storage', syncProducts);
   }, []);
 
-  const featuredProducts = products.slice(0, 8);
+  const featuredProducts = useMemo(
+    () => sortProductsCatalog(products, sortOrder).slice(0, 8),
+    [products, sortOrder]
+  );
   const categoryLabels = {
     collares: 'Collares',
     aretes: 'Aretes',
@@ -75,7 +79,7 @@ export default function Home() {
     { label: 'Registrarse', to: '/signup', tone: 'accent' as const },
   ];
 
-  // Renderizado principal de la pÃ¡gina de inicio
+  // Renderizado principal de la página de inicio
   return (
     <div className="home-page">
       {/* Navbar */}
@@ -133,6 +137,26 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <div className="products-toolbar home-products-toolbar">
+          <span className="products-toolbar-label">Ordenar por</span>
+          <div className="products-sort-options" role="group" aria-label="Ordenar productos">
+            {[
+              { value: 'az', label: 'A-Z' },
+              { value: 'za', label: 'Z-A' },
+              { value: 'recent', label: 'Mas reciente' },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={`products-sort-option ${sortOrder === option.value ? 'active' : ''}`}
+                onClick={() => setSortOrder(option.value as ProductSortOrder)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <section className="products-grid" style={{ margin: '2rem 0' }}>
           {featuredProducts.map((product) => (

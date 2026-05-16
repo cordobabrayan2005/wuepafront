@@ -15,10 +15,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import MobileNavMenu from '../components/MobileNavMenu';
+import ScrollToTopButton from '../components/ScrollToTopButton';
 import { useAuthStore } from '../stores/authStore';
 import { addProductToCart, getCartItemsCount, loadCartItems } from '../utils/cart';
 import { formatCopCurrency } from '../utils/currency';
-import { loadProductsCatalog, ProductCatalogItem } from '../utils/productCatalog';
+import { loadProductsCatalog, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
 
 /**
  * Componente funcional principal para la página de compra.
@@ -32,6 +33,7 @@ export default function Buy() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [cartCount, setCartCount] = useState(() => getCartItemsCount(loadCartItems()));
   const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
+  const [sortOrder, setSortOrder] = useState<ProductSortOrder>('recent');
   // Usuario autenticado y logout obtenido del store
   const { user, logout } = useAuthStore();
   const isAdmin = user?.rol === 'admin';
@@ -99,16 +101,8 @@ export default function Buy() {
     }, 650);
   };
 
-  const featuredProducts = useMemo(() => products.slice(0, 6), [products]);
-  const newProducts = useMemo(() => {
-
-    return [...products]
-      .sort((a, b) =>
-        String(b.id).localeCompare(String(a.id))
-      )
-      .slice(0, 4);
-
-  }, [products]);
+  const sortedProducts = useMemo(() => sortProductsCatalog(products, sortOrder), [products, sortOrder]);
+  const newProducts = useMemo(() => sortedProducts.slice(0, 4), [sortedProducts]);
   const mobileMenuItems = [
     { label: 'Inicio', to: '/buy', isActive: true },
 
@@ -141,11 +135,15 @@ export default function Buy() {
   };
 
   // Filtra productos según la búsqueda
-  const filteredProducts = featuredProducts.filter((product) =>
-    product.code.toLowerCase().includes(searchQuery.toLowerCase())
-    || product.name.toLowerCase().includes(searchQuery.toLowerCase())
-    || product.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProducts = useMemo(() => {
+    const normalizedSearch = searchQuery.toLowerCase();
+
+    return sortedProducts.filter((product) =>
+      product.code.toLowerCase().includes(normalizedSearch)
+      || product.name.toLowerCase().includes(normalizedSearch)
+      || product.description.toLowerCase().includes(normalizedSearch)
+    );
+  }, [searchQuery, sortedProducts]);
 
   // Filtra productos destacados según la búsqueda
   const filteredBestSellers = newProducts.filter((item) =>
@@ -200,7 +198,9 @@ export default function Buy() {
               <p>Descubre nuestras colecciones exclusivas de joyas</p>
               <Link to="/products" className="primary-button">VER PRODUCTOS →</Link>
             </div>
-            <img src="/collagewue.png" alt="Destacados" loading="eager" fetchPriority="high" />
+            <div className="hero-card-media">
+              <img src="/collagewue.png" alt="Destacados" loading="eager" fetchPriority="high" />
+            </div>
           </article>
 
           <div className="wuepa-categories">
@@ -225,6 +225,26 @@ export default function Buy() {
                 <h4>PULSERAS</h4>
               </div>
             </Link>
+          </div>
+
+          <div className="products-toolbar buy-products-toolbar">
+            <span className="products-toolbar-label">Ordenar por</span>
+            <div className="products-sort-options" role="group" aria-label="Ordenar productos">
+              {[
+                { value: 'az', label: 'A-Z' },
+                { value: 'za', label: 'Z-A' },
+                { value: 'recent', label: 'Mas reciente' },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`products-sort-option ${sortOrder === option.value ? 'active' : ''}`}
+                  onClick={() => setSortOrder(option.value as ProductSortOrder)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <h3>PRODUCTOS DESTACADOS</h3>
@@ -274,6 +294,7 @@ export default function Buy() {
           </div>
         </aside>
       </section>
+      <ScrollToTopButton />
     </main>
   );
 }

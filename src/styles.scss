@@ -400,12 +400,28 @@ main.auth-wrapper.login-page {
   align-items: stretch;
 }
 
+main.auth-wrapper.signup-page {
+  min-height: 100vh;
+  padding: 0;
+  align-items: stretch;
+}
+
 main.auth-wrapper.login-page .login-layout {
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
   min-height: 100vh;
   border-radius: 0;
   box-shadow: none;
-  grid-template-columns: minmax(540px, 1.15fr) minmax(480px, 0.85fr);
+  grid-template-columns: 66.666vh minmax(420px, 500px);
+}
+
+main.auth-wrapper.signup-page .signup-layout {
+  width: fit-content;
+  max-width: 100%;
+  min-height: 100vh;
+  border-radius: 0;
+  box-shadow: none;
+  grid-template-columns: minmax(420px, 500px) 72vh;
 }
 
 main.auth-wrapper.login-page .login-right {
@@ -415,8 +431,19 @@ main.auth-wrapper.login-page .login-right {
   padding: 2.25rem 2rem;
 }
 
+main.auth-wrapper.signup-page .signup-left {
+  padding: 2.25rem 2rem;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+main.auth-wrapper.signup-page .signup-left::-webkit-scrollbar {
+  display: none;
+}
+
 main.auth-wrapper.login-page .login-panel {
-  width: min(100%, 540px);
+  width: min(100%, 460px);
 }
 
 .signup-left,
@@ -454,9 +481,9 @@ main.auth-wrapper.login-page .login-panel {
   align-items: center;
   justify-content: center;
   background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center 42%;
-  min-width: 100%;
+  background-size: contain;
+  background-position: center;
+  min-width: 0;
   overflow: hidden;
 }
 
@@ -919,6 +946,50 @@ main.auth-wrapper.login-page .login-panel {
   color: #274f7b;
 }
 
+.scroll-top-button {
+  position: fixed;
+  right: clamp(1rem, 2.5vw, 2rem);
+  bottom: clamp(1rem, 2.5vw, 2rem);
+  z-index: 95;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f8a300, #ef7b00);
+  color: #ffffff;
+  box-shadow: 0 16px 34px rgba(151, 95, 10, 0.28);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(0.75rem) scale(0.94);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.scroll-top-button.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.scroll-top-button:hover {
+  box-shadow: 0 20px 40px rgba(151, 95, 10, 0.34);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.scroll-top-button svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  stroke-width: 3;
+}
+
+.scroll-top-button:focus-visible {
+  outline: 3px solid rgba(248, 163, 0, 0.24);
+  outline-offset: 3px;
+}
+
 @keyframes authToastIn {
   from {
     opacity: 0;
@@ -941,11 +1012,15 @@ main.auth-wrapper.login-page .login-panel {
 .signup-right {
   position: relative;
   padding: 0;
-  min-height: 100%;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: url('/collagewue.png') center/cover no-repeat;
+  background-image: url('/collagewue.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: auto 108%;
+  min-width: 0;
 }
 
 .signup-right::after,
@@ -1524,13 +1599,17 @@ main.auth-wrapper.login-page .login-panel {
 }
 
 .buy-header {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto minmax(280px, 520px) minmax(0, auto);
   align-items: center;
   gap: 1.5rem;
-  padding: 1rem 1.5rem;
+  padding: 1rem clamp(1.25rem, 3vw, 3rem);
   background: #ffffff;
   border-bottom: 1px solid #f7e0b7;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  box-shadow: 0 8px 24px rgba(112, 78, 18, 0.06);
 }
 
 .header-left h1 {
@@ -1548,21 +1627,22 @@ main.auth-wrapper.login-page .login-panel {
 }
 
 .header-center {
-  flex: 1;
+  min-width: 0;
   display: flex;
   justify-content: center;
-  margin-left: 1rem;
 }
 
 .search-bar {
-  padding: 0.5rem 1rem;
+  min-height: 44px;
+  padding: 0.55rem 1rem;
   border: 1px solid #f3e4c2;
-  border-radius: 20px;
+  border-radius: 999px;
   font-size: 1rem;
-  width: 300px;
+  width: 100%;
   max-width: 100%;
   outline: none;
   background: #fff;
+  box-shadow: 0 8px 18px rgba(119, 78, 11, 0.06);
 }
 
 .search-bar:focus {
@@ -1570,19 +1650,27 @@ main.auth-wrapper.login-page .login-panel {
 }
 
 .header-right a {
-  margin: 0 0.85rem;
   color: #60544c;
   text-decoration: none;
   font-weight: 700;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
 .buy-content {
   display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 1.1rem;
-  max-width: 1120px;
-  margin: 1.5rem auto;
-  padding: 0 1rem;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  gap: clamp(1rem, 2vw, 1.6rem);
+  width: min(100% - clamp(1.5rem, 4vw, 4rem), 1480px);
+  margin: 1.5rem auto 2.5rem;
+  padding: 0;
+  align-items: start;
 }
 
 .buy-sidebar {
@@ -1590,12 +1678,16 @@ main.auth-wrapper.login-page .login-panel {
   border-radius: 1rem;
   background: #fff;
   padding: 1rem;
-  min-height: 480px;
+  min-height: 0;
+  position: sticky;
+  top: 5.75rem;
+  display: grid;
+  gap: 1rem;
 }
 
 .user-card,
 .best-seller {
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 }
 
 .user-card h3 {
@@ -1677,17 +1769,20 @@ main.auth-wrapper.login-page .login-panel {
 .buy-grid {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .hero-card {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  background: #fff;
+  grid-template-columns: minmax(0, 0.82fr) minmax(420px, 1fr);
+  align-items: center;
+  background: linear-gradient(135deg, #ffffff 0%, #fffdfa 58%, #fff4dc 100%);
   border: 1px solid #f3e2c2;
   border-radius: 1rem;
-  padding: 1.2rem;
-  gap: 1rem;
+  padding: clamp(1.2rem, 2vw, 1.8rem);
+  gap: clamp(1rem, 2vw, 1.75rem);
+  min-height: 330px;
+  overflow: hidden;
 }
 
 .hero-card div h2 {
@@ -1714,12 +1809,41 @@ main.auth-wrapper.login-page .login-panel {
   text-decoration: none;
 }
 
-.hero-card img,
 .product-card img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: 0.8rem;
+}
+
+.hero-card-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  min-height: 286px;
+  max-height: 350px;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid rgba(239, 192, 109, 0.55);
+  background: #f7ead1;
+  box-shadow: 0 18px 36px rgba(112, 78, 18, 0.18);
+}
+
+.hero-card-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.34);
+}
+
+.hero-card-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+  transform: scale(1.03);
 }
 
 .categories {
@@ -1752,7 +1876,7 @@ main.auth-wrapper.login-page .login-panel {
 
 .product-list {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 1rem;
   margin-top: 0.8rem;
 }
@@ -2410,6 +2534,71 @@ main.auth-wrapper.login-page .login-panel {
   gap: 1rem;
   margin-bottom: 3rem;
   flex-wrap: wrap;
+}
+
+.products-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: -1.35rem 0 2rem;
+  flex-wrap: wrap;
+}
+
+.buy-products-toolbar {
+  justify-content: flex-start;
+  margin: 0;
+}
+
+.home-products-toolbar {
+  margin: 0.25rem 0 1.25rem;
+}
+
+.products-toolbar-label {
+  color: #6c5a42;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.products-sort-options {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem;
+  border: 1px solid #f3e2c2;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 8px 18px rgba(119, 78, 11, 0.06);
+}
+
+.products-sort-option {
+  min-height: 2.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #5f5244;
+  padding: 0 0.95rem;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.products-sort-option:hover {
+  background: #fff6e6;
+  color: #d87d00;
+}
+
+.products-sort-option.active {
+  background: linear-gradient(135deg, #f8a300, #ef7b00);
+  color: #ffffff;
+  box-shadow: 0 6px 14px rgba(248, 163, 0, 0.28);
+}
+
+.products-sort-option:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(248, 163, 0, 0.12);
 }
 
 .category-tab {
@@ -3600,6 +3789,16 @@ main.auth-wrapper.login-page .login-panel {
     font-size: 0.9rem;
   }
 
+  .products-sort-options {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .products-sort-option {
+    flex: 1;
+    padding: 0 0.6rem;
+  }
+
   .products-grid {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 1rem;
@@ -3715,6 +3914,13 @@ main.auth-wrapper.login-page .login-panel {
 
   .content-block {
     padding: 1rem;
+  }
+
+  .scroll-top-button {
+    right: 1rem;
+    bottom: 5.6rem;
+    width: 3rem;
+    height: 3rem;
   }
 
   .profile-actions-row {
@@ -4286,7 +4492,6 @@ button {
 @media (max-width: 1200px) {
   .wuepa-nav-inner,
   .wuepa-container,
-  .buy-content,
   .products-container,
   .cart-hero,
   .cart-layout,
@@ -4303,6 +4508,18 @@ button {
     padding-right: 0;
   }
 
+  .buy-content {
+    width: min(100% - 2rem, 1480px);
+  }
+
+  .buy-page .product-list {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .buy-page .best-seller .product-list {
+    grid-template-columns: 1fr;
+  }
+
   .product-list {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -4317,7 +4534,8 @@ button {
 
   .signup-layout,
   .login-layout,
-  main.auth-wrapper.login-page .login-layout {
+  main.auth-wrapper.login-page .login-layout,
+  main.auth-wrapper.signup-page .signup-layout {
     width: min(100%, 680px);
     min-height: auto;
     grid-template-columns: 1fr;
@@ -4335,12 +4553,14 @@ button {
     display: none;
   }
 
-  main.auth-wrapper.login-page {
+  main.auth-wrapper.login-page,
+  main.auth-wrapper.signup-page {
     align-items: center;
     padding: 1rem;
   }
 
   main.auth-wrapper.login-page .login-right,
+  main.auth-wrapper.signup-page .signup-left,
   .login-right,
   .signup-left {
     min-height: auto;
@@ -4386,9 +4606,14 @@ button {
     display: block;
     min-height: auto;
     order: -1;
+    position: static;
   }
 
   .best-seller .product-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .buy-page .buy-grid > .product-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -4396,8 +4621,9 @@ button {
     grid-template-columns: 1fr;
   }
 
-  .hero-card img {
+  .hero-card-media {
     max-height: 320px;
+    min-height: 220px;
   }
 
   .product-list {
@@ -4523,6 +4749,8 @@ button {
   .products-grid,
   .product-list,
   .best-seller .product-list,
+  .buy-page .buy-grid > .product-list,
+  .buy-page .best-seller .product-list,
   .admin-summary-grid {
     grid-template-columns: 1fr;
   }
@@ -4633,14 +4861,16 @@ button {
 @media (max-width: 520px) {
   .signup-page,
   .login-page,
-  main.auth-wrapper.login-page {
+  main.auth-wrapper.login-page,
+  main.auth-wrapper.signup-page {
     padding: 0;
     align-items: stretch;
   }
 
   .signup-layout,
   .login-layout,
-  main.auth-wrapper.login-page .login-layout {
+  main.auth-wrapper.login-page .login-layout,
+  main.auth-wrapper.signup-page .signup-layout {
     width: 100%;
     min-height: 100dvh;
     border-radius: 0;
@@ -4650,7 +4880,8 @@ button {
 
   .signup-left,
   .login-right,
-  main.auth-wrapper.login-page .login-right {
+  main.auth-wrapper.login-page .login-right,
+  main.auth-wrapper.signup-page .signup-left {
     padding: 1rem;
   }
 
