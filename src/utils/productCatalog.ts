@@ -352,11 +352,33 @@ export function mapBackendProductToCatalogItem(product: Product): ProductCatalog
   };
 }
 
+function getProductMergeKey(product: ProductCatalogItem) {
+  const normalizedCode = product.code.trim().toUpperCase();
+  return normalizedCode || product.id;
+}
+
+function mergeProductsCatalog(
+  baseProducts: ProductCatalogItem[],
+  backendProducts: ProductCatalogItem[]
+) {
+  const mergedProducts = new Map<string, ProductCatalogItem>();
+
+  baseProducts.forEach((product) => {
+    mergedProducts.set(getProductMergeKey(product), product);
+  });
+
+  backendProducts.forEach((product) => {
+    mergedProducts.set(getProductMergeKey(product), product);
+  });
+
+  return Array.from(mergedProducts.values());
+}
+
 export async function loadProductsCatalogFromBackend(): Promise<ProductCatalogItem[]> {
   const backendProducts = await api.getProducts();
   const mappedProducts = backendProducts.map(mapBackendProductToCatalogItem);
 
-  return mappedProducts.length > 0 ? mappedProducts : loadProductsCatalog();
+  return mergeProductsCatalog(loadProductsCatalog(), mappedProducts);
 }
 
 function getProductRecencyValue(product: ProductCatalogItem) {
