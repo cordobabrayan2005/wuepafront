@@ -1,3 +1,5 @@
+import { api, type Product } from '../services/api';
+
 export type ProductCategory = 'collares' | 'aretes' | 'pulseras';
 
 export interface ProductCatalogItem {
@@ -325,6 +327,36 @@ export function groupProductsByCategory(products: ProductCatalogItem[]) {
     aretes: products.filter((product) => product.category === 'aretes'),
     pulseras: products.filter((product) => product.category === 'pulseras'),
   } as const;
+}
+
+function normalizeProductCategory(category: string): ProductCategory {
+  if (category === 'aretes' || category === 'pulseras') {
+    return category;
+  }
+
+  return 'collares';
+}
+
+export function mapBackendProductToCatalogItem(product: Product): ProductCatalogItem {
+  const category = normalizeProductCategory(product.categoria);
+
+  return {
+    id: product.id,
+    code: product.codigo || generateProductCode(category, product.id),
+    category,
+    name: product.nombre,
+    description: product.descripcion || '',
+    units: product.stock || 0,
+    price: product.precio || 0,
+    image: product.imagenUrl || getDefaultProductImage(category),
+  };
+}
+
+export async function loadProductsCatalogFromBackend(): Promise<ProductCatalogItem[]> {
+  const backendProducts = await api.getProducts();
+  const mappedProducts = backendProducts.map(mapBackendProductToCatalogItem);
+
+  return mappedProducts.length > 0 ? mappedProducts : loadProductsCatalog();
 }
 
 function getProductRecencyValue(product: ProductCatalogItem) {

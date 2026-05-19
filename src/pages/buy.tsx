@@ -19,7 +19,7 @@ import ScrollToTopButton from '../components/ScrollToTopButton';
 import { useAuthStore } from '../stores/authStore';
 import { addProductToCart, getCartItemsCount, loadCartItems } from '../utils/cart';
 import { formatCopCurrency } from '../utils/currency';
-import { loadProductsCatalog, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
+import { loadProductsCatalog, loadProductsCatalogFromBackend, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
 
 /**
  * Componente funcional principal para la página de compra.
@@ -41,12 +41,29 @@ export default function Buy() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let isMounted = true;
+
     function syncProducts() {
       setProducts(loadProductsCatalog());
     }
 
+    loadProductsCatalogFromBackend()
+      .then((backendProducts) => {
+        if (isMounted) {
+          setProducts(backendProducts);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setProducts(loadProductsCatalog());
+        }
+      });
+
     window.addEventListener('storage', syncProducts);
-    return () => window.removeEventListener('storage', syncProducts);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('storage', syncProducts);
+    };
   }, []);
 
   useEffect(() => {

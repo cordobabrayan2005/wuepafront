@@ -21,7 +21,7 @@ import { Heart, User, Home as HomeIcon, Package } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import MobileNavMenu from '../components/MobileNavMenu';
 import { formatCopCurrency } from '../utils/currency';
-import { loadProductsCatalog, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
+import { loadProductsCatalog, loadProductsCatalogFromBackend, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
 
 /**
  * Componente funcional principal para la página de inicio.
@@ -54,12 +54,29 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
+
     function syncProducts() {
       setProducts(loadProductsCatalog());
     }
 
+    loadProductsCatalogFromBackend()
+      .then((backendProducts) => {
+        if (isMounted) {
+          setProducts(backendProducts);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setProducts(loadProductsCatalog());
+        }
+      });
+
     window.addEventListener('storage', syncProducts);
-    return () => window.removeEventListener('storage', syncProducts);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('storage', syncProducts);
+    };
   }, []);
 
   const featuredProducts = useMemo(

@@ -2,10 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { formatCopCurrency } from '../utils/currency';
-import { api, type Product } from '../services/api';
+import { api } from '../services/api';
 import {
   createEmptyProduct,
   generateProductCode,
+  mapBackendProductToCatalogItem,
   ProductCatalogItem,
   ProductCategory,
 } from '../utils/productCatalog';
@@ -49,19 +50,6 @@ export default function Admin() {
 
   function getErrorMessage(error: unknown, fallback: string) {
     return error instanceof Error && error.message ? error.message : fallback;
-  }
-
-  function mapBackendProduct(product: Product): ProductCatalogItem {
-    return {
-      id: product.id,
-      code: product.codigo || '',
-      category: product.categoria as ProductCategory,
-      name: product.nombre,
-      description: product.descripcion || '',
-      units: product.stock || 0,
-      price: product.precio || 0,
-      image: product.imagenUrl || '/collar.png',
-    };
   }
 
   const visibleProducts = useMemo(() => {
@@ -114,7 +102,7 @@ export default function Admin() {
 
     api.getProducts()
       .then((backendProducts) => {
-        const mappedProducts = backendProducts.map(mapBackendProduct);
+        const mappedProducts = backendProducts.map(mapBackendProductToCatalogItem);
 
         setProducts(mappedProducts);
         setSelectedProductId(mappedProducts[0]?.id ?? null);
@@ -426,7 +414,7 @@ export default function Admin() {
       showToast({ text: 'Cambios recibidos. Actualizando inventario...', type: 'info', persistent: true });
       const refreshed = await api.getProducts();
 
-      const mappedProducts = refreshed.map(mapBackendProduct);
+      const mappedProducts = refreshed.map(mapBackendProductToCatalogItem);
 
       setProducts(mappedProducts);
       setIsCreating(false);
@@ -469,7 +457,7 @@ export default function Admin() {
       showToast({ text: 'Producto eliminado. Actualizando inventario...', type: 'info', persistent: true });
       const refreshed = await api.getProducts();
 
-      const mappedProducts = refreshed.map(mapBackendProduct);
+      const mappedProducts = refreshed.map(mapBackendProductToCatalogItem);
 
       setProducts(mappedProducts);
       showToast({ text: 'Producto eliminado correctamente.', type: 'success' });

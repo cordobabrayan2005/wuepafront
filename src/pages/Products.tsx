@@ -5,7 +5,7 @@ import MobileNavMenu from '../components/MobileNavMenu';
 import ScrollToTopButton from '../components/ScrollToTopButton';
 import { addProductToCart, getCartItemsCount, loadCartItems } from '../utils/cart';
 import { formatCopCurrency } from '../utils/currency';
-import { groupProductsByCategory, loadProductsCatalog, ProductCategory, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
+import { groupProductsByCategory, loadProductsCatalog, loadProductsCatalogFromBackend, ProductCategory, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
 
 /**
  * Componente Products
@@ -42,12 +42,29 @@ export default function Products() {
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     function syncProducts() {
       setProducts(loadProductsCatalog());
     }
 
+    loadProductsCatalogFromBackend()
+      .then((backendProducts) => {
+        if (isMounted) {
+          setProducts(backendProducts);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setProducts(loadProductsCatalog());
+        }
+      });
+
     window.addEventListener('storage', syncProducts);
-    return () => window.removeEventListener('storage', syncProducts);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('storage', syncProducts);
+    };
   }, []);
 
   useEffect(() => {

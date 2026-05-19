@@ -4,7 +4,7 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import MobileNavMenu from '../components/MobileNavMenu';
 import ScrollToTopButton from '../components/ScrollToTopButton';
 import { formatCopCurrency } from '../utils/currency';
-import { groupProductsByCategory, loadProductsCatalog, ProductCategory, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
+import { groupProductsByCategory, loadProductsCatalog, loadProductsCatalogFromBackend, ProductCategory, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
 
 /**
  * Componente Products
@@ -36,12 +36,29 @@ export default function ProductsSin() {
   const location = useLocation();
 
   useEffect(() => {
+    let isMounted = true;
+
     function syncProducts() {
       setProducts(loadProductsCatalog());
     }
 
+    loadProductsCatalogFromBackend()
+      .then((backendProducts) => {
+        if (isMounted) {
+          setProducts(backendProducts);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setProducts(loadProductsCatalog());
+        }
+      });
+
     window.addEventListener('storage', syncProducts);
-    return () => window.removeEventListener('storage', syncProducts);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('storage', syncProducts);
+    };
   }, []);
 
   // Cambia la categoría activa según el parámetro de la URL
