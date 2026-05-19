@@ -50,6 +50,11 @@ export interface Product extends ProductPayload {
   id: string;
 }
 
+interface InstagramSyncResponse {
+  success: boolean;
+  imported: number;
+}
+
 interface BackendUser {
   uid: string;
   correo: string;
@@ -447,6 +452,16 @@ export const api = {
       `/api/products/${id}`,
       {
         method: 'DELETE',
+      },
+      true
+    );
+  },
+
+  syncInstagramProducts: async () => {
+    return requestBackend<InstagramSyncResponse>(
+      '/api/instagram/sync',
+      {
+        method: 'POST',
       },
       true
     );

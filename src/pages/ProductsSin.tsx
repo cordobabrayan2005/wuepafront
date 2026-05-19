@@ -42,22 +42,37 @@ export default function ProductsSin() {
       setProducts(loadProductsCatalog());
     }
 
-    loadProductsCatalogFromBackend()
-      .then((backendProducts) => {
-        if (isMounted) {
-          setProducts(backendProducts);
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setProducts(loadProductsCatalog());
-        }
-      });
+    function refreshProductsFromBackend() {
+      loadProductsCatalogFromBackend()
+        .then((backendProducts) => {
+          if (isMounted) {
+            setProducts(backendProducts);
+          }
+        })
+        .catch(() => {
+          if (isMounted) {
+            setProducts(loadProductsCatalog());
+          }
+        });
+    }
 
+    function refreshProductsWhenVisible() {
+      if (document.visibilityState === 'visible') {
+        refreshProductsFromBackend();
+      }
+    }
+
+    refreshProductsFromBackend();
+    const refreshIntervalId = window.setInterval(refreshProductsFromBackend, 30000);
     window.addEventListener('storage', syncProducts);
+    window.addEventListener('focus', refreshProductsFromBackend);
+    document.addEventListener('visibilitychange', refreshProductsWhenVisible);
     return () => {
       isMounted = false;
+      window.clearInterval(refreshIntervalId);
       window.removeEventListener('storage', syncProducts);
+      window.removeEventListener('focus', refreshProductsFromBackend);
+      document.removeEventListener('visibilitychange', refreshProductsWhenVisible);
     };
   }, []);
 
@@ -117,7 +132,7 @@ export default function ProductsSin() {
         </div>
         <nav className="header-right">
           <Link to="/">Inicio</Link>
-          <Link to="/products" className="active">Productos</Link>
+          <Link to="/productssin" className="active">Productos</Link>
           <Link to="/about">Nosotros</Link>
         </nav>
       </header>
@@ -208,7 +223,7 @@ export default function ProductsSin() {
           </div>
           <div className="footer-links">
             <Link to="/">Inicio</Link>
-            <Link to="/products">Productos</Link>
+            <Link to="/productssin">Productos</Link>
             <Link to="/about">Nosotros</Link>
           </div>
         </div>

@@ -60,22 +60,37 @@ export default function Home() {
       setProducts(loadProductsCatalog());
     }
 
-    loadProductsCatalogFromBackend()
-      .then((backendProducts) => {
-        if (isMounted) {
-          setProducts(backendProducts);
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setProducts(loadProductsCatalog());
-        }
-      });
+    function refreshProductsFromBackend() {
+      loadProductsCatalogFromBackend()
+        .then((backendProducts) => {
+          if (isMounted) {
+            setProducts(backendProducts);
+          }
+        })
+        .catch(() => {
+          if (isMounted) {
+            setProducts(loadProductsCatalog());
+          }
+        });
+    }
 
+    function refreshProductsWhenVisible() {
+      if (document.visibilityState === 'visible') {
+        refreshProductsFromBackend();
+      }
+    }
+
+    refreshProductsFromBackend();
+    const refreshIntervalId = window.setInterval(refreshProductsFromBackend, 30000);
     window.addEventListener('storage', syncProducts);
+    window.addEventListener('focus', refreshProductsFromBackend);
+    document.addEventListener('visibilitychange', refreshProductsWhenVisible);
     return () => {
       isMounted = false;
+      window.clearInterval(refreshIntervalId);
       window.removeEventListener('storage', syncProducts);
+      window.removeEventListener('focus', refreshProductsFromBackend);
+      document.removeEventListener('visibilitychange', refreshProductsWhenVisible);
     };
   }, []);
 
@@ -123,7 +138,7 @@ export default function Home() {
           <h2 className="wuepa-hero-subtitle">ELEGANCIA</h2>
           <p className="wuepa-hero-text">Descubre la colección más exclusiva de joyas y accesorios diseñados para realzar tu belleza única</p>
           <div className="wuepa-hero-actions">
-            <button onClick={() => navigate('/products')} className="btn-primary">Comenzar Ahora →</button>
+            <button onClick={() => navigate('/productssin')} className="btn-primary">Comenzar Ahora →</button>
             <button onClick={() => navigate('/productssin')} className="btn-secondary">Explorar Catálogo</button>
           </div>
         </section>
@@ -255,7 +270,7 @@ export default function Home() {
             <HomeIcon className="w-6 h-6" />
             <span className="text-xs font-medium">Inicio</span>
           </button>
-          <button className="flex flex-col items-center gap-1 text-stone-500">
+          <button onClick={() => navigate('/productssin')} className="flex flex-col items-center gap-1 text-stone-500">
             <Package className="w-6 h-6" />
             <span className="text-xs">Productos</span>
           </button>
