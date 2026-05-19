@@ -115,7 +115,7 @@ export default function Signup() {
         state: {
           flash: {
             type: "success",
-            text: "Cuenta creada sin problemas. ¡Bienvenida a shop!",
+            text: "Cuenta creada sin problemas. ¡Bienvenida a WUEPA!",
           },
         },
         replace: true,
@@ -136,7 +136,7 @@ export default function Signup() {
         state: {
           flash: {
             type: "success",
-            text: "Cuenta creada con Google. Inicia sesion para continuar.",
+            text: "Cuenta creada con Google. Inicia sesión para continuar.",
           },
         },
         replace: true,
