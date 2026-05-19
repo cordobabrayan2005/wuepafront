@@ -12,7 +12,7 @@ function isCartItem(value: unknown): value is CartItem {
   }
 
   const candidate = value as Partial<CartItem>;
-  return typeof candidate.id === 'number'
+  return typeof candidate.id === 'string'
     && typeof candidate.code === 'string'
     && typeof candidate.category === 'string'
     && typeof candidate.name === 'string'
@@ -76,7 +76,7 @@ export function addProductToCart(product: ProductCatalogItem) {
   return nextItems;
 }
 
-export function updateCartItemQuantity(productId: number, quantity: number) {
+export function updateCartItemQuantity(productId: string, quantity: number) {
   const nextItems = loadCartItems()
     .map((item) => (
       item.id === productId
@@ -89,7 +89,7 @@ export function updateCartItemQuantity(productId: number, quantity: number) {
   return nextItems;
 }
 
-export function removeCartItem(productId: number) {
+export function removeCartItem(productId: string) {
   const nextItems = loadCartItems().filter((item) => item.id !== productId);
   saveCartItems(nextItems);
   return nextItems;
