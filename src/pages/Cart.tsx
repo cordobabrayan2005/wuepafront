@@ -39,9 +39,9 @@ export default function Cart() {
           <h1>WUEPA</h1>
           <p>ACCESORIOS</p>
         </div>
-        <MobileNavMenu title="Menu del carrito" items={mobileMenuItems} />
+        <MobileNavMenu title="Menú del carrito" items={mobileMenuItems} />
         <div className="cart-header-center">
-          <p className="cart-kicker">Tu seleccion</p>
+          <p className="cart-kicker">Tu selección</p>
           <strong>{itemCount} producto{itemCount === 1 ? '' : 's'} en tu carrito</strong>
         </div>
         <nav className="header-right">
@@ -57,7 +57,7 @@ export default function Cart() {
           <p className="cart-kicker">Compra segura</p>
           <h2>Revisa tus joyas antes de finalizar el pedido</h2>
           <p>
-            Ajusta cantidades, revisa tu total estimado y luego continua por WhatsApp para cerrar la compra.
+            Ajusta cantidades, revisa tu total estimado y luego continúa por WhatsApp para cerrar la compra.
           </p>
         </div>
         <div className="cart-hero-badge">
@@ -71,14 +71,14 @@ export default function Cart() {
           {items.length === 0 ? (
             <div className="cart-empty-state">
               <ShoppingBag size={34} />
-              <h3>Tu carrito esta vacio</h3>
-              <p>Agrega productos desde el catalogo para verlos aqui y continuar con tu pedido.</p>
+              <h3>Tu carrito está vacío</h3>
+              <p>Agrega productos desde el catálogo para verlos aquí y continuar con tu pedido.</p>
               <Link to="/products" className="primary-button">Explorar productos</Link>
             </div>
           ) : (
             <>
               <div className="cart-list-header">
-                <h3>Articulos seleccionados</h3>
+                <h3>Artículos seleccionados</h3>
                 <button type="button" className="cart-clear-button" onClick={() => {
                   clearCart();
                   setItems([]);
