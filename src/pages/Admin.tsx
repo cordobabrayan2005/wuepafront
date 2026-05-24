@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { formatCopCurrency } from '../utils/currency';
@@ -19,6 +19,15 @@ type AdminToast = {
   text: string;
   type: 'success' | 'error' | 'info';
   persistent?: boolean;
+};
+
+const PRODUCT_IMAGE_REQUIREMENTS = {
+  acceptedTypes: ['image/jpeg', 'image/png', 'image/webp'],
+  maxSizeMb: 5,
+  minWidth: 900,
+  minHeight: 900,
+  minAspectRatio: 0.72,
+  maxAspectRatio: 1.35,
 };
 
 const categoryLabels: Record<ProductCategory, string> = {
@@ -43,6 +52,9 @@ export default function Admin() {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isSavingProduct, setIsSavingProduct] = useState(false);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [imagePosition, setImagePosition] = useState({ x: 50, y: 50 });
+  const [isAdjustingImage, setIsAdjustingImage] = useState(false);
+  const imagePreviewFrameRef = useRef<HTMLDivElement | null>(null);
 
   function showToast(nextToast: AdminToast) {
     setToast(nextToast);
@@ -206,6 +218,48 @@ export default function Admin() {
     }
   }
 
+  function resetImagePosition() {
+    setImagePosition({ x: 50, y: 50 });
+  }
+
+  function updateImagePositionFromPointer(event: React.PointerEvent<HTMLDivElement>) {
+    const frame = imagePreviewFrameRef.current;
+
+    if (!frame) {
+      return;
+    }
+
+    const rect = frame.getBoundingClientRect();
+    const x = Math.min(100, Math.max(0, ((event.clientX - rect.left) / rect.width) * 100));
+    const y = Math.min(100, Math.max(0, ((event.clientY - rect.top) / rect.height) * 100));
+
+    setImagePosition({
+      x: Math.round(x),
+      y: Math.round(y),
+    });
+  }
+
+  function handleImagePreviewPointerDown(event: React.PointerEvent<HTMLDivElement>) {
+    setIsAdjustingImage(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+    updateImagePositionFromPointer(event);
+  }
+
+  function handleImagePreviewPointerMove(event: React.PointerEvent<HTMLDivElement>) {
+    if (!isAdjustingImage) {
+      return;
+    }
+
+    updateImagePositionFromPointer(event);
+  }
+
+  function handleImagePreviewPointerUp(event: React.PointerEvent<HTMLDivElement>) {
+    setIsAdjustingImage(false);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  }
+
   function handleUnitsChange(value: string) {
     const numericValue = value.replace(/\D/g, '');
     updateDraft('units', numericValue ? Number(numericValue) : 0);
@@ -247,6 +301,7 @@ export default function Admin() {
     setSelectedImageFile(null);
     setLocalPreviewUrl('');
     setFieldErrors({});
+    resetImagePosition();
     showToast({ text: `Editando ${product.name}. Los cambios se aplicaran cuando guardes.`, type: 'info' });
   }
 
@@ -260,6 +315,7 @@ export default function Admin() {
     setSelectedImageFile(null);
     setLocalPreviewUrl('');
     setFieldErrors({});
+    resetImagePosition();
     showToast({ text: 'Nuevo producto listo para completar. Guardalo para subirlo al backend.', type: 'info' });
   }
 
@@ -276,15 +332,73 @@ export default function Admin() {
     });
   }
 
-  function handleImageSelection(event: React.ChangeEvent<HTMLInputElement>) {
+  function getImageDimensions(file: File) {
+    return new Promise<{ width: number; height: number }>((resolve, reject) => {
+      const imageUrl = URL.createObjectURL(file);
+      const image = new Image();
+
+      image.onload = () => {
+        const dimensions = {
+          width: image.naturalWidth,
+          height: image.naturalHeight,
+        };
+        URL.revokeObjectURL(imageUrl);
+        resolve(dimensions);
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(imageUrl);
+        reject(new Error('No pudimos leer las dimensiones de la imagen.'));
+      };
+
+      image.src = imageUrl;
+    });
+  }
+
+  async function validateProductImageFile(file: File) {
+    if (!PRODUCT_IMAGE_REQUIREMENTS.acceptedTypes.includes(file.type)) {
+      return 'Sube una imagen JPG, PNG o WebP para asegurar compatibilidad con la tienda.';
+    }
+
+    const maxSizeBytes = PRODUCT_IMAGE_REQUIREMENTS.maxSizeMb * 1024 * 1024;
+
+    if (file.size > maxSizeBytes) {
+      return `La imagen pesa demasiado. Usa un archivo de maximo ${PRODUCT_IMAGE_REQUIREMENTS.maxSizeMb} MB.`;
+    }
+
+    try {
+      const { width, height } = await getImageDimensions(file);
+      const aspectRatio = width / height;
+
+      if (width < PRODUCT_IMAGE_REQUIREMENTS.minWidth || height < PRODUCT_IMAGE_REQUIREMENTS.minHeight) {
+        return `La imagen debe medir al menos ${PRODUCT_IMAGE_REQUIREMENTS.minWidth} x ${PRODUCT_IMAGE_REQUIREMENTS.minHeight} px para verse nitida.`;
+      }
+
+      if (
+        aspectRatio < PRODUCT_IMAGE_REQUIREMENTS.minAspectRatio
+        || aspectRatio > PRODUCT_IMAGE_REQUIREMENTS.maxAspectRatio
+      ) {
+        return 'Usa una imagen cuadrada o ligeramente vertical. Las fotos muy panoramicas o muy estrechas se recortan mal en el catalogo.';
+      }
+    } catch (error) {
+      return getErrorMessage(error, 'No pudimos validar la imagen. Intenta con otro archivo.');
+    }
+
+    return undefined;
+  }
+
+  async function handleImageSelection(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
 
     if (!file) {
       return;
     }
 
-    if (!file.type.startsWith('image/')) {
-      showToast({ text: 'Selecciona un archivo de imagen valido.', type: 'error' });
+    const imageErrorMessage = await validateProductImageFile(file);
+
+    if (imageErrorMessage) {
+      event.target.value = '';
+      showToast({ text: imageErrorMessage, type: 'error' });
       return;
     }
 
@@ -295,6 +409,7 @@ export default function Admin() {
     const previewUrl = URL.createObjectURL(file);
     setSelectedImageFile(file);
     setLocalPreviewUrl(previewUrl);
+    resetImagePosition();
     showToast({ text: `Imagen "${file.name}" lista para subir.`, type: 'info' });
   }
 
@@ -762,7 +877,7 @@ export default function Admin() {
                       <div className="admin-upload-panel">
                         <input
                           type="file"
-                          accept="image/*"
+                          accept="image/jpeg,image/png,image/webp"
                           onChange={handleImageSelection}
                           className="admin-file-input"
                         />
@@ -775,6 +890,9 @@ export default function Admin() {
                           {isUploadingImage ? 'Subiendo imagen...' : 'Subir imagen'}
                         </button>
                       </div>
+                      <small className="admin-field-help">
+                        Formatos permitidos: JPG, PNG o WebP. Minimo 900 x 900 px, maximo 5 MB y proporcion cuadrada o ligeramente vertical.
+                      </small>
                     </div>
                   </div>
                 </section>
@@ -825,12 +943,49 @@ export default function Admin() {
                     <h3>Imagen actual</h3>
                     <p>La imagen mostrada se actualiza con la URL escrita o con la ultima seleccionada para subir.</p>
                   </div>
-                  <div className="admin-image-preview-frame">
+                  <div
+                    ref={imagePreviewFrameRef}
+                    className={`admin-image-preview-frame ${isAdjustingImage ? 'is-adjusting' : ''}`}
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Mover encuadre de la imagen"
+                    onPointerDown={handleImagePreviewPointerDown}
+                    onPointerMove={handleImagePreviewPointerMove}
+                    onPointerUp={handleImagePreviewPointerUp}
+                    onPointerCancel={handleImagePreviewPointerUp}
+                  >
                     <ImageWithFallback
                       src={localPreviewUrl || draft.image || '/W.png'}
                       alt={draft.name || 'Vista previa del producto'}
                       className="admin-image-preview"
+                      draggable={false}
+                      style={{ objectPosition: `${imagePosition.x}% ${imagePosition.y}%` }}
                     />
+                  </div>
+                  <div className="admin-image-position-controls" aria-label="Controles de encuadre de imagen">
+                    <label>
+                      <span>Horizontal</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={imagePosition.x}
+                        onChange={(event) => setImagePosition((current) => ({ ...current, x: Number(event.target.value) }))}
+                      />
+                    </label>
+                    <label>
+                      <span>Vertical</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={imagePosition.y}
+                        onChange={(event) => setImagePosition((current) => ({ ...current, y: Number(event.target.value) }))}
+                      />
+                    </label>
+                    <button type="button" className="admin-secondary-btn" onClick={resetImagePosition}>
+                      Centrar imagen
+                    </button>
                   </div>
                 </div>
 

@@ -17,7 +17,7 @@
 
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import { Heart, User, Home as HomeIcon, Package } from 'lucide-react';
+import { Heart, ShoppingBag, User, Home as HomeIcon, Package } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import MobileNavMenu from '../components/MobileNavMenu';
 import { formatCopCurrency } from '../utils/currency';
@@ -98,17 +98,10 @@ export default function Home() {
     () => sortProductsCatalog(products, sortOrder).slice(0, 8),
     [products, sortOrder]
   );
-  const categoryLabels = {
-    collares: 'Collares',
-    aretes: 'Aretes',
-    pulseras: 'Pulseras',
-  } as const;
   const mobileMenuItems = [
-    { label: 'Inicio', to: '/' },
-    { label: 'Catalogo', to: '/productssin' },
-    { label: 'Sobre nosotros', to: '/about' },
+    { label: 'Crear cuenta', to: '/signup', tone: 'accent' as const },
     { label: 'Iniciar sesion', to: '/login', tone: 'default' as const },
-    { label: 'Registrarse', to: '/signup', tone: 'accent' as const },
+    { label: 'Productos', to: '/productssin' },
   ];
 
   // Renderizado principal de la página de inicio
@@ -117,57 +110,81 @@ export default function Home() {
       {/* Navbar */}
       <nav className={`wuepa-nav${showNavbar ? '' : ' hidden'}`}>
         <div className="wuepa-nav-inner">
-          <div className="wuepa-brand">
+          <button type="button" className="wuepa-brand" onClick={() => navigate('/')} aria-label="Ir al inicio">
             <div>
               <h1>WUEPA</h1>
               <p>ACCESORIOS</p>
             </div>
-          </div>
+          </button>
           <MobileNavMenu title="WUEPA" items={mobileMenuItems} />
           <div className="wuepa-actions">
-            <button onClick={() => navigate('/login')} className="btn-secondary">Iniciar Sesión</button>
-            <button onClick={() => navigate('/signup')} className="btn-primary">Registrarse</button>
+            <button onClick={() => navigate('/signup')} className="btn-primary">Crear cuenta</button>
+            <button onClick={() => navigate('/login')} className="btn-secondary">Iniciar sesión</button>
+            <button onClick={() => navigate('/productssin')} className="wuepa-catalog-btn">
+              <ShoppingBag aria-hidden="true" />
+              Productos
+            </button>
           </div>
         </div>
       </nav>
       <div className="spacer"></div>
 
       <div className="wuepa-container">
-        <section className="wuepa-hero">
-          <h2 className="wuepa-hero-title">BRILLA CON</h2>
-          <h2 className="wuepa-hero-subtitle">ELEGANCIA</h2>
-          <p className="wuepa-hero-text">Descubre la colección más exclusiva de joyas y accesorios diseñados para realzar tu belleza única</p>
-          <div className="wuepa-hero-actions">
-            <button onClick={() => navigate('/productssin')} className="btn-primary">Comenzar Ahora →</button>
-            <button onClick={() => navigate('/productssin')} className="btn-secondary">Explorar Catálogo</button>
+        <section className="wuepa-launch-banner" aria-label="Lanzamiento Wuepa">
+          <span>Brillo hecho a mano para todos tus looks</span>
+          <strong>Lanzamiento de pagina web</strong>
+          <button type="button" onClick={() => navigate('/productssin')}>Ver productos</button>
+        </section>
+
+        <section className="wuepa-hero wuepa-campaign-hero">
+          <div className="wuepa-campaign-side wuepa-campaign-left">
+            <ImageWithFallback
+              src="/WuepaCrear.png"
+              alt="Accesorios Wuepa"
+              loading="eager"
+              fetchPriority="high"
+            />
+          </div>
+
+          <div className="wuepa-campaign-copy">
+            <ImageWithFallback src="/W.png" alt="Wuepa accesorios" className="wuepa-campaign-logo" />
+            <p>Nueva experiencia online</p>
+            <h2>
+              Lanzamiento
+              <span>de pagina web</span>
+            </h2>
+            <small>Collares, pulseras y aretes con el detalle dorado que identifica a Wuepa.</small>
+            <button type="button" onClick={() => navigate('/productssin')}>
+              Explorar coleccion
+            </button>
+          </div>
+
+          <div className="wuepa-campaign-side wuepa-campaign-right">
+            <ImageWithFallback
+              src="/wuepaini.png"
+              alt="Coleccion Wuepa"
+              loading="eager"
+              fetchPriority="high"
+            />
           </div>
         </section>
 
-        <section className="wuepa-categories">
-          <div className="category-card" onClick={() => navigate('/productssin?category=collares')} style={{ cursor: 'pointer' }}>
-            <ImageWithFallback src="/Collareswue.png" alt="Collares" className="w-full h-full object-cover" loading="eager" fetchPriority="high" />
-            <div className="backdrop"></div>
-            <div className="content">
-              <h3>Collares</h3>
-              <p>Elegancia atemporal</p>
-            </div>
-          </div>
-          <div className="category-card" onClick={() => navigate('/productssin?category=aretes')} style={{ cursor: 'pointer' }}>
-            <ImageWithFallback src="/AretesWue.png" alt="Aretes" className="w-full h-full object-cover" loading="eager" />
-            <div className="backdrop"></div>
-            <div className="content">
-              <h3>Aretes</h3>
-              <p>Brillo perfecto</p>
-            </div>
-          </div>
-          <div className="category-card" onClick={() => navigate('/productssin?category=pulseras')} style={{ cursor: 'pointer' }}>
-            <ImageWithFallback src="/Pulseraswue.png" alt="Pulseras" className="w-full h-full object-cover" loading="eager" />
-            <div className="backdrop"></div>
-            <div className="content">
-              <h3>Pulseras</h3>
-              <p>Estilo Ãºnico</p>
-            </div>
-          </div>
+        <section className="wuepa-quick-showcase" aria-label="Categorias destacadas">
+          <button type="button" onClick={() => navigate('/productssin?category=collares')} className="wuepa-quick-card">
+            <ImageWithFallback src="/Collareswue.png" alt="" className="wuepa-quick-image-collares" />
+            <span>Collares</span>
+            <small>Ver mas →</small>
+          </button>
+          <button type="button" onClick={() => navigate('/productssin?category=pulseras')} className="wuepa-quick-card">
+            <ImageWithFallback src="/Pulseraswue.png" alt="" />
+            <span>Pulseras</span>
+            <small>Ver mas →</small>
+          </button>
+          <button type="button" onClick={() => navigate('/productssin?category=aretes')} className="wuepa-quick-card">
+            <ImageWithFallback src="/AretesWue.png" alt="" />
+            <span>Aretes</span>
+            <small>Ver mas →</small>
+          </button>
         </section>
 
         <div className="products-toolbar home-products-toolbar">
@@ -190,7 +207,7 @@ export default function Home() {
           </div>
         </div>
 
-        <section className="products-grid" style={{ margin: '2rem 0' }}>
+        <section className="products-grid home-featured-products">
           {featuredProducts.map((product) => (
             <article key={product.id} className="product-card-simple">
               <div className="product-card-media product-card-media-simple">
