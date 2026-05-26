@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
+import MobileBottomNav from '../components/MobileBottomNav';
 import MobileNavMenu from '../components/MobileNavMenu';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { formatCopCurrency } from '../utils/currency';
@@ -164,6 +165,8 @@ export default function Cart() {
           </div>
         </aside>
       </section>
+      {/* Barra inferior autenticada visible solo en movil, con carrito como seccion activa. */}
+      <MobileBottomNav active="cart" cartCount={itemCount} variant="auth" />
     </main>
   );
 }

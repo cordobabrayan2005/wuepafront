@@ -17,8 +17,9 @@
 
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import { Heart, ShoppingBag, User, Home as HomeIcon, Package } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import MobileBottomNav from '../components/MobileBottomNav';
 import MobileNavMenu from '../components/MobileNavMenu';
 import { formatCopCurrency } from '../utils/currency';
 import { loadProductsCatalog, loadProductsCatalogFromBackend, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
@@ -281,29 +282,7 @@ export default function Home() {
       </footer>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-amber-50/95 to-stone-100/95 backdrop-blur-md border-t border-amber-200/50 md:hidden">
-        <div className="flex items-center justify-around py-4">
-          <button onClick={() => navigate('/buy')} className="flex flex-col items-center gap-1 text-amber-600">
-            <HomeIcon className="w-6 h-6" />
-            <span className="text-xs font-medium">Inicio</span>
-          </button>
-          <button onClick={() => navigate('/productssin')} className="flex flex-col items-center gap-1 text-stone-500">
-            <Package className="w-6 h-6" />
-            <span className="text-xs">Productos</span>
-          </button>
-          <button 
-            onClick={() => navigate('/favorites')}
-            className="flex flex-col items-center gap-1 text-stone-500"
-          >
-            <Heart className="w-6 h-6" />
-            <span className="text-xs">Favoritos</span>
-          </button>
-          <button className="flex flex-col items-center gap-1 text-stone-500">
-            <User className="w-6 h-6" />
-            <span className="text-xs">Cuenta</span>
-          </button>
-        </div>
-      </div>
+      <MobileBottomNav active="home" />
     </div>
   );
 }

@@ -14,6 +14,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import MobileBottomNav from '../components/MobileBottomNav';
 import MobileNavMenu from '../components/MobileNavMenu';
 import ScrollToTopButton from '../components/ScrollToTopButton';
 import { useAuthStore } from '../stores/authStore';
@@ -312,6 +313,8 @@ export default function Buy() {
         </aside>
       </section>
       <ScrollToTopButton />
+      {/* Barra inferior autenticada visible solo en movil despues de iniciar sesion. */}
+      <MobileBottomNav active="home" cartCount={cartCount} variant="auth" />
     </main>
   );
 }

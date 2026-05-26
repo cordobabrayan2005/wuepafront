@@ -1,6 +1,7 @@
 // src/pages/Signup.tsx
 import React, { useState, useEffect } from "react";
 import { api } from "../services/api";
+import MobileBottomNav from "../components/MobileBottomNav";
 import PasswordField from "../components/PasswordField";
 import { useNavigate } from "react-router-dom";
 import { validatePasswordRules } from "../utils/passwordRules";
@@ -148,6 +149,7 @@ export default function Signup() {
   }
 
   return (
+    <>
     <main className="auth-wrapper signup-page" role="main" aria-labelledby="signup-title" lang="es">
       <div className="signup-layout">
         <section className="signup-left">
@@ -264,5 +266,8 @@ export default function Signup() {
         </aside>
       </div>
     </main>
+    {/* Navegacion inferior solo visible en movil y con registro como accion activa. */}
+    <MobileBottomNav active="signup" />
+    </>
   );
 }

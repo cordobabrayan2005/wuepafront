@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import MobileBottomNav from '../components/MobileBottomNav';
 import MobileNavMenu from '../components/MobileNavMenu';
 import ScrollToTopButton from '../components/ScrollToTopButton';
 import { formatCopCurrency } from '../utils/currency';
@@ -232,6 +233,8 @@ export default function ProductsSin() {
         </div>
       </footer>
       <ScrollToTopButton />
+      {/* Navegacion inferior solo visible en movil para accesos publicos rapidos. */}
+      <MobileBottomNav active="products" />
     </div>
   );
 }

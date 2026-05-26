@@ -12,6 +12,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuthStore } from '../stores/authStore';  // Nuevo
+import MobileBottomNav from "../components/MobileBottomNav";
 import PasswordField from "../components/PasswordField";
 
 /**
@@ -195,6 +196,7 @@ export default function Login({ onAuth }: Props) {
   }, [toast]);
 
   return (
+    <>
     <main className="auth-wrapper login-page" role="main" aria-labelledby="login-title">
       {toast && (
         <div role="status" aria-live="polite" className={`auth-toast ${toast.type}`}>
@@ -276,5 +278,8 @@ export default function Login({ onAuth }: Props) {
         </section>
       </div>
     </main>
+    {/* Navegacion inferior solo visible en movil para cambiar entre tienda, login y registro. */}
+    <MobileBottomNav active="login" />
+    </>
   );
 }

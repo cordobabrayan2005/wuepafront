@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import MobileBottomNav from "../components/MobileBottomNav";
 import { api } from "../services/api";
 import { useAuthStore } from "../stores/authStore";
 
@@ -223,6 +224,7 @@ export default function Profile() {
   );
 
   return (
+    <>
     <section className="profile-page" role="region" aria-labelledby="profile-title" lang="es">
       <div className="profile-card-new">
         <div className="profile-header-row">
@@ -331,5 +333,8 @@ export default function Profile() {
         {msg && <p role="status" className="profile-message-alt">{msg}</p>}
       </div>
     </section>
+    {/* Barra inferior autenticada visible solo en movil, con cuenta como seccion activa. */}
+    <MobileBottomNav active="profile" variant="auth" />
+    </>
   );
 };
