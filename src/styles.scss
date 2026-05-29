@@ -6112,6 +6112,16 @@ button {
   background: rgba(255, 250, 240, 0.94);
   backdrop-filter: blur(14px);
   box-shadow: 0 -12px 30px rgba(72, 51, 25, 0.12);
+  transform: translateY(0);
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+  will-change: transform;
+}
+
+/* .wuepa-mobile-bottom-nav.hidden oculta el menu inferior cuando el usuario baja la pagina. */
+.wuepa-mobile-bottom-nav.hidden {
+  transform: translateY(calc(100% + 1rem));
+  box-shadow: none;
+  pointer-events: none;
 }
 
 /* .wuepa-mobile-bottom-inner distribuye los accesos principales en una fila compacta y escaneable. */
@@ -7579,8 +7589,8 @@ body.modal-open {
   .products-footer,
   .wuepa-footer {
     border-radius: 0;
-    margin-left: -0.5rem;
-    margin-right: -0.5rem;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   /* .footer-links da forma a el pie de pagina; ajusta espaciado. */

@@ -1,4 +1,5 @@
 import { Home as HomeIcon, LogIn, Package, ShoppingCart, User, UserPlus } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 /**
@@ -21,6 +22,28 @@ type MobileBottomNavProps = {
  */
 export default function MobileBottomNav({ active, cartCount = 0, variant = 'public' }: MobileBottomNavProps) {
   const navigate = useNavigate();
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const isScrollingDown = currentScrollY > lastScrollY.current;
+
+      if (isScrollingDown && currentScrollY > 80) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+
+      lastScrollY.current = Math.max(currentScrollY, 0);
+    };
+
+    lastScrollY.current = window.scrollY;
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Define las acciones publicas en un solo lugar para reutilizar la misma barra en varias paginas.
   const publicItems = [
@@ -39,7 +62,7 @@ export default function MobileBottomNav({ active, cartCount = 0, variant = 'publ
   const items = variant === 'auth' ? authItems : publicItems;
 
   return (
-    <div className="wuepa-mobile-bottom-nav md:hidden">
+    <div className={`wuepa-mobile-bottom-nav md:hidden${isVisible ? '' : ' hidden'}`}>
       <div className="wuepa-mobile-bottom-inner">
         {items.map((item) => {
           const Icon = item.icon;
