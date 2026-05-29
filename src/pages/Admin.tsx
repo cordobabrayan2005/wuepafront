@@ -13,7 +13,7 @@ import {
   saveProductsCatalog,
 } from '../utils/productCatalog';
 
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage } from '../config/firebase';
 
 type AdminMobileView = 'inventory' | 'editor' | 'preview';
@@ -474,6 +474,33 @@ export default function Admin() {
     await uploadSelectedImageToStorage();
   }
 
+  async function deleteImageFromStorageUrl(imageUrl: string) {
+    const normalizedImageUrl = imageUrl.trim();
+
+    if (
+      !normalizedImageUrl.startsWith('gs://')
+      && !normalizedImageUrl.startsWith('https://firebasestorage.googleapis.com/')
+      && !normalizedImageUrl.startsWith('https://storage.googleapis.com/')
+    ) {
+      return;
+    }
+
+    try {
+      await deleteObject(ref(storage, normalizedImageUrl));
+    } catch (error) {
+      if (
+        typeof error === 'object'
+        && error
+        && 'code' in error
+        && String((error as { code?: string }).code) === 'storage/object-not-found'
+      ) {
+        return;
+      }
+
+      throw error;
+    }
+  }
+
   async function handleSaveProduct() {
     if (isSavingProduct || isUploadingImage) {
       return;
@@ -575,6 +602,9 @@ export default function Admin() {
 
   async function handleDeleteProduct() {
     if (isCreating) {
+      await deleteImageFromStorageUrl(draft.image).catch((error) => {
+        console.error(error);
+      });
       setIsCreating(false);
       showToast({ text: 'Creacion de producto cancelada.', type: 'info' });
       return;
@@ -586,6 +616,9 @@ export default function Admin() {
     try {
       showToast({ text: `Eliminando "${draft.name}" del inventario...`, type: 'info', persistent: true });
       await api.deleteProduct(String(draft.id));
+      await deleteImageFromStorageUrl(draft.image).catch((error) => {
+        console.error(error);
+      });
 
       showToast({ text: 'Producto eliminado. Actualizando inventario...', type: 'info', persistent: true });
       const refreshed = await api.getProducts();
