@@ -2,7 +2,7 @@ import type { AuthUser } from '../services/api';
 import type { CartItem } from './cart';
 import { getCartItemsCount, getCartSubtotal } from './cart';
 
-export const WUEPA_WHATSAPP_PHONE = '573044673320';
+export const WUEPA_WHATSAPP_PHONE = '573136704796';
 export const ORDERS_STORAGE_KEY = 'wuepa-customer-orders';
 
 export type CustomerOrderStatus = 'pending' | 'paid';
