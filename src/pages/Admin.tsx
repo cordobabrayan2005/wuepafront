@@ -83,6 +83,10 @@ export default function Admin() {
 
   useEffect(() => {
     if (products.length === 0) {
+      if (isCreating) {
+        return;
+      }
+
       const freshDraft = createEmptyProduct();
       setDraft(freshDraft);
       setSelectedProductId(freshDraft.id);
