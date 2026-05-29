@@ -6584,9 +6584,195 @@ button {
 }
 
 /* .cart-checkout-button.disabled da forma a el carrito de compras; ajusta apariencia visual. */
-.cart-checkout-button.disabled {
+.cart-checkout-button.disabled,
+.cart-checkout-button:disabled {
   pointer-events: none;
   opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* body.modal-open bloquea el desplazamiento cuando una ventana emergente esta activa. */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* .cart-order-modal-backdrop da forma a el carrito de compras; ajusta estructura y posicion, apariencia visual. */
+.cart-order-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgba(45, 35, 23, 0.58);
+}
+
+/* .cart-order-confirmation da forma a el carrito de compras; ajusta estructura y posicion, espaciado, apariencia visual. */
+.cart-order-confirmation {
+  width: min(520px, 100%);
+  max-height: min(82vh, 720px);
+  overflow: auto;
+  padding: 1.25rem;
+  border: 1px solid #efc67e;
+  border-radius: 1rem;
+  background: #fffaf0;
+  box-shadow: 0 24px 70px rgba(45, 35, 23, 0.28);
+  color: #3d352b;
+}
+
+/* .cart-order-confirmation-header da forma a el carrito de compras; ajusta estructura y posicion, espaciado. */
+.cart-order-confirmation-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* .cart-order-confirmation h3 da forma a el carrito de compras; ajusta espaciado, tipografia. */
+.cart-order-confirmation h3 {
+  margin: 0.15rem 0 0;
+  font-size: clamp(1.25rem, 4vw, 1.7rem);
+}
+
+/* .cart-order-close-button da forma a el carrito de compras; ajusta estructura y posicion, apariencia visual. */
+.cart-order-close-button {
+  flex: 0 0 auto;
+  width: 2.4rem;
+  height: 2.4rem;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid #e6c58e;
+  border-radius: 999px;
+  background: #fffdf8;
+  color: #5d421a;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* .cart-order-close-button:hover da forma a el carrito de compras; ajusta apariencia visual, movimiento o efectos. */
+.cart-order-close-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(127, 85, 32, 0.12);
+}
+
+/* .cart-order-confirmation ul da forma a el carrito de compras; ajusta estructura y posicion, espaciado. */
+.cart-order-confirmation ul {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* .cart-order-confirmation li, .cart-order-confirmation-total da forma a el carrito de compras; ajusta estructura y posicion, espaciado. */
+.cart-order-confirmation li,
+.cart-order-confirmation-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+/* .cart-order-confirmation li da forma a el carrito de compras; ajusta espaciado, apariencia visual. */
+.cart-order-confirmation li {
+  padding: 0.75rem;
+  border: 1px solid #f1d7a6;
+  border-radius: 0.75rem;
+  background: #fffdf8;
+}
+
+/* .cart-order-item-media da forma a el carrito de compras; ajusta estructura y posicion, apariencia visual. */
+.cart-order-item-media {
+  flex: 0 0 4.25rem;
+  width: 4.25rem;
+  height: 4.25rem;
+  overflow: hidden;
+  border-radius: 0.65rem;
+  background: #f6ead4;
+}
+
+/* .cart-order-item-media img da forma a el carrito de compras; ajusta encuadre de imagenes. */
+.cart-order-item-media img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+/* .cart-order-item-copy da forma a el carrito de compras; ajusta estructura y posicion. */
+.cart-order-item-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* .cart-order-item-copy span da forma a el carrito de compras; ajusta tipografia. */
+.cart-order-item-copy span {
+  display: block;
+  font-weight: 800;
+  color: #2d2a25;
+}
+
+/* .cart-order-item-meta da forma a el carrito de compras; ajusta estructura y posicion, tipografia. */
+.cart-order-item-meta {
+  flex: 0 0 auto;
+  display: grid;
+  justify-items: end;
+  gap: 0.2rem;
+  text-align: right;
+}
+
+/* .cart-order-item-meta strong da forma a el carrito de compras; ajusta tipografia. */
+.cart-order-item-meta strong {
+  color: #2d2a25;
+}
+
+/* .cart-order-item-meta span da forma a el carrito de compras; ajusta apariencia visual, tipografia. */
+.cart-order-item-meta span {
+  color: #5d421a;
+  font-weight: 800;
+}
+
+/* .cart-order-confirmation-total da forma a el carrito de compras; ajusta espaciado, apariencia visual, tipografia. */
+.cart-order-confirmation-total {
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid #efc67e;
+  font-weight: 800;
+}
+
+/* .cart-order-confirmation-actions da forma a el carrito de compras; ajusta estructura y posicion, espaciado. */
+.cart-order-confirmation-actions {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+/* .cart-order-confirmation-actions .cart-checkout-button da forma a el carrito de compras; ajusta espaciado. */
+.cart-order-confirmation-actions .cart-checkout-button {
+  margin-top: 0;
+}
+
+/* .cart-cancel-order-button da forma a el carrito de compras; ajusta estructura y posicion, espaciado, apariencia visual. */
+.cart-cancel-order-button {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.95rem 1.1rem;
+  border: 1px solid #d9b675;
+  border-radius: 999px;
+  background: #fffdf8;
+  color: #5d421a;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* .cart-cancel-order-button:hover da forma a el carrito de compras; ajusta apariencia visual, movimiento o efectos. */
+.cart-cancel-order-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(127, 85, 32, 0.12);
 }
 
 /* .cart-empty-state da forma a el carrito de compras; ajusta estructura y posicion, espaciado, apariencia visual. */
@@ -6602,6 +6788,148 @@ button {
   border-radius: 1.4rem;
   border: 1px dashed #efc67e;
   color: #5d564b;
+}
+
+/* ==========================================================================
+   Admin de pedidos
+   Lista pedidos pendientes y pagados con acciones de confirmacion.
+   ========================================================================== */
+
+/* .admin-orders-layout da forma al admin de pedidos; ajusta estructura y posicion, espaciado. */
+.admin-orders-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+}
+
+/* .admin-orders-list da forma al admin de pedidos; ajusta estructura y posicion, espaciado. */
+.admin-orders-list {
+  display: grid;
+  gap: 1rem;
+}
+
+/* .admin-order-card da forma al admin de pedidos; ajusta espaciado, apariencia visual. */
+.admin-order-card {
+  padding: 1rem;
+  border: 1px solid #f1d7a6;
+  border-radius: 1rem;
+  background: #fffdf8;
+}
+
+/* .admin-order-card-header, .admin-order-footer da forma al admin de pedidos; ajusta estructura y posicion, espaciado. */
+.admin-order-card-header,
+.admin-order-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* .admin-order-card-header h3 da forma al admin de pedidos; ajusta espaciado, tipografia. */
+.admin-order-card-header h3 {
+  margin: 0.15rem 0;
+  font-size: 1.25rem;
+}
+
+/* .admin-order-card-header span, .admin-order-footer span da forma al admin de pedidos; ajusta apariencia visual, tipografia. */
+.admin-order-card-header span,
+.admin-order-footer span {
+  color: #6f6254;
+  font-weight: 800;
+}
+
+/* .admin-order-card-header > strong da forma al admin de pedidos; ajusta tipografia. */
+.admin-order-card-header > strong {
+  color: #2d2a25;
+  font-size: 1.25rem;
+  white-space: nowrap;
+}
+
+/* .admin-order-items da forma al admin de pedidos; ajusta estructura y posicion, espaciado. */
+.admin-order-items {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+/* .admin-order-item da forma al admin de pedidos; ajusta estructura y posicion, espaciado, apariencia visual. */
+.admin-order-item {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.85rem;
+  background: #fff8ea;
+}
+
+/* .admin-order-item-media da forma al admin de pedidos; ajusta estructura y posicion, apariencia visual. */
+.admin-order-item-media {
+  width: 4rem;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 0.7rem;
+  background: #f6ead4;
+}
+
+/* .admin-order-item-media img da forma al admin de pedidos; ajusta encuadre de imagenes. */
+.admin-order-item-media img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+/* .admin-order-item h4 da forma al admin de pedidos; ajusta espaciado, tipografia. */
+.admin-order-item h4 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+/* .admin-order-item p da forma al admin de pedidos; ajusta espaciado, apariencia visual, tipografia. */
+.admin-order-item p {
+  margin: 0;
+  color: #8f5b0c;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+/* .admin-order-item-meta da forma al admin de pedidos; ajusta estructura y posicion, tipografia. */
+.admin-order-item-meta {
+  display: grid;
+  justify-items: end;
+  gap: 0.2rem;
+  text-align: right;
+}
+
+/* .admin-order-item-meta span da forma al admin de pedidos; ajusta apariencia visual, tipografia. */
+.admin-order-item-meta span {
+  color: #5d421a;
+  font-weight: 900;
+}
+
+/* .admin-order-status da forma al admin de pedidos; ajusta estructura y posicion, espaciado, apariencia visual. */
+.admin-order-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: 999px;
+  background: #e9f8ef;
+  color: #177245;
+}
+
+/* .admin-orders-empty da forma al admin de pedidos; ajusta estructura y posicion, espaciado, apariencia visual. */
+.admin-orders-empty {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.75rem;
+  border: 1px dashed #efc67e;
+  border-radius: 1rem;
+  color: #6f6254;
+  text-align: center;
 }
 
 /* @media (max-width: 960px) agrupa ajustes responsive para que el layout se adapte a ese ancho de pantalla. */
@@ -6652,6 +6980,54 @@ button {
 
 /* @media (max-width: 600px) agrupa ajustes responsive para que el layout se adapte a ese ancho de pantalla. */
 @media (max-width: 600px) {
+  /* .admin-order-card-header, .admin-order-footer da forma al admin de pedidos; ajusta estructura y posicion en movil. */
+  .admin-order-card-header,
+  .admin-order-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  /* .admin-order-item da forma al admin de pedidos; ajusta estructura y posicion en movil. */
+  .admin-order-item {
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+  }
+
+  /* .admin-order-item-media da forma al admin de pedidos; ajusta estructura y posicion en movil. */
+  .admin-order-item-media {
+    width: 3.5rem;
+  }
+
+  /* .admin-order-item-meta da forma al admin de pedidos; ajusta estructura y posicion en movil. */
+  .admin-order-item-meta {
+    grid-column: 2;
+    justify-items: start;
+    text-align: left;
+  }
+
+  /* .cart-order-modal-backdrop da forma a el carrito de compras; ajusta espaciado en movil. */
+  .cart-order-modal-backdrop {
+    align-items: end;
+    padding: 0.75rem;
+  }
+
+  /* .cart-order-confirmation da forma a el carrito de compras; ajusta estructura y posicion en movil. */
+  .cart-order-confirmation {
+    max-height: 86vh;
+    border-radius: 0.9rem;
+  }
+
+  /* .cart-order-confirmation li da forma a el carrito de compras; ajusta estructura y posicion en movil. */
+  .cart-order-confirmation li {
+    align-items: flex-start;
+  }
+
+  /* .cart-order-item-media da forma a el carrito de compras; ajusta estructura y posicion en movil. */
+  .cart-order-item-media {
+    flex-basis: 3.75rem;
+    width: 3.75rem;
+    height: 3.75rem;
+  }
+
   /* .cart-page da forma a el carrito de compras; ajusta detalle visual del componente. */
   .cart-page {
     padding-left: 0.8rem;

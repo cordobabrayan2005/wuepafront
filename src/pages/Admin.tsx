@@ -6,9 +6,11 @@ import { api } from '../services/api';
 import {
   createEmptyProduct,
   generateProductCode,
+  isCurrentProductCode,
   mapBackendProductToCatalogItem,
   ProductCatalogItem,
   ProductCategory,
+  saveProductsCatalog,
 } from '../utils/productCatalog';
 
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -113,9 +115,19 @@ export default function Admin() {
     setIsLoadingProducts(true);
 
     api.getProducts()
-      .then((backendProducts) => {
+      .then(async (backendProducts) => {
+        const outdatedProducts = backendProducts.filter((product) => !isCurrentProductCode(product.codigo || ''));
+
+        if (outdatedProducts.length > 0) {
+          await Promise.all(outdatedProducts.map((product) => {
+            const mappedProduct = mapBackendProductToCatalogItem(product);
+            return api.updateProduct(product.id, { codigo: mappedProduct.code });
+          }));
+        }
+
         const mappedProducts = backendProducts.map(mapBackendProductToCatalogItem);
 
+        saveProductsCatalog(mappedProducts);
         setProducts(mappedProducts);
         setSelectedProductId(mappedProducts[0]?.id ?? null);
 
@@ -323,11 +335,12 @@ export default function Admin() {
     setDraft((currentDraft) => {
       const defaultCurrentCode = generateProductCode(currentDraft.category, currentDraft.id);
       const nextDefaultCode = generateProductCode(category, currentDraft.id);
+      const shouldRefreshCode = currentDraft.code === defaultCurrentCode || !/^W-\d{6}$/.test(currentDraft.code.trim().toUpperCase());
 
       return {
         ...currentDraft,
         category,
-        code: currentDraft.code === defaultCurrentCode ? nextDefaultCode : currentDraft.code,
+        code: shouldRefreshCode ? nextDefaultCode : currentDraft.code,
       };
     });
   }
@@ -531,6 +544,7 @@ export default function Admin() {
 
       const mappedProducts = refreshed.map(mapBackendProductToCatalogItem);
 
+      saveProductsCatalog(mappedProducts);
       setProducts(mappedProducts);
       setIsCreating(false);
       const savedProduct = mappedProducts.find((product) => product.code === normalizedDraft.code) ?? mappedProducts[0];
@@ -574,6 +588,7 @@ export default function Admin() {
 
       const mappedProducts = refreshed.map(mapBackendProductToCatalogItem);
 
+      saveProductsCatalog(mappedProducts);
       setProducts(mappedProducts);
       showToast({ text: 'Producto eliminado correctamente.', type: 'success' });
 
@@ -613,6 +628,7 @@ export default function Admin() {
             </p>
           </div>
           <div className="admin-hero-actions">
+            <Link to="/admin/orders" className="admin-secondary-link">Ver pedidos</Link>
             <Link to="/products" className="admin-secondary-link">Ver catalogo</Link>
             <Link to="/buy" className="admin-secondary-link">Volver al inicio</Link>
           </div>
@@ -769,7 +785,7 @@ export default function Admin() {
                         type="text"
                         value={draft.code}
                         onChange={(event) => updateDraft('code', event.target.value.toUpperCase())}
-                        placeholder="WUE-COL-001"
+                        placeholder="W-123456"
                         aria-invalid={Boolean(fieldErrors.code)}
                         className={fieldErrors.code ? 'admin-input-error' : ''}
                       />

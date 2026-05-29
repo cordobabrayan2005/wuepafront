@@ -81,30 +81,25 @@ export function getDefaultProductImage(category: ProductCategory) {
   return accessoryImage('Collarcorazon.png');
 }
 
-function getCategoryCodePrefix(category: ProductCategory) {
-  if (category === 'aretes') {
-    return 'ARE';
-  }
-
-  if (category === 'pulseras') {
-    return 'PUL';
-  }
-
-  return 'COL';
-}
-
 export function generateProductCode(
-  category: ProductCategory,
+  _category: ProductCategory,
   id: string
 ) {
-  const shortId = id.slice(0, 5).toUpperCase();
+  const numericSeed = Array.from(id).reduce((total, character, index) => (
+    total + character.charCodeAt(0) * (index + 17)
+  ), 0);
+  const randomLikeNumber = ((numericSeed * 9301 + 49297) % 900000) + 100000;
 
-  return `WUE-${getCategoryCodePrefix(category)}-${shortId}`;
+  return `W-${randomLikeNumber}`;
 }
 
-function normalizeProductCode(product: Pick<ProductCatalogItem, 'id' | 'category' | 'code'>) {
+export function isCurrentProductCode(code: string) {
+  return /^W-\d{6}$/.test(code.trim().toUpperCase());
+}
+
+export function normalizeProductCode(product: Pick<ProductCatalogItem, 'id' | 'category' | 'code'>) {
   const normalizedCode = product.code.trim().toUpperCase();
-  return normalizedCode || generateProductCode(product.category, product.id);
+  return isCurrentProductCode(normalizedCode) ? normalizedCode : generateProductCode(product.category, product.id);
 }
 
 export const initialProductsCatalog: ProductCatalogItem[] = [
@@ -302,7 +297,7 @@ export function loadProductsCatalog(): ProductCatalogItem[] {
         image: normalizeProductImage(product),
       }));
 
-    return sanitizedProducts.length > 0 ? sanitizedProducts : initialProductsCatalog;
+    return sanitizedProducts;
   } catch {
     return initialProductsCatalog;
   }
@@ -340,9 +335,9 @@ function normalizeProductCategory(category: string): ProductCategory {
 export function mapBackendProductToCatalogItem(product: Product): ProductCatalogItem {
   const category = normalizeProductCategory(product.categoria);
 
-  return {
+  const catalogItem = {
     id: product.id,
-    code: product.codigo || generateProductCode(category, product.id),
+    code: product.codigo || '',
     category,
     name: product.nombre,
     description: product.descripcion || '',
@@ -350,35 +345,19 @@ export function mapBackendProductToCatalogItem(product: Product): ProductCatalog
     price: product.precio || 0,
     image: product.imagenUrl || getDefaultProductImage(category),
   };
-}
 
-function getProductMergeKey(product: ProductCatalogItem) {
-  const normalizedCode = product.code.trim().toUpperCase();
-  return normalizedCode || product.id;
-}
-
-function mergeProductsCatalog(
-  baseProducts: ProductCatalogItem[],
-  backendProducts: ProductCatalogItem[]
-) {
-  const mergedProducts = new Map<string, ProductCatalogItem>();
-
-  baseProducts.forEach((product) => {
-    mergedProducts.set(getProductMergeKey(product), product);
-  });
-
-  backendProducts.forEach((product) => {
-    mergedProducts.set(getProductMergeKey(product), product);
-  });
-
-  return Array.from(mergedProducts.values());
+  return {
+    ...catalogItem,
+    code: normalizeProductCode(catalogItem),
+  };
 }
 
 export async function loadProductsCatalogFromBackend(): Promise<ProductCatalogItem[]> {
   const backendProducts = await api.getProducts();
   const mappedProducts = backendProducts.map(mapBackendProductToCatalogItem);
 
-  return mergeProductsCatalog(loadProductsCatalog(), mappedProducts);
+  saveProductsCatalog(mappedProducts);
+  return mappedProducts;
 }
 
 function getProductRecencyValue(product: ProductCatalogItem) {

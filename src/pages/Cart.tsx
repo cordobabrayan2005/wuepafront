@@ -1,14 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
+import { Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
 import MobileBottomNav from '../components/MobileBottomNav';
 import MobileNavMenu from '../components/MobileNavMenu';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { formatCopCurrency } from '../utils/currency';
 import { CartItem, clearCart, getCartItemsCount, getCartSubtotal, loadCartItems, removeCartItem, updateCartItemQuantity } from '../utils/cart';
+import { useAuthStore } from '../stores/authStore';
+import { WUEPA_WHATSAPP_PHONE, addCustomerOrder, createCustomerOrder } from '../utils/orders';
 
 export default function Cart() {
   const [items, setItems] = useState<CartItem[]>(() => loadCartItems());
+  const [isConfirmingOrder, setIsConfirmingOrder] = useState(false);
+  const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
     function syncCart() {
@@ -23,15 +27,58 @@ export default function Cart() {
     };
   }, []);
 
+  useEffect(() => {
+    if (items.length === 0) {
+      setIsConfirmingOrder(false);
+    }
+  }, [items.length]);
+
+  useEffect(() => {
+    if (!isConfirmingOrder) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsConfirmingOrder(false);
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    document.body.classList.add('modal-open');
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.classList.remove('modal-open');
+    };
+  }, [isConfirmingOrder]);
+
   const itemCount = useMemo(() => getCartItemsCount(items), [items]);
   const subtotal = useMemo(() => getCartSubtotal(items), [items]);
   const total = subtotal;
+  const customerName = useMemo(() => (
+    [user?.name, user?.lastname].map((value) => value?.trim()).filter(Boolean).join(' ') || 'Usuario'
+  ), [user?.name, user?.lastname]);
+  const orderSummaryMessage = useMemo(() => (
+    `Hola Wuepa Accesorios, soy ${customerName} y quiero hacer este pedido:\n\n${items.map((item) => `${item.name}\nCodigo: ${item.code}\nCantidad: ${item.quantity}\nPrecio: ${formatCopCurrency(item.price)}`).join('\n\n')}\n\nTotal estimado: ${formatCopCurrency(total)}`
+  ), [customerName, items, total]);
+  const whatsappOrderUrl = items.length === 0 ? '' : `https://wa.me/${WUEPA_WHATSAPP_PHONE}?text=${encodeURIComponent(orderSummaryMessage)}`;
   const mobileMenuItems = [
     { label: 'Inicio', to: '/buy' },
     { label: 'Productos', to: '/products' },
     { label: 'Carrito', to: '/cart', isActive: true },
     { label: 'Nosotros', to: '/about' },
   ];
+
+  function handleContinueOrder() {
+    if (items.length === 0) {
+      return;
+    }
+
+    addCustomerOrder(createCustomerOrder(items, user));
+    clearCart();
+    setItems([]);
+    setIsConfirmingOrder(false);
+  }
 
   return (
     <main className="cart-page">
@@ -83,6 +130,7 @@ export default function Cart() {
                 <button type="button" className="cart-clear-button" onClick={() => {
                   clearCart();
                   setItems([]);
+                  setIsConfirmingOrder(false);
                 }}>
                   Vaciar carrito
                 </button>
@@ -99,7 +147,6 @@ export default function Cart() {
                       <div className="cart-item-copy">
                         <p className="cart-item-code">{item.code}</p>
                         <h4>{item.name}</h4>
-                        <p>{item.description}</p>
                         <span className="cart-item-stock">{item.units} disponibles</span>
                       </div>
 
@@ -152,19 +199,83 @@ export default function Cart() {
               <span>Total</span>
               <strong>{formatCopCurrency(total)}</strong>
             </div>
-            <a
+            <button
+              type="button"
               className={`whatsapp-btn cart-checkout-button${items.length === 0 ? ' disabled' : ''}`}
-              href={items.length === 0 ? undefined : `https://wa.me/?text=${encodeURIComponent(`Hola, quiero finalizar mi pedido en Wuepa:\n${items.map((item) => `- ${item.name} x${item.quantity}`).join('\n')}\n\nTotal estimado: ${formatCopCurrency(total)}`)}`}
-              target="_blank"
-              rel="noreferrer"
+              onClick={() => setIsConfirmingOrder(true)}
+              disabled={items.length === 0}
               aria-disabled={items.length === 0}
             >
               Finalizar por WhatsApp
-            </a>
+            </button>
             <Link to="/products" className="cart-continue-link">Seguir comprando</Link>
           </div>
         </aside>
       </section>
+      {isConfirmingOrder && items.length > 0 ? (
+        <div className="cart-order-modal-backdrop" role="presentation" onClick={() => setIsConfirmingOrder(false)}>
+          <section
+            className="cart-order-confirmation"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cart-order-confirmation-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="cart-order-confirmation-header">
+              <div>
+                <p className="cart-kicker">Resumen del pedido</p>
+                <h3 id="cart-order-confirmation-title">Confirma tu pedido</h3>
+              </div>
+              <button
+                type="button"
+                className="cart-order-close-button"
+                aria-label="Cerrar resumen del pedido"
+                onClick={() => setIsConfirmingOrder(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <ul>
+              {items.map((item) => (
+                <li key={item.id}>
+                  <div className="cart-order-item-media">
+                    <ImageWithFallback src={item.image} alt={item.name} sizes="72px" />
+                  </div>
+                  <div className="cart-order-item-copy">
+                    <span>{item.name}</span>
+                  </div>
+                  <div className="cart-order-item-meta">
+                    <strong>{formatCopCurrency(item.price)}</strong>
+                    <span>x{item.quantity}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="cart-order-confirmation-total">
+              <span>Total estimado</span>
+              <strong>{formatCopCurrency(total)}</strong>
+            </div>
+            <div className="cart-order-confirmation-actions">
+              <a
+                className="whatsapp-btn cart-checkout-button"
+                href={whatsappOrderUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={handleContinueOrder}
+              >
+                Seguir con el pedido
+              </a>
+              <button
+                type="button"
+                className="cart-cancel-order-button"
+                onClick={() => setIsConfirmingOrder(false)}
+              >
+                Cancelar
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
       {/* Barra inferior autenticada visible solo en movil, con carrito como seccion activa. */}
       <MobileBottomNav active="cart" cartCount={itemCount} variant="auth" />
     </main>

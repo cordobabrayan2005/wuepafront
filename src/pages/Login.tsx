@@ -83,11 +83,11 @@ export default function Login({ onAuth }: Props) {
 
       if (userData.rol === 'admin') {
 
-        navigate("/admin", {
+        navigate("/buy", {
           state: {
             flash: {
               type: "success",
-              text: "Bienvenido administrador."
+              text: "Bienvenido administrador. Conservas tus accesos de admin."
             }
           }
         });
@@ -128,11 +128,11 @@ export default function Login({ onAuth }: Props) {
 
       if (userData.rol === 'admin') {
 
-        navigate("/admin", {
+        navigate("/buy", {
           state: {
             flash: {
               type: "success",
-              text: "Bienvenido administrador."
+              text: "Bienvenido administrador. Conservas tus accesos de admin."
             }
           }
         });

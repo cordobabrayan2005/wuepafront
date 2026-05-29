@@ -1,4 +1,4 @@
-import { ProductCatalogItem } from './productCatalog';
+import { ProductCatalogItem, normalizeProductCode } from './productCatalog';
 
 export const CART_STORAGE_KEY = 'wuepa-cart-items';
 
@@ -39,10 +39,14 @@ export function loadCartItems() {
       return [] as CartItem[];
     }
 
-    return parsedValue.filter(isCartItem).map((item) => ({
+    const normalizedItems = parsedValue.filter(isCartItem).map((item) => ({
       ...item,
+      code: normalizeProductCode(item),
       quantity: Math.max(1, Math.min(item.quantity, item.units)),
     }));
+
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(normalizedItems));
+    return normalizedItems;
   } catch {
     return [] as CartItem[];
   }
