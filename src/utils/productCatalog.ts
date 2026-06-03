@@ -11,6 +11,8 @@ export interface ProductCatalogItem {
   units: number;
   price: number;
   image: string;
+  estado?: string;
+  origen?: string;
 }
 
 export type ProductSortOrder = 'az' | 'za' | 'recent';
@@ -344,6 +346,8 @@ export function mapBackendProductToCatalogItem(product: Product): ProductCatalog
     units: product.stock || 0,
     price: product.precio || 0,
     image: product.imagenUrl || getDefaultProductImage(category),
+    estado: product.estado,
+    origen: product.origen,
   };
 
   return {
