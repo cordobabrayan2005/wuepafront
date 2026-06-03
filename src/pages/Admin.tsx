@@ -81,6 +81,13 @@ export default function Admin() {
     });
   }, [filter, products]);
 
+  const pendingInstagramProducts =
+  products.filter(
+    product =>
+      product.origen === 'instagram' &&
+      product.estado === 'pendiente'
+  );
+
   useEffect(() => {
     if (products.length === 0) {
       if (isCreating) {
@@ -130,6 +137,7 @@ export default function Admin() {
         }
 
         const mappedProducts = backendProducts.map(mapBackendProductToCatalogItem);
+        console.log('PRODUCTOS BACKEND', mappedProducts);
 
         saveProductsCatalog(mappedProducts);
         setProducts(mappedProducts);
@@ -551,23 +559,41 @@ export default function Admin() {
       if (isCreating) {
         await api.createProduct({
           nombre: normalizedDraft.name,
-          descripcion: normalizedDraft.description,
-          precio: normalizedDraft.price,
-          categoria: normalizedDraft.category,
-          imagenUrl: normalizedDraft.image,
-          codigo: normalizedDraft.code,
-          stock: normalizedDraft.units,
+          descripcion:
+            normalizedDraft.description,
+          precio:
+            normalizedDraft.price,
+          categoria:
+            normalizedDraft.category,
+          imagenUrl:
+            normalizedDraft.image,
+          codigo:
+            normalizedDraft.code,
+          stock:
+            normalizedDraft.units,
+          estado: 'publicado',
+          origen: 'manual',
         });
       } else {
-        await api.updateProduct(String(normalizedDraft.id), {
-          nombre: normalizedDraft.name,
-          descripcion: normalizedDraft.description,
-          precio: normalizedDraft.price,
-          categoria: normalizedDraft.category,
-          imagenUrl: normalizedDraft.image,
-          codigo: normalizedDraft.code,
-          stock: normalizedDraft.units,
-        });
+        const productStatus =
+          normalizedDraft.price > 0 &&
+            normalizedDraft.units > 0
+            ? 'publicado'
+            : 'pendiente';
+
+        await api.updateProduct(
+          String(normalizedDraft.id),
+          {
+            nombre: normalizedDraft.name,
+            descripcion: normalizedDraft.description,
+            precio: normalizedDraft.price,
+            categoria: normalizedDraft.category,
+            imagenUrl: normalizedDraft.image,
+            codigo: normalizedDraft.code,
+            stock: normalizedDraft.units,
+            estado: productStatus,
+          }
+        );
       }
 
       showToast({ text: 'Cambios recibidos. Actualizando inventario...', type: 'info', persistent: true });
@@ -690,6 +716,19 @@ export default function Admin() {
           </article>
         </section>
 
+        {pendingInstagramProducts.length > 0 && (
+          <section className="admin-summary-grid">
+            <article className="admin-summary-card">
+              <span>
+                Pendientes Instagram
+              </span>
+              <strong>
+                {pendingInstagramProducts.length}
+              </strong>
+            </article>
+          </section>
+        )}
+
         <section className="admin-mobile-toolbar" aria-label="Controles rapidos del admin">
           <div className="admin-mobile-status">
             <p className="admin-kicker">Control rapido</p>
@@ -770,10 +809,35 @@ export default function Admin() {
                   onClick={() => handleSelectProduct(product)}
                 >
                   <div className="admin-product-row-top">
-                    <span>{product.name}</span>
+                    <span>
+                      {product.name}
+
+                      {product.origen === 'instagram' &&
+                        product.estado === 'pendiente' && (
+                          <span
+                            style={{
+                              marginLeft: '8px',
+                              background: '#f59e0b',
+                              color: '#fff',
+                              padding: '2px 8px',
+                              borderRadius: '8px',
+                              fontSize: '11px',
+                            }}
+                          >
+                            Instagram
+                          </span>
+                        )}
+                    </span>
+
                     <small>{product.code}</small>
                   </div>
-                  <small>{categoryLabels[product.category]} · {product.units} unidades</small>
+                  <small>
+                    {categoryLabels[product.category]}
+                    {' · '}
+                    {product.units} unidades
+                    {' · '}
+                    {product.estado ?? 'sin estado'}
+                  </small>
                 </button>
               ))}
               {isLoadingProducts && (

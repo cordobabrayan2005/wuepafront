@@ -44,6 +44,8 @@ export interface ProductPayload {
   imagenUrl?: string;
   codigo?: string;
   stock?: number;
+  estado?: string;
+  origen?: string;
 }
 
 export interface Product extends ProductPayload {
