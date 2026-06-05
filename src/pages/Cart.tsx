@@ -9,7 +9,7 @@ import { CartItem, clearCart, getCartItemsCount, getCartSubtotal, loadCartItems,
 import { useAuthStore } from '../stores/authStore';
 import { WUEPA_WHATSAPP_PHONE, createBackendCustomerOrder } from '../utils/orders';
 
-const COLOMBIAN_MOBILE_PATTERN = /^3\d{9}$/;
+const INTERNATIONAL_PHONE_PATTERN = /^\+?[0-9\s()-]+$/;
 const ADDRESS_PATTERN = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9\s#.,°/-]+$/;
 
 export default function Cart() {
@@ -127,8 +127,10 @@ export default function Cart() {
 
     if (!phone) {
       nextErrors.telefono = 'Ingresa tu numero de celular.';
-    } else if (!COLOMBIAN_MOBILE_PATTERN.test(phone)) {
-      nextErrors.telefono = 'El celular debe tener 10 numeros y comenzar por 3.';
+    } else if (!INTERNATIONAL_PHONE_PATTERN.test(phone)) {
+      nextErrors.telefono = 'Usa solo numeros, espacios, parentesis, guiones y un + inicial.';
+    } else if (phone.replace(/\D/g, '').length < 7 || phone.replace(/\D/g, '').length > 15) {
+      nextErrors.telefono = 'El telefono debe contener entre 7 y 15 numeros.';
     }
 
     if (!address) {
@@ -146,12 +148,16 @@ export default function Cart() {
   }
 
   function handlePhoneChange(value: string) {
-    const phoneDigits = value.replace(/\D/g, '').slice(0, 10);
-    setCheckoutData((current) => ({ ...current, telefono: phoneDigits }));
+    const sanitizedPhone = value
+      .replace(/[^\d+\s()-]/g, '')
+      .replace(/(?!^)\+/g, '')
+      .slice(0, 25);
+    const phoneDigits = sanitizedPhone.replace(/\D/g, '');
+    setCheckoutData((current) => ({ ...current, telefono: sanitizedPhone }));
     setCheckoutFieldErrors((current) => ({
       ...current,
-      telefono: phoneDigits && !COLOMBIAN_MOBILE_PATTERN.test(phoneDigits)
-        ? 'El celular debe tener 10 numeros y comenzar por 3.'
+      telefono: phoneDigits && (phoneDigits.length < 7 || phoneDigits.length > 15)
+        ? 'El telefono debe contener entre 7 y 15 numeros.'
         : '',
     }));
   }
@@ -377,15 +383,14 @@ export default function Cart() {
                     onChange={(event) => handlePhoneChange(event.target.value)}
                     autoComplete="tel"
                     inputMode="numeric"
-                    pattern="3[0-9]{9}"
-                    minLength={10}
-                    maxLength={10}
-                    placeholder="Ej. 3177816764"
+                    pattern="\+?[0-9\s()\-]{7,25}"
+                    maxLength={25}
+                    placeholder="Ej. +57 317 781 6764"
                     aria-invalid={Boolean(checkoutFieldErrors.telefono)}
                     required
                     disabled={isSubmittingOrder}
                   />
-                  <small>Debe tener 10 numeros y comenzar por 3.</small>
+                  <small>Incluye el prefijo del pais. Debe contener entre 7 y 15 numeros.</small>
                   {checkoutFieldErrors.telefono ? (
                     <small className="cart-field-error" role="alert">{checkoutFieldErrors.telefono}</small>
                   ) : null}
