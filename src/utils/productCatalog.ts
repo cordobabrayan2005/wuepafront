@@ -336,6 +336,10 @@ export function groupProductsByCategory(products: ProductCatalogItem[]) {
   } as const;
 }
 
+export function getAvailableProducts(products: ProductCatalogItem[]) {
+  return products.filter((product) => product.units > 0);
+}
+
 function normalizeProductCategory(category: string): ProductCategory {
   if (category === 'aretes' || category === 'pulseras' || category === 'anillos' || category === 'paquetes') {
     return category;

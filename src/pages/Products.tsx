@@ -6,7 +6,7 @@ import MobileNavMenu from '../components/MobileNavMenu';
 import ScrollToTopButton from '../components/ScrollToTopButton';
 import { addProductToCart, getCartItemsCount, loadCartItems } from '../utils/cart';
 import { formatCopCurrency } from '../utils/currency';
-import { groupProductsByCategory, loadProductsCatalog, loadProductsCatalogFromBackend, ProductCategory, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
+import { getAvailableProducts, groupProductsByCategory, loadProductsCatalog, loadProductsCatalogFromBackend, ProductCategory, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
 
 /**
  * Componente Products
@@ -120,11 +120,11 @@ export default function Products() {
   const categories: Array<{ key: ProductCategory; label: string; icon: string }> = [
     { key: 'collares', label: 'Collares', icon: '💎' },
     { key: 'aretes', label: 'Aretes', icon: '✨' },
-    { key: 'pulseras', label: 'Pulseras', icon: '💍' }
+    { key: 'pulseras', label: 'Pulseras', icon: '📿' }
   ];
   categories.push(
-    { key: 'anillos', label: 'Anillos', icon: 'AN' },
-    { key: 'paquetes', label: 'Paquetes', icon: 'PK' }
+    { key: 'anillos', label: 'Anillos', icon: '💍' },
+    { key: 'paquetes', label: 'Paquetes', icon: '🎁' }
   );
 
   const mobileMenuItems = [
@@ -135,13 +135,18 @@ export default function Products() {
   ];
 
   const handleAddToCart = (product: ProductCatalogItem) => {
+    if (product.units <= 0) {
+      setFeedback(`${product.name} no tiene unidades disponibles.`);
+      return;
+    }
+
     const nextItems = addProductToCart(product);
     setCartCount(getCartItemsCount(nextItems));
     setFeedback(`${product.name} se agrego al carrito.`);
   };
 
   // Productos de la categoría activa
-  const productsByCategory = groupProductsByCategory(products);
+  const productsByCategory = groupProductsByCategory(getAvailableProducts(products));
   const currentProducts = productsByCategory[activeCategory];
   // Filtra productos según la búsqueda (nombre o descripción)
   const filteredProducts = useMemo(() => {
@@ -248,8 +253,13 @@ export default function Products() {
                   <p className="product-card-description products-page-description">{product.description}</p>
                   <p className="product-card-price">{formatCopCurrency(product.price)}</p>
                 </div>
-                <button type="button" className="add-cart-btn add-cart-btn-secondary" onClick={() => handleAddToCart(product)}>
-                  Agregar al carrito
+                <button
+                  type="button"
+                  className="add-cart-btn add-cart-btn-secondary"
+                  onClick={() => handleAddToCart(product)}
+                  disabled={product.units <= 0}
+                >
+                  {product.units > 0 ? 'Agregar al carrito' : 'Agotado'}
                 </button>
               </article>
             ))}

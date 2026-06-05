@@ -5,7 +5,7 @@ import MobileBottomNav from '../components/MobileBottomNav';
 import MobileNavMenu from '../components/MobileNavMenu';
 import ScrollToTopButton from '../components/ScrollToTopButton';
 import { formatCopCurrency } from '../utils/currency';
-import { groupProductsByCategory, loadProductsCatalog, loadProductsCatalogFromBackend, ProductCategory, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
+import { getAvailableProducts, groupProductsByCategory, loadProductsCatalog, loadProductsCatalogFromBackend, ProductCategory, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
 
 /**
  * Componente Products
@@ -90,11 +90,11 @@ export default function ProductsSin() {
   const categories: Array<{ key: ProductCategory; label: string; icon: string }> = [
     { key: 'collares', label: 'Collares', icon: '💎' },
     { key: 'aretes', label: 'Aretes', icon: '✨' },
-    { key: 'pulseras', label: 'Pulseras', icon: '💍' }
+    { key: 'pulseras', label: 'Pulseras', icon: '📿' }
   ];
   categories.push(
-    { key: 'anillos', label: 'Anillos', icon: 'AN' },
-    { key: 'paquetes', label: 'Paquetes', icon: 'PK' }
+    { key: 'anillos', label: 'Anillos', icon: '💍' },
+    { key: 'paquetes', label: 'Paquetes', icon: '🎁' }
   );
 
   const mobileMenuItems = [
@@ -105,7 +105,7 @@ export default function ProductsSin() {
   ];
 
   // Productos de la categoría activa
-  const currentProducts = groupProductsByCategory(products)[activeCategory];
+  const currentProducts = groupProductsByCategory(getAvailableProducts(products))[activeCategory];
   // Filtra productos según la búsqueda (nombre o descripción)
   const filteredProducts = useMemo(() => {
     const normalizedSearch = searchQuery.toLowerCase();

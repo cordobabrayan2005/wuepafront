@@ -6331,6 +6331,16 @@ button {
   box-shadow: 0 10px 20px var(--catalog-button-shadow);
 }
 
+/* .add-cart-btn:disabled muestra claramente los productos agotados. */
+.add-cart-btn:disabled {
+  border-color: #d8d2c7;
+  background: #f2eee7;
+  color: #81796f;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
 /* .add-cart-btn-secondary da forma a el carrito de compras; ajusta apariencia visual. */
 .add-cart-btn-secondary {
   margin-top: auto;

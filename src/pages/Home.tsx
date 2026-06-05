@@ -22,7 +22,7 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import MobileBottomNav from '../components/MobileBottomNav';
 import MobileNavMenu from '../components/MobileNavMenu';
 import { formatCopCurrency } from '../utils/currency';
-import { loadProductsCatalog, loadProductsCatalogFromBackend, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
+import { getAvailableProducts, loadProductsCatalog, loadProductsCatalogFromBackend, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
 
 /**
  * Componente funcional principal para la página de inicio.
@@ -96,7 +96,7 @@ export default function Home() {
   }, []);
 
   const featuredProducts = useMemo(
-    () => sortProductsCatalog(products, sortOrder).slice(0, 8),
+    () => sortProductsCatalog(getAvailableProducts(products), sortOrder).slice(0, 8),
     [products, sortOrder]
   );
   const mobileMenuItems = [

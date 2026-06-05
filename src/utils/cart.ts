@@ -39,11 +39,14 @@ export function loadCartItems() {
       return [] as CartItem[];
     }
 
-    const normalizedItems = parsedValue.filter(isCartItem).map((item) => ({
-      ...item,
-      code: normalizeProductCode(item),
-      quantity: Math.max(1, Math.min(item.quantity, item.units)),
-    }));
+    const normalizedItems = parsedValue
+      .filter(isCartItem)
+      .filter((item) => item.units > 0)
+      .map((item) => ({
+        ...item,
+        code: normalizeProductCode(item),
+        quantity: Math.max(1, Math.min(item.quantity, item.units)),
+      }));
 
     window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(normalizedItems));
     return normalizedItems;
@@ -63,6 +66,11 @@ export function saveCartItems(items: CartItem[]) {
 
 export function addProductToCart(product: ProductCatalogItem) {
   const currentItems = loadCartItems();
+
+  if (product.units <= 0) {
+    return currentItems;
+  }
+
   const existingItem = currentItems.find((item) => item.id === product.id);
 
   if (existingItem) {

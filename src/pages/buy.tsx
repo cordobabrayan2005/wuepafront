@@ -20,7 +20,7 @@ import ScrollToTopButton from '../components/ScrollToTopButton';
 import { useAuthStore } from '../stores/authStore';
 import { addProductToCart, getCartItemsCount, loadCartItems } from '../utils/cart';
 import { formatCopCurrency } from '../utils/currency';
-import { loadProductsCatalog, loadProductsCatalogFromBackend, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
+import { getAvailableProducts, loadProductsCatalog, loadProductsCatalogFromBackend, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
 
 /**
  * Componente funcional principal para la página de compra.
@@ -119,7 +119,7 @@ export default function Buy() {
     }, 650);
   };
 
-  const sortedProducts = useMemo(() => sortProductsCatalog(products, sortOrder), [products, sortOrder]);
+  const sortedProducts = useMemo(() => sortProductsCatalog(getAvailableProducts(products), sortOrder), [products, sortOrder]);
   const newProducts = useMemo(() => sortedProducts.slice(0, 4), [sortedProducts]);
   const mobileMenuItems = [
     { label: 'Inicio', to: '/buy', isActive: true },
@@ -146,6 +146,12 @@ export default function Buy() {
   ];
 
   const handleAddToCart = (product: ProductCatalogItem) => {
+    if (product.units <= 0) {
+      setMsg(`${product.name} no tiene unidades disponibles.`);
+      setMsgType('error');
+      return;
+    }
+
     const nextItems = addProductToCart(product);
     setCartCount(getCartItemsCount(nextItems));
     setMsg(`${product.name} se agrego al carrito.`);
@@ -291,7 +297,9 @@ export default function Buy() {
                 <p className="product-card-description buy-product-description">{product.description}</p>
                 <p className="product-card-price">{formatCopCurrency(product.price)}</p>
                 <div className="product-card-actions">
-                  <button type="button" className="add-cart-btn" onClick={() => handleAddToCart(product)}>Agregar al carrito</button>
+                  <button type="button" className="add-cart-btn" onClick={() => handleAddToCart(product)} disabled={product.units <= 0}>
+                    {product.units > 0 ? 'Agregar al carrito' : 'Agotado'}
+                  </button>
                 </div>
               </article>
             ))}
@@ -318,7 +326,9 @@ export default function Buy() {
                   <p className="product-card-description buy-product-description">{item.description}</p>
                   <p className="product-card-price">{formatCopCurrency(item.price)}</p>
                   <div className="product-card-actions">
-                    <button type="button" className="add-cart-btn" onClick={() => handleAddToCart(item)}>Agregar al carrito</button>
+                    <button type="button" className="add-cart-btn" onClick={() => handleAddToCart(item)} disabled={item.units <= 0}>
+                      {item.units > 0 ? 'Agregar al carrito' : 'Agotado'}
+                    </button>
                   </div>
                 </article>
               ))}
