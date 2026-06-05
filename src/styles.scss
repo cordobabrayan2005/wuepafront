@@ -1331,7 +1331,7 @@ main.auth-wrapper.signup-page .signup-form {
   align-items: flex-start;
   justify-content: center;
   background-image: url('/WuepaCrear.png');
-  background-position: center center;
+  background-position: 20% center;
   background-repeat: no-repeat;
   background-size: cover;
   min-width: 0;
@@ -1441,7 +1441,7 @@ main.auth-wrapper.signup-page .social-signup-buttons {
 /* main.auth-wrapper.signup-page .login-button da forma a las pantallas de autenticacion; ajusta tipografia. */
 main.auth-wrapper.signup-page .login-button {
   padding-left: 1rem;
-  text-align: left;
+  text-align: center;
 }
 
 /* .eye-btn da forma a botones y acciones; ajusta estructura y posicion, espaciado, apariencia visual. */
@@ -3111,7 +3111,7 @@ main.auth-wrapper.signup-page .login-button {
 
 /* .wuepa-campaign-left img da forma a la pagina de inicio; ajusta encuadre de imagenes. */
 .wuepa-campaign-left img {
-  object-position: center 58%;
+  object-position: 25% 58%;
 }
 
 /* .wuepa-campaign-right img da forma a la pagina de inicio; ajusta encuadre de imagenes. */
@@ -6838,6 +6838,48 @@ body.modal-open {
   margin-top: 0.9rem;
 }
 
+.cart-customer-data-summary {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+  padding: 0.9rem;
+  border: 1px solid #f1d7a6;
+  border-radius: 0.75rem;
+  background: #fffdf8;
+}
+
+.cart-customer-data-summary div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.cart-customer-data-summary span,
+.cart-customer-data-summary p {
+  margin: 0;
+  color: #6c6a63;
+  font-size: 0.86rem;
+}
+
+.cart-customer-data-summary strong {
+  overflow-wrap: anywhere;
+  color: #2d2a25;
+}
+
+.cart-edit-customer-data-button {
+  justify-self: start;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid #d47b04;
+  border-radius: 0.65rem;
+  background: #fff8ec;
+  color: #8a5205;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.cart-edit-customer-data-button:hover {
+  background: #fdf0d5;
+}
+
 /* .cart-customer-fields label da forma a el carrito de compras; ajusta estructura y posicion, espaciado, tipografia. */
 .cart-customer-fields label {
   display: grid;
@@ -6863,6 +6905,22 @@ body.modal-open {
 .cart-customer-fields input:focus {
   outline: 2px solid rgba(34, 184, 176, 0.24);
   border-color: #22b8b0;
+}
+
+.cart-customer-fields input[aria-invalid="true"] {
+  border-color: #c83b3b;
+  background: #fff7f7;
+}
+
+.cart-customer-fields label > small {
+  color: #786b5d;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.cart-customer-fields .cart-field-error {
+  color: #9b2222;
+  font-weight: 800;
 }
 
 /* .cart-order-error da forma a el carrito de compras; ajusta espaciado, apariencia visual, tipografia. */
@@ -8067,5 +8125,52 @@ body.modal-open {
   /* .wuepa-campaign-copy h2 da forma a la pagina de inicio; ajusta tipografia. */
   .wuepa-campaign-copy h2 {
     font-size: clamp(2.05rem, 11vw, 3.15rem);
+  }
+}
+.admin-categories-manager {
+  margin: 1.25rem 0;
+}
+
+.admin-category-create {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.admin-category-create input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid #efdbb6;
+  border-radius: 0.85rem;
+  background: #fffdf8;
+  font: inherit;
+}
+
+.admin-category-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.admin-category-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.45rem 0.45rem 0.85rem;
+  border: 1px solid #efdbb6;
+  border-radius: 999px;
+  background: #fffaf2;
+  font-weight: 800;
+}
+
+.admin-category-item .admin-danger-btn {
+  padding: 0.5rem 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .admin-category-create {
+    flex-direction: column;
   }
 }

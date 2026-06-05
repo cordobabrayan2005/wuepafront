@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { formatCopCurrency } from '../utils/currency';
 import { api } from '../services/api';
+import { DEFAULT_CATEGORIES, getCategoryLabel, loadCategories } from '../utils/categories';
 import {
   createEmptyProduct,
   generateProductCode,
@@ -32,16 +33,11 @@ const PRODUCT_IMAGE_REQUIREMENTS = {
   maxAspectRatio: 1.35,
 };
 
-const categoryLabels: Record<ProductCategory, string> = {
-  collares: 'Collares',
-  aretes: 'Aretes',
-  pulseras: 'Pulseras',
-  anillos: 'Anillos',
-  paquetes: 'Paquetes',
-};
-
 export default function Admin() {
   const [products, setProducts] = useState<ProductCatalogItem[]>([]);
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [isSavingCategory, setIsSavingCategory] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<AdminMobileView>('inventory');
   const [isCreating, setIsCreating] = useState(false);
@@ -79,9 +75,9 @@ export default function Admin() {
       return product.code.toLowerCase().includes(normalizedFilter)
         || product.name.toLowerCase().includes(normalizedFilter)
         || product.description.toLowerCase().includes(normalizedFilter)
-        || categoryLabels[product.category].toLowerCase().includes(normalizedFilter);
+        || getCategoryLabel(categories, product.category).toLowerCase().includes(normalizedFilter);
     });
-  }, [filter, products]);
+  }, [categories, filter, products]);
 
   const pendingInstagramProducts =
   products.filter(
@@ -170,6 +166,10 @@ export default function Admin() {
       .finally(() => {
         setIsLoadingProducts(false);
       });
+  }, []);
+
+  useEffect(() => {
+    loadCategories().then(setCategories);
   }, []);
 
   useEffect(() => {
@@ -357,6 +357,50 @@ export default function Admin() {
         code: shouldRefreshCode ? nextDefaultCode : currentDraft.code,
       };
     });
+  }
+
+  async function handleCreateCategory(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const name = newCategoryName.trim();
+
+    if (!name || isSavingCategory) {
+      return;
+    }
+
+    try {
+      setIsSavingCategory(true);
+      const response = await api.createCategory(name);
+      const nextCategories = [...categories, response.category];
+      setCategories(nextCategories);
+      setNewCategoryName('');
+      showToast({ text: `Categoria "${response.category.nombre}" creada correctamente.`, type: 'success' });
+    } catch (error) {
+      showToast({ text: getErrorMessage(error, 'No se pudo crear la categoria.'), type: 'error' });
+    } finally {
+      setIsSavingCategory(false);
+    }
+  }
+
+  async function handleDeleteCategory(categoryId: string) {
+    const categoryName = getCategoryLabel(categories, categoryId);
+
+    if (!window.confirm(`¿Eliminar la categoria "${categoryName}"?`)) {
+      return;
+    }
+
+    try {
+      await api.deleteCategory(categoryId);
+      const nextCategories = categories.filter((category) => category.id !== categoryId);
+      setCategories(nextCategories);
+
+      if (draft.category === categoryId && nextCategories[0]) {
+        handleCategoryChange(nextCategories[0].id);
+      }
+
+      showToast({ text: `Categoria "${categoryName}" eliminada.`, type: 'success' });
+    } catch (error) {
+      showToast({ text: getErrorMessage(error, 'No se pudo eliminar la categoria.'), type: 'error' });
+    }
   }
 
   function getImageDimensions(file: File) {
@@ -672,7 +716,7 @@ export default function Admin() {
 
   const totalUnits = products.reduce((total, product) => total + product.units, 0);
   const totalValue = products.reduce((total, product) => total + (product.units * product.price), 0);
-  const selectedCategoryLabel = categoryLabels[draft.category];
+  const selectedCategoryLabel = getCategoryLabel(categories, draft.category);
   const activeProductLabel = isCreating ? 'Nuevo producto' : draft.name || 'Producto sin nombre';
 
   return (
@@ -730,6 +774,40 @@ export default function Admin() {
             </article>
           </section>
         )}
+
+        <section className="admin-section-card admin-categories-manager">
+          <div className="admin-section-heading">
+            <p className="admin-kicker">Categorias</p>
+            <h2>Gestionar categorias</h2>
+            <p>Crea categorias nuevas o elimina las que ya no tengan productos asociados.</p>
+          </div>
+          <form className="admin-category-create" onSubmit={handleCreateCategory}>
+            <input
+              type="text"
+              value={newCategoryName}
+              onChange={(event) => setNewCategoryName(event.target.value)}
+              placeholder="Ej. Tobilleras"
+              aria-label="Nombre de la nueva categoria"
+            />
+            <button type="submit" className="admin-primary-btn" disabled={!newCategoryName.trim() || isSavingCategory}>
+              {isSavingCategory ? 'Creando...' : 'Crear categoria'}
+            </button>
+          </form>
+          <div className="admin-category-list">
+            {categories.map((category) => (
+              <div className="admin-category-item" key={category.id}>
+                <span>{category.nombre}</span>
+                <button
+                  type="button"
+                  className="admin-danger-btn"
+                  onClick={() => handleDeleteCategory(category.id)}
+                >
+                  Borrar
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <section className="admin-mobile-toolbar" aria-label="Controles rapidos del admin">
           <div className="admin-mobile-status">
@@ -834,7 +912,7 @@ export default function Admin() {
                     <small>{product.code}</small>
                   </div>
                   <small>
-                    {categoryLabels[product.category]}
+                    {getCategoryLabel(categories, product.category)}
                     {' · '}
                     {product.units} unidades
                     {' · '}
@@ -916,11 +994,9 @@ export default function Admin() {
                         value={draft.category}
                         onChange={(event) => handleCategoryChange(event.target.value as ProductCategory)}
                       >
-                        <option value="collares">Collares</option>
-                        <option value="aretes">Aretes</option>
-                        <option value="pulseras">Pulseras</option>
-                        <option value="anillos">Anillos</option>
-                        <option value="paquetes">Paquetes</option>
+                        {categories.map((category) => (
+                          <option key={category.id} value={category.id}>{category.nombre}</option>
+                        ))}
                       </select>
                       <small className="admin-field-help">Esto define donde aparecera dentro del catalogo.</small>
                     </label>

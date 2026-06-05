@@ -18,6 +18,8 @@ export interface AuthUser {
   name: string;
   lastname: string;
   rol: 'cliente' | 'admin';
+  telefono?: string;
+  direccion?: string;
   birthdate?: string;
   age?: number | null;
 }
@@ -33,6 +35,8 @@ interface SignupPayload {
 interface UpdateProfilePayload {
   name: string;
   lastname: string;
+  telefono?: string;
+  direccion?: string;
   birthdate?: string;
 }
 
@@ -50,6 +54,11 @@ export interface ProductPayload {
 
 export interface Product extends ProductPayload {
   id: string;
+}
+
+export interface ProductCategoryRecord {
+  id: string;
+  nombre: string;
 }
 
 export type BackendOrderStatus = 'Pendiente' | 'Pagado' | 'Cancelado';
@@ -96,9 +105,12 @@ interface BackendUser {
   uid: string;
   correo: string;
   nombre: string;
+  apellidos?: string;
   rol?: string;
   telefono?: string;
   direccion?: string;
+  birthdate?: string | { seconds?: number; _seconds?: number };
+  age?: number | null;
 }
 
 interface BackendResponse<T> {
@@ -131,13 +143,25 @@ function splitDisplayName(displayName: string | null | undefined) {
   };
 }
 
+function normalizeBackendDate(value: BackendUser['birthdate']) {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  const seconds = value?.seconds ?? value?._seconds;
+  return typeof seconds === 'number' ? new Date(seconds * 1000).toISOString() : undefined;
+}
+
 function mapBackendUserToAuthUser(backendUser: BackendUser, profile?: Partial<AuthUser>): AuthUser {
   return {
     id: backendUser.uid,
     email: profile?.email ?? backendUser.correo ?? '',
     name: profile?.name ?? backendUser.nombre ?? '',
-    lastname: profile?.lastname ?? '',
-    age: typeof profile?.age === 'number' ? profile.age : 0,
+    lastname: profile?.lastname ?? backendUser.apellidos ?? '',
+    telefono: profile?.telefono ?? backendUser.telefono ?? '',
+    direccion: profile?.direccion ?? backendUser.direccion ?? '',
+    birthdate: profile?.birthdate ?? normalizeBackendDate(backendUser.birthdate),
+    age: typeof profile?.age === 'number' ? profile.age : backendUser.age ?? 0,
     rol: backendUser.rol === 'admin' ? 'admin' : 'cliente',
   };
 }
@@ -394,17 +418,25 @@ export const api = {
       throw new Error('No hay una sesión activa.');
     }
 
-    const normalizedUser: AuthUser = {
-      id: currentUser.uid,
-      email: currentUser.email ?? '',
-      name: profileData.name.trim(),
-      lastname: profileData.lastname.trim(),
-      rol: 'cliente',
-      birthdate: profileData.birthdate,
-    };
-
     try {
-      return normalizedUser;
+      const currentProfile = await api.me();
+
+      await requestBackend<{ success: boolean; user: BackendUser }>(
+        '/api/users/me',
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            nombre: profileData.name.trim(),
+            apellidos: profileData.lastname.trim(),
+            telefono: profileData.telefono?.trim() ?? currentProfile.telefono ?? '',
+            direccion: profileData.direccion?.trim() ?? currentProfile.direccion ?? '',
+            birthdate: profileData.birthdate ?? currentProfile.birthdate,
+          }),
+        },
+        true
+      );
+
+      return api.me();
     } catch (error) {
       throw normalizeFirebaseError(error);
     }
@@ -520,6 +552,31 @@ export const api = {
       {
         method: 'DELETE',
       },
+      true
+    );
+  },
+
+  getCategories: async (): Promise<ProductCategoryRecord[]> => {
+    return requestBackend<ProductCategoryRecord[]>('/api/categories', {
+      method: 'GET',
+    });
+  },
+
+  createCategory: async (nombre: string) => {
+    return requestBackend<{ success: boolean; category: ProductCategoryRecord }>(
+      '/api/categories',
+      {
+        method: 'POST',
+        body: JSON.stringify({ nombre }),
+      },
+      true
+    );
+  },
+
+  deleteCategory: async (id: string) => {
+    return requestBackend<{ success: boolean; message: string }>(
+      `/api/categories/${encodeURIComponent(id)}`,
+      { method: 'DELETE' },
       true
     );
   },

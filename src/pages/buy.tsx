@@ -218,7 +218,7 @@ export default function Buy() {
         <section className="buy-grid">
           <article className="hero-card">
             <div>
-              <h2>BRILLA CON <span>ELEGANCIA</span></h2>
+              <h2>JOYAS QUE <span>HABLAN POR TI</span></h2>
               <p>Descubre nuestras colecciones exclusivas de joyas</p>
               <Link to="/products" className="primary-button">VER PRODUCTOS →</Link>
             </div>
@@ -257,10 +257,10 @@ export default function Buy() {
               </div>
             </Link>
             <Link to="/products?category=paquetes" className="category-card category-card-paquetes">
-              <img src="/CatPaquetes.png" alt="Paquetes" className="category-image-paquetes" loading="lazy" decoding="async" />
+              <img src="/CatPaquetes.png" alt="Set de accesorios" className="category-image-paquetes" loading="lazy" decoding="async" />
               <div className="backdrop" />
               <div className="content">
-                <h4>PAQUETES</h4>
+                <h4>SET DE ACCESORIOS</h4>
               </div>
             </Link>
           </div>

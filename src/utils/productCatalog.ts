@@ -1,6 +1,6 @@
 import { api, type Product } from '../services/api';
 
-export type ProductCategory = 'collares' | 'aretes' | 'pulseras' | 'anillos' | 'paquetes';
+export type ProductCategory = string;
 
 export interface ProductCatalogItem {
   id: string;
@@ -273,7 +273,8 @@ function isProductCatalogItem(value: unknown): value is ProductCatalogItem {
   const product = value as Partial<ProductCatalogItem>;
 
   return typeof product.id === 'string'
-    && (product.category === 'collares' || product.category === 'aretes' || product.category === 'pulseras' || product.category === 'anillos' || product.category === 'paquetes')
+    && typeof product.category === 'string'
+    && product.category.trim().length > 0
     && typeof product.name === 'string'
     && typeof product.description === 'string'
     && typeof product.units === 'number'
@@ -327,13 +328,10 @@ export function resetProductsCatalog() {
 }
 
 export function groupProductsByCategory(products: ProductCatalogItem[]) {
-  return {
-    collares: products.filter((product) => product.category === 'collares'),
-    aretes: products.filter((product) => product.category === 'aretes'),
-    pulseras: products.filter((product) => product.category === 'pulseras'),
-    anillos: products.filter((product) => product.category === 'anillos'),
-    paquetes: products.filter((product) => product.category === 'paquetes'),
-  } as const;
+  return products.reduce<Record<string, ProductCatalogItem[]>>((groups, product) => {
+    groups[product.category] = [...(groups[product.category] ?? []), product];
+    return groups;
+  }, {});
 }
 
 export function getAvailableProducts(products: ProductCatalogItem[]) {
@@ -341,11 +339,7 @@ export function getAvailableProducts(products: ProductCatalogItem[]) {
 }
 
 function normalizeProductCategory(category: string): ProductCategory {
-  if (category === 'aretes' || category === 'pulseras' || category === 'anillos' || category === 'paquetes') {
-    return category;
-  }
-
-  return 'collares';
+  return category.trim() || 'collares';
 }
 
 export function mapBackendProductToCatalogItem(product: Product): ProductCatalogItem {
