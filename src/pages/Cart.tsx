@@ -117,24 +117,17 @@ export default function Cart() {
       return;
     }
 
-    const whatsappWindow = window.open('', '_blank', 'noopener,noreferrer');
     setIsSubmittingOrder(true);
     setOrderError('');
 
     createBackendCustomerOrder(items, user, checkoutData)
       .then(() => {
-        if (whatsappWindow) {
-          whatsappWindow.location.href = whatsappOrderUrl;
-        } else {
-          window.open(whatsappOrderUrl, '_blank', 'noopener,noreferrer');
-        }
-
         clearCart();
         setItems([]);
         setIsConfirmingOrder(false);
+        window.location.assign(whatsappOrderUrl);
       })
       .catch((error) => {
-        whatsappWindow?.close();
         setOrderError(getCheckoutErrorMessage(error));
       })
       .finally(() => {
