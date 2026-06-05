@@ -1331,7 +1331,7 @@ main.auth-wrapper.signup-page .signup-form {
   align-items: flex-start;
   justify-content: center;
   background-image: url('/WuepaCrear.png');
-  background-position: center center;
+  background-position: 20% center;
   background-repeat: no-repeat;
   background-size: cover;
   min-width: 0;
@@ -1441,7 +1441,7 @@ main.auth-wrapper.signup-page .social-signup-buttons {
 /* main.auth-wrapper.signup-page .login-button da forma a las pantallas de autenticacion; ajusta tipografia. */
 main.auth-wrapper.signup-page .login-button {
   padding-left: 1rem;
-  text-align: left;
+  text-align: center;
 }
 
 /* .eye-btn da forma a botones y acciones; ajusta estructura y posicion, espaciado, apariencia visual. */
@@ -3111,7 +3111,7 @@ main.auth-wrapper.signup-page .login-button {
 
 /* .wuepa-campaign-left img da forma a la pagina de inicio; ajusta encuadre de imagenes. */
 .wuepa-campaign-left img {
-  object-position: center 58%;
+  object-position: 25% 58%;
 }
 
 /* .wuepa-campaign-right img da forma a la pagina de inicio; ajusta encuadre de imagenes. */
@@ -6865,6 +6865,22 @@ body.modal-open {
   border-color: #22b8b0;
 }
 
+.cart-customer-fields input[aria-invalid="true"] {
+  border-color: #c83b3b;
+  background: #fff7f7;
+}
+
+.cart-customer-fields label > small {
+  color: #786b5d;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.cart-customer-fields .cart-field-error {
+  color: #9b2222;
+  font-weight: 800;
+}
+
 /* .cart-order-error da forma a el carrito de compras; ajusta espaciado, apariencia visual, tipografia. */
 .cart-order-error {
   margin: 0.8rem 0 0;
@@ -8067,5 +8083,52 @@ body.modal-open {
   /* .wuepa-campaign-copy h2 da forma a la pagina de inicio; ajusta tipografia. */
   .wuepa-campaign-copy h2 {
     font-size: clamp(2.05rem, 11vw, 3.15rem);
+  }
+}
+.admin-categories-manager {
+  margin: 1.25rem 0;
+}
+
+.admin-category-create {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.admin-category-create input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid #efdbb6;
+  border-radius: 0.85rem;
+  background: #fffdf8;
+  font: inherit;
+}
+
+.admin-category-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.admin-category-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.45rem 0.45rem 0.85rem;
+  border: 1px solid #efdbb6;
+  border-radius: 999px;
+  background: #fffaf2;
+  font-weight: 800;
+}
+
+.admin-category-item .admin-danger-btn {
+  padding: 0.5rem 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .admin-category-create {
+    flex-direction: column;
   }
 }

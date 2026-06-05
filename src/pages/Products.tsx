@@ -7,6 +7,7 @@ import ScrollToTopButton from '../components/ScrollToTopButton';
 import { addProductToCart, getCartItemsCount, loadCartItems } from '../utils/cart';
 import { formatCopCurrency } from '../utils/currency';
 import { getAvailableProducts, groupProductsByCategory, loadProductsCatalog, loadProductsCatalogFromBackend, ProductCategory, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
+import { DEFAULT_CATEGORIES, getCategoryIcon, loadCategories } from '../utils/categories';
 
 /**
  * Componente Products
@@ -34,15 +35,9 @@ export default function Products() {
   const [cartCount, setCartCount] = useState(() => getCartItemsCount(loadCartItems()));
   const [feedback, setFeedback] = useState('');
   const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [sortOrder, setSortOrder] = useState<ProductSortOrder>('recent');
   const location = useLocation();
-  const categoryLabels: Record<ProductCategory, string> = {
-    collares: 'Collares',
-    aretes: 'Aretes',
-    pulseras: 'Pulseras',
-    anillos: 'Anillos',
-    paquetes: 'Paquetes',
-  };
 
   useEffect(() => {
     let isMounted = true;
@@ -86,6 +81,15 @@ export default function Products() {
   }, []);
 
   useEffect(() => {
+    loadCategories().then((nextCategories) => {
+      setCategories(nextCategories);
+      setActiveCategory((current) => nextCategories.some((category) => category.id === current)
+        ? current
+        : nextCategories[0]?.id ?? 'collares');
+    });
+  }, []);
+
+  useEffect(() => {
     function syncCartCount() {
       setCartCount(getCartItemsCount(loadCartItems()));
     }
@@ -111,21 +115,10 @@ export default function Products() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const category = params.get('category');
-    if (category === 'collares' || category === 'aretes' || category === 'pulseras' || category === 'anillos' || category === 'paquetes') {
+    if (category && categories.some((item) => item.id === category)) {
       setActiveCategory(category);
     }
-  }, [location.search]);
-
-  // Definición de categorías disponibles
-  const categories: Array<{ key: ProductCategory; label: string; icon: string }> = [
-    { key: 'collares', label: 'Collares', icon: '💎' },
-    { key: 'aretes', label: 'Aretes', icon: '✨' },
-    { key: 'pulseras', label: 'Pulseras', icon: '📿' }
-  ];
-  categories.push(
-    { key: 'anillos', label: 'Anillos', icon: '💍' },
-    { key: 'paquetes', label: 'Paquetes', icon: '🎁' }
-  );
+  }, [categories, location.search]);
 
   const mobileMenuItems = [
     { label: 'Inicio', to: '/buy' },
@@ -147,7 +140,7 @@ export default function Products() {
 
   // Productos de la categoría activa
   const productsByCategory = groupProductsByCategory(getAvailableProducts(products));
-  const currentProducts = productsByCategory[activeCategory];
+  const currentProducts = productsByCategory[activeCategory] ?? [];
   // Filtra productos según la búsqueda (nombre o descripción)
   const filteredProducts = useMemo(() => {
     const normalizedSearch = searchQuery.toLowerCase();
@@ -203,12 +196,12 @@ export default function Products() {
         <section className="categories-nav">
           {categories.map((category) => (
             <button
-              key={category.key}
-              className={`category-tab ${activeCategory === category.key ? 'active' : ''}`}
-              onClick={() => setActiveCategory(category.key as any)}
+              key={category.id}
+              className={`category-tab ${activeCategory === category.id ? 'active' : ''}`}
+              onClick={() => setActiveCategory(category.id)}
             >
-              <span className="category-icon">{category.icon}</span>
-              <span className="category-label">{category.label}</span>
+              <span className="category-icon">{getCategoryIcon(category.id)}</span>
+              <span className="category-label">{category.nombre}</span>
             </button>
           ))}
         </section>
@@ -235,7 +228,7 @@ export default function Products() {
 
         {/* Products Grid */}
         <section className="products-section">
-          <h3>{categories.find(c => c.key === activeCategory)?.label}</h3>
+          <h3>{categories.find(c => c.id === activeCategory)?.nombre}</h3>
           <div className="products-grid">
             {filteredProducts.map((product) => (
               <article key={product.id} className="product-card-simple">

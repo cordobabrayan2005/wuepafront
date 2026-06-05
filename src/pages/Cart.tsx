@@ -9,12 +9,19 @@ import { CartItem, clearCart, getCartItemsCount, getCartSubtotal, loadCartItems,
 import { useAuthStore } from '../stores/authStore';
 import { WUEPA_WHATSAPP_PHONE, createBackendCustomerOrder } from '../utils/orders';
 
+const COLOMBIAN_MOBILE_PATTERN = /^3\d{9}$/;
+const ADDRESS_PATTERN = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9\s#.,°/-]+$/;
+
 export default function Cart() {
   const [items, setItems] = useState<CartItem[]>(() => loadCartItems());
   const [isConfirmingOrder, setIsConfirmingOrder] = useState(false);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
   const [orderError, setOrderError] = useState('');
   const [checkoutData, setCheckoutData] = useState({
+    telefono: '',
+    direccion: '',
+  });
+  const [checkoutFieldErrors, setCheckoutFieldErrors] = useState({
     telefono: '',
     direccion: '',
   });
@@ -110,10 +117,64 @@ export default function Cart() {
     return message || 'No pudimos guardar tu pedido. Intenta nuevamente en unos minutos.';
   }
 
+  function validateCheckoutData() {
+    const phone = checkoutData.telefono.trim();
+    const address = checkoutData.direccion.trim();
+    const nextErrors = {
+      telefono: '',
+      direccion: '',
+    };
+
+    if (!phone) {
+      nextErrors.telefono = 'Ingresa tu numero de celular.';
+    } else if (!COLOMBIAN_MOBILE_PATTERN.test(phone)) {
+      nextErrors.telefono = 'El celular debe tener 10 numeros y comenzar por 3.';
+    }
+
+    if (!address) {
+      nextErrors.direccion = 'Ingresa la direccion de entrega.';
+    } else if (address.length < 8) {
+      nextErrors.direccion = 'La direccion debe tener minimo 8 caracteres.';
+    } else if (address.length > 120) {
+      nextErrors.direccion = 'La direccion no puede superar los 120 caracteres.';
+    } else if (!ADDRESS_PATTERN.test(address) || !/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(address)) {
+      nextErrors.direccion = 'Escribe una direccion valida usando letras, numeros y signos como #, - o /.';
+    }
+
+    setCheckoutFieldErrors(nextErrors);
+    return !nextErrors.telefono && !nextErrors.direccion;
+  }
+
+  function handlePhoneChange(value: string) {
+    const phoneDigits = value.replace(/\D/g, '').slice(0, 10);
+    setCheckoutData((current) => ({ ...current, telefono: phoneDigits }));
+    setCheckoutFieldErrors((current) => ({
+      ...current,
+      telefono: phoneDigits && !COLOMBIAN_MOBILE_PATTERN.test(phoneDigits)
+        ? 'El celular debe tener 10 numeros y comenzar por 3.'
+        : '',
+    }));
+  }
+
+  function handleAddressChange(value: string) {
+    const address = value.slice(0, 120);
+    setCheckoutData((current) => ({ ...current, direccion: address }));
+    setCheckoutFieldErrors((current) => ({
+      ...current,
+      direccion: address && (
+        !ADDRESS_PATTERN.test(address)
+        || !/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(address)
+        || address.trim().length < 8
+      )
+        ? 'Escribe una direccion valida de minimo 8 caracteres.'
+        : '',
+    }));
+  }
+
   function handleContinueOrder(event?: React.FormEvent<HTMLFormElement>) {
     event?.preventDefault();
 
-    if (items.length === 0) {
+    if (items.length === 0 || !validateCheckoutData()) {
       return;
     }
 
@@ -313,24 +374,40 @@ export default function Cart() {
                   <input
                     type="tel"
                     value={checkoutData.telefono}
-                    onChange={(event) => setCheckoutData((current) => ({ ...current, telefono: event.target.value }))}
+                    onChange={(event) => handlePhoneChange(event.target.value)}
                     autoComplete="tel"
-                    placeholder="Ej. 317 7816764"
+                    inputMode="numeric"
+                    pattern="3[0-9]{9}"
+                    minLength={10}
+                    maxLength={10}
+                    placeholder="Ej. 3177816764"
+                    aria-invalid={Boolean(checkoutFieldErrors.telefono)}
                     required
                     disabled={isSubmittingOrder}
                   />
+                  <small>Debe tener 10 numeros y comenzar por 3.</small>
+                  {checkoutFieldErrors.telefono ? (
+                    <small className="cart-field-error" role="alert">{checkoutFieldErrors.telefono}</small>
+                  ) : null}
                 </label>
                 <label>
                   <span>Direccion</span>
                   <input
                     type="text"
                     value={checkoutData.direccion}
-                    onChange={(event) => setCheckoutData((current) => ({ ...current, direccion: event.target.value }))}
+                    onChange={(event) => handleAddressChange(event.target.value)}
                     autoComplete="street-address"
-                    placeholder="Direccion de entrega"
+                    minLength={8}
+                    maxLength={120}
+                    placeholder="Ej. Calle 10 # 20-30"
+                    aria-invalid={Boolean(checkoutFieldErrors.direccion)}
                     required
                     disabled={isSubmittingOrder}
                   />
+                  <small>Entre 8 y 120 caracteres. Puedes usar #, -, /, punto o coma.</small>
+                  {checkoutFieldErrors.direccion ? (
+                    <small className="cart-field-error" role="alert">{checkoutFieldErrors.direccion}</small>
+                  ) : null}
                 </label>
               </div>
               <div className="cart-order-confirmation-total">

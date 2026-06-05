@@ -52,6 +52,11 @@ export interface Product extends ProductPayload {
   id: string;
 }
 
+export interface ProductCategoryRecord {
+  id: string;
+  nombre: string;
+}
+
 export type BackendOrderStatus = 'Pendiente' | 'Pagado' | 'Cancelado';
 
 export interface BackendOrderItem {
@@ -520,6 +525,31 @@ export const api = {
       {
         method: 'DELETE',
       },
+      true
+    );
+  },
+
+  getCategories: async (): Promise<ProductCategoryRecord[]> => {
+    return requestBackend<ProductCategoryRecord[]>('/api/categories', {
+      method: 'GET',
+    });
+  },
+
+  createCategory: async (nombre: string) => {
+    return requestBackend<{ success: boolean; category: ProductCategoryRecord }>(
+      '/api/categories',
+      {
+        method: 'POST',
+        body: JSON.stringify({ nombre }),
+      },
+      true
+    );
+  },
+
+  deleteCategory: async (id: string) => {
+    return requestBackend<{ success: boolean; message: string }>(
+      `/api/categories/${encodeURIComponent(id)}`,
+      { method: 'DELETE' },
       true
     );
   },
