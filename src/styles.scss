@@ -6838,6 +6838,48 @@ body.modal-open {
   margin-top: 0.9rem;
 }
 
+.cart-customer-data-summary {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+  padding: 0.9rem;
+  border: 1px solid #f1d7a6;
+  border-radius: 0.75rem;
+  background: #fffdf8;
+}
+
+.cart-customer-data-summary div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.cart-customer-data-summary span,
+.cart-customer-data-summary p {
+  margin: 0;
+  color: #6c6a63;
+  font-size: 0.86rem;
+}
+
+.cart-customer-data-summary strong {
+  overflow-wrap: anywhere;
+  color: #2d2a25;
+}
+
+.cart-edit-customer-data-button {
+  justify-self: start;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid #d47b04;
+  border-radius: 0.65rem;
+  background: #fff8ec;
+  color: #8a5205;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.cart-edit-customer-data-button:hover {
+  background: #fdf0d5;
+}
+
 /* .cart-customer-fields label da forma a el carrito de compras; ajusta estructura y posicion, espaciado, tipografia. */
 .cart-customer-fields label {
   display: grid;

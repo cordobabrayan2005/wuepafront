@@ -7,6 +7,7 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { formatCopCurrency } from '../utils/currency';
 import { CartItem, clearCart, getCartItemsCount, getCartSubtotal, loadCartItems, removeCartItem, updateCartItemQuantity } from '../utils/cart';
 import { useAuthStore } from '../stores/authStore';
+import { api } from '../services/api';
 import { WUEPA_WHATSAPP_PHONE, createBackendCustomerOrder } from '../utils/orders';
 
 const INTERNATIONAL_PHONE_PATTERN = /^\+?[0-9\s()-]+$/;
@@ -15,6 +16,7 @@ const ADDRESS_PATTERN = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9\s#.,°/-]+$/;
 export default function Cart() {
   const [items, setItems] = useState<CartItem[]>(() => loadCartItems());
   const [isConfirmingOrder, setIsConfirmingOrder] = useState(false);
+  const [isEditingCheckoutData, setIsEditingCheckoutData] = useState(false);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
   const [orderError, setOrderError] = useState('');
   const [checkoutData, setCheckoutData] = useState({
@@ -26,6 +28,8 @@ export default function Cart() {
     direccion: '',
   });
   const user = useAuthStore((state) => state.user);
+  const setUser = useAuthStore((state) => state.setUser);
+  const hasSavedCheckoutData = Boolean(user?.telefono?.trim() && user?.direccion?.trim());
 
   useEffect(() => {
     function syncCart() {
@@ -51,6 +55,15 @@ export default function Cart() {
       return;
     }
 
+    const savedCheckoutData = {
+      telefono: user?.telefono?.trim() ?? '',
+      direccion: user?.direccion?.trim() ?? '',
+    };
+    setCheckoutData(savedCheckoutData);
+    setIsEditingCheckoutData(!savedCheckoutData.telefono || !savedCheckoutData.direccion);
+    setCheckoutFieldErrors({ telefono: '', direccion: '' });
+    setOrderError('');
+
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         setIsConfirmingOrder(false);
@@ -63,7 +76,7 @@ export default function Cart() {
       window.removeEventListener('keydown', handleKeyDown);
       document.body.classList.remove('modal-open');
     };
-  }, [isConfirmingOrder]);
+  }, [isConfirmingOrder, user?.direccion, user?.telefono]);
 
   const itemCount = useMemo(() => getCartItemsCount(items), [items]);
   const subtotal = useMemo(() => getCartSubtotal(items), [items]);
@@ -180,14 +193,33 @@ export default function Cart() {
   function handleContinueOrder(event?: React.FormEvent<HTMLFormElement>) {
     event?.preventDefault();
 
-    if (items.length === 0 || !validateCheckoutData()) {
+    if (items.length === 0 || (isEditingCheckoutData && !validateCheckoutData())) {
       return;
     }
 
     setIsSubmittingOrder(true);
     setOrderError('');
 
-    createBackendCustomerOrder(items, user, checkoutData)
+    const normalizedCheckoutData = {
+      telefono: checkoutData.telefono.trim(),
+      direccion: checkoutData.direccion.trim(),
+    };
+    const saveCheckoutData = isEditingCheckoutData
+      ? api.updateProfile({
+        name: user?.name ?? '',
+        lastname: user?.lastname ?? '',
+        birthdate: user?.birthdate,
+        ...normalizedCheckoutData,
+      })
+      : Promise.resolve(user);
+
+    saveCheckoutData
+      .then((updatedUser) => {
+        if (updatedUser) {
+          setUser(updatedUser);
+        }
+        return createBackendCustomerOrder(items, updatedUser ?? user, normalizedCheckoutData);
+      })
       .then(() => {
         clearCart();
         setItems([]);
@@ -374,7 +406,8 @@ export default function Cart() {
               ))}
             </ul>
             <form className="cart-customer-form" onSubmit={handleContinueOrder}>
-              <div className="cart-customer-fields">
+              {isEditingCheckoutData ? (
+                <div className="cart-customer-fields">
                 <label>
                   <span>Telefono</span>
                   <input
@@ -414,7 +447,28 @@ export default function Cart() {
                     <small className="cart-field-error" role="alert">{checkoutFieldErrors.direccion}</small>
                   ) : null}
                 </label>
-              </div>
+                </div>
+              ) : (
+                <div className="cart-customer-data-summary">
+                  <div>
+                    <span>Telefono</span>
+                    <strong>{checkoutData.telefono}</strong>
+                  </div>
+                  <div>
+                    <span>Direccion de entrega</span>
+                    <strong>{checkoutData.direccion}</strong>
+                  </div>
+                  <p>¿Deseas editar esta información antes de continuar?</p>
+                  <button
+                    type="button"
+                    className="cart-edit-customer-data-button"
+                    onClick={() => setIsEditingCheckoutData(true)}
+                    disabled={isSubmittingOrder}
+                  >
+                    Editar información
+                  </button>
+                </div>
+              )}
               <div className="cart-order-confirmation-total">
                 <span>Total estimado</span>
                 <strong>{formatCopCurrency(total)}</strong>
@@ -428,7 +482,11 @@ export default function Cart() {
                   className="whatsapp-btn cart-checkout-button"
                   disabled={isSubmittingOrder}
                 >
-                  {isSubmittingOrder ? 'Guardando pedido...' : 'Seguir con el pedido'}
+                  {isSubmittingOrder
+                    ? 'Guardando pedido...'
+                    : hasSavedCheckoutData && !isEditingCheckoutData
+                      ? 'Usar estos datos y continuar'
+                      : 'Guardar datos y continuar'}
                 </button>
                 <button
                   type="button"
