@@ -179,6 +179,12 @@ function OrderList({ orders, emptyText, activeOrderId, onAcceptPayment }: OrderL
             <strong>{formatCopCurrency(order.total)}</strong>
           </div>
 
+          <div className="admin-order-customer-data">
+            <span>{order.customerEmail || 'Sin correo'}</span>
+            <span>{order.customerPhone || 'Sin telefono'}</span>
+            <span>{order.customerAddress || 'Sin direccion'}</span>
+          </div>
+
           <div className="admin-order-items">
             {order.items.map((item) => (
               <div key={`${order.id}-${item.id}`} className="admin-order-item">

@@ -22,6 +22,8 @@ export interface CustomerOrder {
   paidAt?: string;
   customerName: string;
   customerEmail: string;
+  customerPhone: string;
+  customerAddress: string;
   status: CustomerOrderStatus;
   items: CustomerOrderItem[];
   itemCount: number;
@@ -67,12 +69,17 @@ function getOrderDate(value: BackendOrder['fechaCreacion']) {
   return new Date().toISOString();
 }
 
-function getCustomerData(user: AuthUser | null): BackendOrderCustomerData {
+export interface CustomerCheckoutData {
+  telefono: string;
+  direccion: string;
+}
+
+function getCustomerData(user: AuthUser | null, checkoutData: CustomerCheckoutData): BackendOrderCustomerData {
   return {
     nombre: getCustomerName(user),
     correo: user?.email ?? '',
-    telefono: '',
-    direccion: '',
+    telefono: checkoutData.telefono,
+    direccion: checkoutData.direccion,
   };
 }
 
@@ -82,6 +89,8 @@ export function mapBackendOrderToCustomerOrder(order: BackendOrder): CustomerOrd
     createdAt: getOrderDate(order.fechaCreacion),
     customerName: order.clienteData?.nombre || 'Usuario',
     customerEmail: order.clienteData?.correo || '',
+    customerPhone: order.clienteData?.telefono || '',
+    customerAddress: order.clienteData?.direccion || '',
     status: order.estado === 'Pagado' ? 'paid' : 'pending',
     items: (order.productos || []).map((item) => ({
       id: item.productId,
@@ -130,6 +139,8 @@ export function createCustomerOrder(items: CartItem[], user: AuthUser | null): C
     createdAt: new Date().toISOString(),
     customerName: getCustomerName(user),
     customerEmail: user?.email ?? '',
+    customerPhone: '',
+    customerAddress: '',
     status: 'pending',
     items: items.map((item) => ({
       id: item.id,
@@ -144,13 +155,17 @@ export function createCustomerOrder(items: CartItem[], user: AuthUser | null): C
   };
 }
 
-export async function createBackendCustomerOrder(items: CartItem[], user: AuthUser | null) {
+export async function createBackendCustomerOrder(
+  items: CartItem[],
+  user: AuthUser | null,
+  checkoutData: CustomerCheckoutData
+) {
   const response = await api.createOrder({
     productos: items.map((item) => ({
       id: item.id,
       cantidad: item.quantity,
     })),
-    clienteData: getCustomerData(user),
+    clienteData: getCustomerData(user, checkoutData),
   });
 
   return mapBackendOrderToCustomerOrder(response.order);

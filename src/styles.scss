@@ -6815,6 +6815,46 @@ body.modal-open {
   margin-top: 0;
 }
 
+/* .cart-customer-form da forma a el carrito de compras; ajusta estructura y posicion, espaciado. */
+.cart-customer-form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+/* .cart-customer-fields da forma a el carrito de compras; ajusta estructura y posicion, espaciado. */
+.cart-customer-fields {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+/* .cart-customer-fields label da forma a el carrito de compras; ajusta estructura y posicion, espaciado, tipografia. */
+.cart-customer-fields label {
+  display: grid;
+  gap: 0.35rem;
+  color: #5d421a;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+/* .cart-customer-fields input da forma a el carrito de compras; ajusta espaciado, apariencia visual, tipografia. */
+.cart-customer-fields input {
+  width: 100%;
+  min-height: 2.85rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #efc67e;
+  border-radius: 8px;
+  background: #fffdf8;
+  color: #2d2a25;
+  font: inherit;
+}
+
+/* .cart-customer-fields input:focus da forma a el carrito de compras; ajusta apariencia visual. */
+.cart-customer-fields input:focus {
+  outline: 2px solid rgba(34, 184, 176, 0.24);
+  border-color: #22b8b0;
+}
+
 /* .cart-order-error da forma a el carrito de compras; ajusta espaciado, apariencia visual, tipografia. */
 .cart-order-error {
   margin: 0.8rem 0 0;
@@ -6917,6 +6957,26 @@ body.modal-open {
   color: #2d2a25;
   font-size: 1.25rem;
   white-space: nowrap;
+}
+
+/* .admin-order-customer-data da forma al admin de pedidos; ajusta estructura y posicion, espaciado, apariencia visual. */
+.admin-order-customer-data {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+  padding: 0.75rem;
+  border-radius: 0.8rem;
+  background: #fff8ea;
+}
+
+/* .admin-order-customer-data span da forma al admin de pedidos; ajusta tipografia. */
+.admin-order-customer-data span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: #5d421a;
+  font-size: 0.9rem;
+  font-weight: 800;
 }
 
 /* .admin-order-items da forma al admin de pedidos; ajusta estructura y posicion, espaciado. */
@@ -7059,6 +7119,11 @@ body.modal-open {
   .admin-order-footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  /* .admin-order-customer-data da forma al admin de pedidos; ajusta estructura y posicion en movil. */
+  .admin-order-customer-data {
+    grid-template-columns: 1fr;
   }
 
   /* .admin-order-item da forma al admin de pedidos; ajusta estructura y posicion en movil. */

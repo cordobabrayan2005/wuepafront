@@ -14,6 +14,10 @@ export default function Cart() {
   const [isConfirmingOrder, setIsConfirmingOrder] = useState(false);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
   const [orderError, setOrderError] = useState('');
+  const [checkoutData, setCheckoutData] = useState({
+    telefono: '',
+    direccion: '',
+  });
   const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
@@ -61,8 +65,8 @@ export default function Cart() {
     [user?.name, user?.lastname].map((value) => value?.trim()).filter(Boolean).join(' ') || 'Usuario'
   ), [user?.name, user?.lastname]);
   const orderSummaryMessage = useMemo(() => (
-    `Hola Wuepa Accesorios, soy ${customerName} y quiero hacer este pedido:\n\n${items.map((item) => `${item.name}\nCodigo: ${item.code}\nCantidad: ${item.quantity}\nPrecio: ${formatCopCurrency(item.price)}`).join('\n\n')}\n\nTotal estimado: ${formatCopCurrency(total)}`
-  ), [customerName, items, total]);
+    `Hola Wuepa Accesorios, soy ${customerName} y quiero hacer este pedido:\n\nTelefono: ${checkoutData.telefono}\nDireccion: ${checkoutData.direccion}\n\n${items.map((item) => `${item.name}\nCodigo: ${item.code}\nCantidad: ${item.quantity}\nPrecio: ${formatCopCurrency(item.price)}`).join('\n\n')}\n\nTotal estimado: ${formatCopCurrency(total)}`
+  ), [checkoutData.direccion, checkoutData.telefono, customerName, items, total]);
   const whatsappOrderUrl = items.length === 0 ? '' : `https://wa.me/${WUEPA_WHATSAPP_PHONE}?text=${encodeURIComponent(orderSummaryMessage)}`;
   const mobileMenuItems = [
     { label: 'Inicio', to: '/buy' },
@@ -71,7 +75,9 @@ export default function Cart() {
     { label: 'Nosotros', to: '/about' },
   ];
 
-  function handleContinueOrder() {
+  function handleContinueOrder(event?: React.FormEvent<HTMLFormElement>) {
+    event?.preventDefault();
+
     if (items.length === 0) {
       return;
     }
@@ -80,7 +86,7 @@ export default function Cart() {
     setIsSubmittingOrder(true);
     setOrderError('');
 
-    createBackendCustomerOrder(items, user)
+    createBackendCustomerOrder(items, user, checkoutData)
       .then(() => {
         if (whatsappWindow) {
           whatsappWindow.location.href = whatsappOrderUrl;
@@ -272,31 +278,58 @@ export default function Cart() {
                 </li>
               ))}
             </ul>
-            <div className="cart-order-confirmation-total">
-              <span>Total estimado</span>
-              <strong>{formatCopCurrency(total)}</strong>
-            </div>
-            {orderError ? (
-              <p className="cart-order-error" role="alert">{orderError}</p>
-            ) : null}
-            <div className="cart-order-confirmation-actions">
-              <button
-                type="button"
-                className="whatsapp-btn cart-checkout-button"
-                onClick={handleContinueOrder}
-                disabled={isSubmittingOrder}
-              >
-                {isSubmittingOrder ? 'Guardando pedido...' : 'Seguir con el pedido'}
-              </button>
-              <button
-                type="button"
-                className="cart-cancel-order-button"
-                onClick={() => setIsConfirmingOrder(false)}
-                disabled={isSubmittingOrder}
-              >
-                Cancelar
-              </button>
-            </div>
+            <form className="cart-customer-form" onSubmit={handleContinueOrder}>
+              <div className="cart-customer-fields">
+                <label>
+                  <span>Telefono</span>
+                  <input
+                    type="tel"
+                    value={checkoutData.telefono}
+                    onChange={(event) => setCheckoutData((current) => ({ ...current, telefono: event.target.value }))}
+                    autoComplete="tel"
+                    placeholder="Ej. 317 7816764"
+                    required
+                    disabled={isSubmittingOrder}
+                  />
+                </label>
+                <label>
+                  <span>Direccion</span>
+                  <input
+                    type="text"
+                    value={checkoutData.direccion}
+                    onChange={(event) => setCheckoutData((current) => ({ ...current, direccion: event.target.value }))}
+                    autoComplete="street-address"
+                    placeholder="Direccion de entrega"
+                    required
+                    disabled={isSubmittingOrder}
+                  />
+                </label>
+              </div>
+              <div className="cart-order-confirmation-total">
+                <span>Total estimado</span>
+                <strong>{formatCopCurrency(total)}</strong>
+              </div>
+              {orderError ? (
+                <p className="cart-order-error" role="alert">{orderError}</p>
+              ) : null}
+              <div className="cart-order-confirmation-actions">
+                <button
+                  type="submit"
+                  className="whatsapp-btn cart-checkout-button"
+                  disabled={isSubmittingOrder}
+                >
+                  {isSubmittingOrder ? 'Guardando pedido...' : 'Seguir con el pedido'}
+                </button>
+                <button
+                  type="button"
+                  className="cart-cancel-order-button"
+                  onClick={() => setIsConfirmingOrder(false)}
+                  disabled={isSubmittingOrder}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
           </section>
         </div>
       ) : null}
