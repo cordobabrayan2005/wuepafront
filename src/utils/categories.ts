@@ -5,7 +5,7 @@ export const DEFAULT_CATEGORIES: ProductCategoryRecord[] = [
   { id: 'aretes', nombre: 'Aretes' },
   { id: 'pulseras', nombre: 'Pulseras' },
   { id: 'anillos', nombre: 'Anillos' },
-  { id: 'paquetes', nombre: 'Paquetes' },
+  { id: 'paquetes', nombre: 'Set de accesorios' },
 ];
 
 export function getCategoryLabel(categories: ProductCategoryRecord[], id: string) {
@@ -26,7 +26,12 @@ export function getCategoryIcon(id: string) {
 
 export async function loadCategories() {
   try {
-    return await api.getCategories();
+    const categories = await api.getCategories();
+    return categories.map((category) => (
+      category.id === 'paquetes'
+        ? { ...category, nombre: 'Set de accesorios' }
+        : category
+    ));
   } catch {
     return DEFAULT_CATEGORIES;
   }

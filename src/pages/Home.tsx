@@ -154,7 +154,7 @@ export default function Home() {
               Lanzamiento
               <span>de pagina web</span>
             </h2>
-            <small>Collares, pulseras, aretes, anillos y paquetes con el detalle dorado que identifica a Wuepa.</small>
+            <small>Collares, pulseras, aretes, anillos y sets de accesorios con el detalle dorado que identifica a Wuepa.</small>
             <button type="button" onClick={() => navigate('/productssin')}>
               Explorar coleccion
             </button>
@@ -193,7 +193,7 @@ export default function Home() {
           </button>
           <button type="button" onClick={() => navigate('/productssin?category=paquetes')} className="wuepa-quick-card wuepa-quick-card-paquetes">
             <ImageWithFallback src="/CatPaquetes.png" alt="" className="wuepa-quick-image-paquetes" />
-            <span>Paquetes</span>
+            <span>Set de accesorios</span>
             <small>Ver mas →</small>
           </button>
         </section>
@@ -266,7 +266,7 @@ export default function Home() {
               <li><a href="#">Aretes</a></li>
               <li><a href="#">Pulseras</a></li>
               <li><a href="#">Anillos</a></li>
-              <li><a href="#">Paquetes</a></li>
+              <li><a href="#">Set de accesorios</a></li>
             </ul>
           </div>
 
