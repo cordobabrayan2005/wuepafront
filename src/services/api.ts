@@ -285,21 +285,49 @@ async function requestBackend<T>(
   options: RequestInit = {},
   withAuth = false
 ): Promise<T> {
-  const token = withAuth ? await getFirebaseToken() : null;
+  let token: string | null = null;
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers || {}),
-    },
-  });
+  try {
+    token = withAuth ? await getFirebaseToken() : null;
+  } catch {
+    throw new Error('Tu sesion vencio. Inicia sesion de nuevo para continuar.');
+  }
+
+  let response: Response;
+
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers || {}),
+      },
+    });
+  } catch {
+    throw new Error('No pudimos conectar con Wuepa. Revisa tu internet e intenta nuevamente.');
+  }
 
   const payload = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(payload?.message ?? 'Error en la solicitud al backend.');
+    if (response.status === 401) {
+      throw new Error('Tu sesion vencio. Inicia sesion de nuevo para continuar.');
+    }
+
+    if (response.status === 403) {
+      throw new Error('No tienes permisos para realizar esta accion.');
+    }
+
+    if (response.status === 404) {
+      throw new Error('No encontramos el servicio necesario para guardar el pedido. Intenta mas tarde.');
+    }
+
+    if (response.status >= 500) {
+      throw new Error('Wuepa esta teniendo problemas para guardar el pedido. Intenta nuevamente en unos minutos.');
+    }
+
+    throw new Error(payload?.message ?? 'No pudimos completar la solicitud. Revisa los datos e intenta nuevamente.');
   }
 
   return payload;

@@ -75,6 +75,41 @@ export default function Cart() {
     { label: 'Nosotros', to: '/about' },
   ];
 
+  function getCheckoutErrorMessage(error: unknown) {
+    const message = error instanceof Error ? error.message : '';
+    const normalizedMessage = message.toLowerCase();
+
+    if (!checkoutData.telefono.trim() || !checkoutData.direccion.trim()) {
+      return 'Escribe tu telefono y direccion para poder continuar con el pedido.';
+    }
+
+    if (normalizedMessage.includes('telefono') || normalizedMessage.includes('direccion') || normalizedMessage.includes('datos del cliente')) {
+      return 'Revisa tu telefono y direccion. Necesitamos esos datos completos para coordinar la entrega.';
+    }
+
+    if (normalizedMessage.includes('sesion')) {
+      return 'Tu sesion vencio. Inicia sesion de nuevo y vuelve a finalizar el pedido.';
+    }
+
+    if (normalizedMessage.includes('suficientes unidades') || normalizedMessage.includes('stock')) {
+      return 'Uno de los productos ya no tiene unidades suficientes. Revisa las cantidades del carrito.';
+    }
+
+    if (normalizedMessage.includes('producto no encontrado')) {
+      return 'Uno de los productos ya no esta disponible. Quitalo del carrito e intenta de nuevo.';
+    }
+
+    if (normalizedMessage.includes('servicio necesario') || normalizedMessage.includes('guardar el pedido')) {
+      return 'No pudimos guardar tu pedido en este momento. Intenta de nuevo en unos minutos.';
+    }
+
+    if (normalizedMessage.includes('conectar')) {
+      return 'No pudimos conectar con Wuepa. Revisa tu internet e intenta nuevamente.';
+    }
+
+    return message || 'No pudimos guardar tu pedido. Intenta nuevamente en unos minutos.';
+  }
+
   function handleContinueOrder(event?: React.FormEvent<HTMLFormElement>) {
     event?.preventDefault();
 
@@ -100,7 +135,7 @@ export default function Cart() {
       })
       .catch((error) => {
         whatsappWindow?.close();
-        setOrderError(error instanceof Error ? error.message : 'No se pudo guardar el pedido.');
+        setOrderError(getCheckoutErrorMessage(error));
       })
       .finally(() => {
         setIsSubmittingOrder(false);
