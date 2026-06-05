@@ -154,7 +154,7 @@ export default function Home() {
               Lanzamiento
               <span>de pagina web</span>
             </h2>
-            <small>Collares, pulseras y aretes con el detalle dorado que identifica a Wuepa.</small>
+            <small>Collares, pulseras, aretes, anillos y paquetes con el detalle dorado que identifica a Wuepa.</small>
             <button type="button" onClick={() => navigate('/productssin')}>
               Explorar coleccion
             </button>
@@ -184,6 +184,16 @@ export default function Home() {
           <button type="button" onClick={() => navigate('/productssin?category=aretes')} className="wuepa-quick-card">
             <ImageWithFallback src="/AretesWue.png" alt="" />
             <span>Aretes</span>
+            <small>Ver mas →</small>
+          </button>
+          <button type="button" onClick={() => navigate('/productssin?category=anillos')} className="wuepa-quick-card wuepa-quick-card-anillos">
+            <ImageWithFallback src="/Anilloswue.png" alt="" className="wuepa-quick-image-anillos" />
+            <span>Anillos</span>
+            <small>Ver mas →</small>
+          </button>
+          <button type="button" onClick={() => navigate('/productssin?category=paquetes')} className="wuepa-quick-card wuepa-quick-card-paquetes">
+            <ImageWithFallback src="/CatPaquetes.png" alt="" className="wuepa-quick-image-paquetes" />
+            <span>Paquetes</span>
             <small>Ver mas →</small>
           </button>
         </section>
@@ -255,6 +265,8 @@ export default function Home() {
               <li><a href="#">Collares</a></li>
               <li><a href="#">Aretes</a></li>
               <li><a href="#">Pulseras</a></li>
+              <li><a href="#">Anillos</a></li>
+              <li><a href="#">Paquetes</a></li>
             </ul>
           </div>
 

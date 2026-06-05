@@ -243,6 +243,20 @@ export default function Buy() {
                 <h4>PULSERAS</h4>
               </div>
             </Link>
+            <Link to="/products?category=anillos" className="category-card category-card-anillos">
+              <img src="/Anilloswue.png" alt="Anillos" className="category-image-anillos" loading="lazy" decoding="async" />
+              <div className="backdrop" />
+              <div className="content">
+                <h4>ANILLOS</h4>
+              </div>
+            </Link>
+            <Link to="/products?category=paquetes" className="category-card category-card-paquetes">
+              <img src="/CatPaquetes.png" alt="Paquetes" className="category-image-paquetes" loading="lazy" decoding="async" />
+              <div className="backdrop" />
+              <div className="content">
+                <h4>PAQUETES</h4>
+              </div>
+            </Link>
           </div>
 
           <div className="products-toolbar buy-products-toolbar">

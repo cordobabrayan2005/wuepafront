@@ -2908,7 +2908,7 @@ main.auth-wrapper.signup-page .login-button {
 /* .wuepa-quick-showcase da forma a la pagina de inicio; ajusta estructura y posicion, espaciado. */
 .wuepa-quick-showcase {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: clamp(1rem, 1.8vw, 1.5rem);
   max-width: 94rem;
   margin: 1.55rem auto 1.8rem;
@@ -2917,6 +2917,7 @@ main.auth-wrapper.signup-page .login-button {
 
 /* .wuepa-quick-showcase button da forma a la pagina de inicio; ajusta estructura y posicion, espaciado, apariencia visual. */
 .wuepa-quick-showcase button {
+  grid-column: span 2;
   display: block;
   position: relative;
   min-height: clamp(10rem, 15vw, 13rem);
@@ -2929,6 +2930,14 @@ main.auth-wrapper.signup-page .login-button {
   box-shadow: 0 14px 28px rgba(72, 51, 25, 0.1);
   padding: 1.5rem 1.8rem;
   text-align: left;
+}
+
+.wuepa-quick-showcase .wuepa-quick-card-anillos {
+  grid-column: 2 / span 2;
+}
+
+.wuepa-quick-showcase .wuepa-quick-card-paquetes {
+  grid-column: 4 / span 2;
 }
 
 /* .wuepa-quick-showcase img da forma a la pagina de inicio; ajusta estructura y posicion, encuadre de imagenes. */
@@ -2944,6 +2953,16 @@ main.auth-wrapper.signup-page .login-button {
 /* .wuepa-quick-showcase .wuepa-quick-image-collares da forma a la pagina de inicio; ajusta encuadre de imagenes. */
 .wuepa-quick-showcase .wuepa-quick-image-collares {
   object-position: center 69%;
+}
+
+/* .wuepa-quick-showcase .wuepa-quick-image-anillos ajusta el encuadre de la categoria Anillos. */
+.wuepa-quick-showcase .wuepa-quick-image-anillos {
+  object-position: center 43%;
+}
+
+/* .wuepa-quick-showcase .wuepa-quick-image-paquetes ajusta el encuadre de la categoria Paquetes. */
+.wuepa-quick-showcase .wuepa-quick-image-paquetes {
+  object-position: center 62%;
 }
 
 /* .wuepa-quick-showcase button::after da forma a la pagina de inicio; ajusta estructura y posicion, apariencia visual. */
@@ -3530,6 +3549,7 @@ main.auth-wrapper.signup-page .login-button {
 
   /* .wuepa-quick-showcase button da forma a la pagina de inicio; ajusta estructura y posicion, espaciado, apariencia visual. */
   .wuepa-quick-showcase button {
+    grid-column: auto;
     display: grid;
     grid-template-columns: minmax(5.4rem, 7.2rem) minmax(0, 1fr);
     grid-template-rows: auto auto;
@@ -3541,6 +3561,11 @@ main.auth-wrapper.signup-page .login-button {
     border-radius: 0.9rem;
     background: #fffdf7;
     box-shadow: 0 10px 24px rgba(72, 51, 25, 0.08);
+  }
+
+  .wuepa-quick-showcase .wuepa-quick-card-anillos,
+  .wuepa-quick-showcase .wuepa-quick-card-paquetes {
+    grid-column: auto;
   }
 
   /* .wuepa-quick-showcase button::after da forma a la pagina de inicio; ajusta detalle visual del componente. */
@@ -3658,7 +3683,19 @@ main.auth-wrapper.signup-page .login-button {
 @media (min-width: 768px) {
   /* .wuepa-categories da forma a este bloque visual; ajusta estructura y posicion. */
   .wuepa-categories {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .wuepa-categories .category-card {
+    grid-column: span 2;
+  }
+
+  .wuepa-categories .category-card-anillos {
+    grid-column: 2 / span 2;
+  }
+
+  .wuepa-categories .category-card-paquetes {
+    grid-column: 4 / span 2;
   }
 }
 
@@ -3683,6 +3720,21 @@ main.auth-wrapper.signup-page .login-button {
 /* .wuepa-categories .category-card .category-image-collares da forma a este bloque visual; ajusta encuadre de imagenes. */
 .wuepa-categories .category-card .category-image-collares {
   object-position: center 39%;
+}
+
+/* .wuepa-categories .category-card .category-image-anillos ajusta el foco visual de la foto de Anillos. */
+.wuepa-categories .category-card .category-image-anillos {
+  object-fit: cover;
+  object-position: 55% 48%;
+  transform: scale(1.03);
+  transform-origin: 55% 48%;
+  filter: saturate(1.12) contrast(1.08) brightness(1.03);
+}
+
+/* .wuepa-categories .category-card .category-image-paquetes ajusta el encuadre de la foto de Paquetes. */
+.wuepa-categories .category-card .category-image-paquetes {
+  object-fit: cover;
+  object-position: center 78%;
 }
 
 /* .wuepa-categories .category-card .backdrop da forma a este bloque visual; ajusta apariencia visual. */

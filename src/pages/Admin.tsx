@@ -36,6 +36,8 @@ const categoryLabels: Record<ProductCategory, string> = {
   collares: 'Collares',
   aretes: 'Aretes',
   pulseras: 'Pulseras',
+  anillos: 'Anillos',
+  paquetes: 'Paquetes',
 };
 
 export default function Admin() {
@@ -917,6 +919,8 @@ export default function Admin() {
                         <option value="collares">Collares</option>
                         <option value="aretes">Aretes</option>
                         <option value="pulseras">Pulseras</option>
+                        <option value="anillos">Anillos</option>
+                        <option value="paquetes">Paquetes</option>
                       </select>
                       <small className="admin-field-help">Esto define donde aparecera dentro del catalogo.</small>
                     </label>

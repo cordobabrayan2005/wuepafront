@@ -81,7 +81,7 @@ export default function ProductsSin() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const category = params.get('category');
-    if (category === 'collares' || category === 'aretes' || category === 'pulseras') {
+    if (category === 'collares' || category === 'aretes' || category === 'pulseras' || category === 'anillos' || category === 'paquetes') {
       setActiveCategory(category);
     }
   }, [location.search]);
@@ -92,6 +92,11 @@ export default function ProductsSin() {
     { key: 'aretes', label: 'Aretes', icon: '✨' },
     { key: 'pulseras', label: 'Pulseras', icon: '💍' }
   ];
+  categories.push(
+    { key: 'anillos', label: 'Anillos', icon: 'AN' },
+    { key: 'paquetes', label: 'Paquetes', icon: 'PK' }
+  );
+
   const mobileMenuItems = [
     { label: 'Inicio', to: '/' },
     { label: 'Catalogo', to: '/productssin', isActive: true },

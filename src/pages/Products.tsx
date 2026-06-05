@@ -40,6 +40,8 @@ export default function Products() {
     collares: 'Collares',
     aretes: 'Aretes',
     pulseras: 'Pulseras',
+    anillos: 'Anillos',
+    paquetes: 'Paquetes',
   };
 
   useEffect(() => {
@@ -109,7 +111,7 @@ export default function Products() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const category = params.get('category');
-    if (category === 'collares' || category === 'aretes' || category === 'pulseras') {
+    if (category === 'collares' || category === 'aretes' || category === 'pulseras' || category === 'anillos' || category === 'paquetes') {
       setActiveCategory(category);
     }
   }, [location.search]);
@@ -120,6 +122,11 @@ export default function Products() {
     { key: 'aretes', label: 'Aretes', icon: '✨' },
     { key: 'pulseras', label: 'Pulseras', icon: '💍' }
   ];
+  categories.push(
+    { key: 'anillos', label: 'Anillos', icon: 'AN' },
+    { key: 'paquetes', label: 'Paquetes', icon: 'PK' }
+  );
+
   const mobileMenuItems = [
     { label: 'Inicio', to: '/buy' },
     { label: 'Productos', to: '/products', isActive: true },

@@ -1,6 +1,6 @@
 import { api, type Product } from '../services/api';
 
-export type ProductCategory = 'collares' | 'aretes' | 'pulseras';
+export type ProductCategory = 'collares' | 'aretes' | 'pulseras' | 'anillos' | 'paquetes';
 
 export interface ProductCatalogItem {
   id: string;
@@ -78,6 +78,14 @@ export function getDefaultProductImage(category: ProductCategory) {
 
   if (category === 'pulseras') {
     return accessoryImage('pulseraperlas.png');
+  }
+
+  if (category === 'anillos') {
+    return '/Anilloswue.png';
+  }
+
+  if (category === 'paquetes') {
+    return '/CatPaquetes.png';
   }
 
   return accessoryImage('Collarcorazon.png');
@@ -265,7 +273,7 @@ function isProductCatalogItem(value: unknown): value is ProductCatalogItem {
   const product = value as Partial<ProductCatalogItem>;
 
   return typeof product.id === 'string'
-    && (product.category === 'collares' || product.category === 'aretes' || product.category === 'pulseras')
+    && (product.category === 'collares' || product.category === 'aretes' || product.category === 'pulseras' || product.category === 'anillos' || product.category === 'paquetes')
     && typeof product.name === 'string'
     && typeof product.description === 'string'
     && typeof product.units === 'number'
@@ -323,11 +331,13 @@ export function groupProductsByCategory(products: ProductCatalogItem[]) {
     collares: products.filter((product) => product.category === 'collares'),
     aretes: products.filter((product) => product.category === 'aretes'),
     pulseras: products.filter((product) => product.category === 'pulseras'),
+    anillos: products.filter((product) => product.category === 'anillos'),
+    paquetes: products.filter((product) => product.category === 'paquetes'),
   } as const;
 }
 
 function normalizeProductCategory(category: string): ProductCategory {
-  if (category === 'aretes' || category === 'pulseras') {
+  if (category === 'aretes' || category === 'pulseras' || category === 'anillos' || category === 'paquetes') {
     return category;
   }
 
