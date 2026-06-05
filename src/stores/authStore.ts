@@ -1,5 +1,5 @@
-import { create } from 'zustand';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { create } from 'zustand';
 import { auth } from '../config/firebase';
 import { api, type AuthUser } from '../services/api';
 
@@ -14,16 +14,31 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   socialLogin: (provider: 'google' | 'facebook') => Promise<void>;
   logout: () => void;
-  checkAuth: () => void;
+}
+
+function getStoredUser(firebaseUid?: string): User | null {
+  try {
+    const storedUser = localStorage.getItem('user');
+    const parsedUser = storedUser ? JSON.parse(storedUser) as Partial<User> : null;
+
+    if (!parsedUser || typeof parsedUser.id !== 'string') {
+      return null;
+    }
+
+    if (firebaseUid && parsedUser.id !== firebaseUid) {
+      return null;
+    }
+
+    return parsedUser as User;
+  } catch {
+    return null;
+  }
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthed: false,
-
-  // 🔥 IMPORTANTE: empieza en true
   isLoading: true,
-
   error: null,
 
   setUser: (user) => {
@@ -39,6 +54,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   login: async (email: string, password: string) => {
     set({ isLoading: true, error: null });
+
     try {
       const { user, token } = await api.login(email, password);
 
@@ -50,10 +66,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('token', token);
-
     } catch (error) {
       set({
-        error: error instanceof Error ? error.message : 'No se pudo iniciar sesión'
+        error: error instanceof Error ? error.message : 'No se pudo iniciar sesion',
       });
       throw error;
     } finally {
@@ -63,6 +78,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   socialLogin: async (provider: 'google' | 'facebook') => {
     set({ isLoading: true, error: null });
+
     try {
       const { user, token } = await api.socialLogin('', provider);
 
@@ -74,10 +90,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('token', token);
-
     } catch (error) {
       set({
-        error: error instanceof Error ? error.message : `Error en login social con ${provider}`
+        error: error instanceof Error ? error.message : `Error en login social con ${provider}`,
       });
       throw error;
     } finally {
@@ -97,59 +112,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.removeItem('user');
     localStorage.removeItem('token');
   },
-
-  // 🔥 CORREGIDO COMPLETAMENTE
-  checkAuth: () => {
-    set({ isLoading: true });
-
-    const currentUser = auth.currentUser;
-
-    if (!currentUser) {
-
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
-
-      set({
-        user: null,
-        isAuthed: false,
-        isLoading: false,
-        error: null,
-      });
-
-      return;
-    }
-
-    void api.me()
-      .then((user) => {
-        set({
-          user,
-          isAuthed: true,
-          error: null
-        });
-
-        localStorage.setItem('user', JSON.stringify(user));
-      })
-      .catch(() => {
-        set({
-          user: null,
-          isAuthed: false,
-          error: 'No se pudo validar la sesión'
-        });
-
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-      })
-      .finally(() => {
-        set({ isLoading: false });
-      });
-  }
 }));
 
-
-// 🔥 ESTE ES EL CORE REAL DE TU AUTENTICACIÓN
+// Firebase emits once after restoring persisted authentication. Protected routes
+// stay in loading state until that first result arrives, preserving the current URL.
 onAuthStateChanged(auth, async (firebaseUser) => {
-
-  // 🔥 siempre entrar en loading al detectar cambio
   useAuthStore.setState({ isLoading: true });
 
   if (!firebaseUser) {
@@ -178,18 +145,24 @@ onAuthStateChanged(auth, async (firebaseUser) => {
 
     localStorage.setItem('user', JSON.stringify(user));
     localStorage.setItem('token', token);
-
   } catch (error) {
+    const storedUser = getStoredUser(firebaseUser.uid);
+
+    if (storedUser) {
+      useAuthStore.setState({
+        user: storedUser,
+        isAuthed: true,
+        isLoading: false,
+        error: null,
+      });
+      return;
+    }
+
     useAuthStore.setState({
       user: null,
       isAuthed: false,
       isLoading: false,
-      error: error instanceof Error
-        ? error.message
-        : 'No se pudo sincronizar la sesión',
+      error: error instanceof Error ? error.message : 'No se pudo sincronizar la sesion',
     });
-
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
   }
 });

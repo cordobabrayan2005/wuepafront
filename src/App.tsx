@@ -42,13 +42,12 @@ export default function App() {
 function Shell() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const { isAuthed, logout, checkAuth } = useAuthStore();  
+  const { logout } = useAuthStore();  
 
   /**
    * Realiza comprobaciones iniciales de autenticación y suscribe a eventos de apertura/cierre del menú lateral.
    */
   useEffect(() => {
-    checkAuth();
     function onToggle() {
       setSidebarOpen((s) => !s);
     }
