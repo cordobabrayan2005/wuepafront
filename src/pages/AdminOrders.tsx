@@ -4,8 +4,8 @@ import { CheckCircle2, PackageCheck, ShoppingBag } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { api } from '../services/api';
 import { formatCopCurrency } from '../utils/currency';
-import { CustomerOrder, CustomerOrderItem, loadCustomerOrders, markCustomerOrderAsPaid } from '../utils/orders';
-import { loadProductsCatalog, mapBackendProductToCatalogItem, ProductCatalogItem, saveProductsCatalog } from '../utils/productCatalog';
+import { CustomerOrder, loadBackendCustomerOrders, loadCustomerOrders, markBackendCustomerOrderAsPaid } from '../utils/orders';
+import { loadProductsCatalog, mapBackendProductToCatalogItem, ProductCatalogItem } from '../utils/productCatalog';
 
 type OrdersToast = {
   text: string;
@@ -19,17 +19,6 @@ function formatOrderDate(value: string) {
   }).format(new Date(value));
 }
 
-function getMatchingProduct(products: ProductCatalogItem[], item: CustomerOrderItem) {
-  const normalizedItemCode = item.code.trim().toUpperCase();
-  const normalizedItemName = item.name.trim().toLowerCase();
-
-  return products.find((candidate) => (
-    candidate.id === item.id
-    || candidate.code.trim().toUpperCase() === normalizedItemCode
-    || candidate.name.trim().toLowerCase() === normalizedItemName
-  ));
-}
-
 export default function AdminOrders() {
   const [orders, setOrders] = useState<CustomerOrder[]>(() => loadCustomerOrders());
   const [products, setProducts] = useState<ProductCatalogItem[]>([]);
@@ -38,9 +27,12 @@ export default function AdminOrders() {
 
   useEffect(() => {
     function syncOrders() {
-      setOrders(loadCustomerOrders());
+      loadBackendCustomerOrders()
+        .then(setOrders)
+        .catch(() => setOrders(loadCustomerOrders()));
     }
 
+    syncOrders();
     window.addEventListener('storage', syncOrders);
     window.addEventListener('wuepa-orders-updated', syncOrders as EventListener);
     return () => {
@@ -66,60 +58,17 @@ export default function AdminOrders() {
 
   async function handleAcceptPayment(order: CustomerOrder) {
     setActiveOrderId(order.id);
-    setToast({ text: 'Actualizando inventario...', type: 'info' });
+    setToast({ text: 'Actualizando pedido e inventario...', type: 'info' });
 
     try {
-      let latestBackendProducts: ProductCatalogItem[] = [];
+      await markBackendCustomerOrderAsPaid(order.id);
+      const [backendOrders, backendProducts] = await Promise.all([
+        loadBackendCustomerOrders(),
+        api.getProducts(),
+      ]);
 
-      try {
-        latestBackendProducts = (await api.getProducts()).map(mapBackendProductToCatalogItem);
-      } catch {
-        latestBackendProducts = [];
-      }
-
-      const latestLocalProducts = loadProductsCatalog();
-      const missingLocalItems: CustomerOrderItem[] = [];
-
-      await Promise.all(order.items.map((item) => {
-        const product = getMatchingProduct(latestBackendProducts, item);
-
-        if (!product) {
-          missingLocalItems.push(item);
-          return Promise.resolve();
-        }
-
-        const nextStock = Math.max(0, product.units - item.quantity);
-        return api.updateProduct(product.id, { stock: nextStock });
-      }));
-
-      const updatedLocalProducts = latestLocalProducts.map((product) => {
-        const orderedItem = missingLocalItems.find((item) => getMatchingProduct([product], item));
-
-        return orderedItem
-          ? { ...product, units: Math.max(0, product.units - orderedItem.quantity) }
-          : product;
-      });
-
-      if (missingLocalItems.length > 0) {
-        const missingItemsWithoutLocalProduct = missingLocalItems.filter((item) => !getMatchingProduct(latestLocalProducts, item));
-
-        if (missingItemsWithoutLocalProduct.length > 0) {
-          throw new Error(`No se encontro el producto ${missingItemsWithoutLocalProduct[0].name}.`);
-        }
-
-        saveProductsCatalog(updatedLocalProducts);
-      }
-
-      const updatedBackendProducts = latestBackendProducts.map((product) => {
-        const orderedItem = order.items.find((item) => getMatchingProduct([product], item));
-
-        return orderedItem
-          ? { ...product, units: Math.max(0, product.units - orderedItem.quantity) }
-          : product;
-      });
-
-      setProducts(updatedBackendProducts.length > 0 ? updatedBackendProducts : updatedLocalProducts);
-      setOrders(markCustomerOrderAsPaid(order.id));
+      setOrders(backendOrders);
+      setProducts(backendProducts.map(mapBackendProductToCatalogItem));
       setToast({ text: 'Pedido aceptado e inventario actualizado.', type: 'success' });
     } catch (error) {
       setToast({

@@ -6815,6 +6815,18 @@ body.modal-open {
   margin-top: 0;
 }
 
+/* .cart-order-error da forma a el carrito de compras; ajusta espaciado, apariencia visual, tipografia. */
+.cart-order-error {
+  margin: 0.8rem 0 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #f0a7a7;
+  border-radius: 8px;
+  background: #fff1f1;
+  color: #8f1f1f;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
 /* .cart-cancel-order-button da forma a el carrito de compras; ajusta estructura y posicion, espaciado, apariencia visual. */
 .cart-cancel-order-button {
   width: 100%;

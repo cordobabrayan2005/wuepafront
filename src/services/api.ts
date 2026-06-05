@@ -52,6 +52,41 @@ export interface Product extends ProductPayload {
   id: string;
 }
 
+export type BackendOrderStatus = 'Pendiente' | 'Pagado' | 'Cancelado';
+
+export interface BackendOrderItem {
+  productId: string;
+  codigo: string;
+  nombre: string;
+  imagenUrl: string;
+  cantidad: number;
+  precioUnitario: number;
+  subtotal: number;
+}
+
+export interface BackendOrderCustomerData {
+  nombre: string;
+  correo: string;
+  telefono: string;
+  direccion: string;
+}
+
+export interface BackendOrder {
+  id: string;
+  clienteId: string;
+  productos: BackendOrderItem[];
+  total: number;
+  estado: BackendOrderStatus;
+  clienteData: BackendOrderCustomerData;
+  fechaCreacion: string | { seconds?: number; _seconds?: number; nanoseconds?: number; _nanoseconds?: number };
+  fechaActualizacion: string | { seconds?: number; _seconds?: number; nanoseconds?: number; _nanoseconds?: number };
+}
+
+export interface CreateOrderPayload {
+  productos: Array<{ id: string; cantidad: number }>;
+  clienteData: BackendOrderCustomerData;
+}
+
 interface InstagramSyncResponse {
   success: boolean;
   imported: number;
@@ -70,6 +105,8 @@ interface BackendResponse<T> {
   success: boolean;
   message?: string;
   user?: T;
+  order?: T;
+  orders?: T;
 }
 
 const USERS_COLLECTION = 'usuarios';
@@ -454,6 +491,38 @@ export const api = {
       `/api/products/${id}`,
       {
         method: 'DELETE',
+      },
+      true
+    );
+  },
+
+  createOrder: async (orderData: CreateOrderPayload) => {
+    return requestBackend<{ success: boolean; order: BackendOrder }>(
+      '/api/orders',
+      {
+        method: 'POST',
+        body: JSON.stringify(orderData),
+      },
+      true
+    );
+  },
+
+  getAdminOrders: async () => {
+    return requestBackend<{ success: boolean; orders: BackendOrder[] }>(
+      '/api/orders',
+      {
+        method: 'GET',
+      },
+      true
+    );
+  },
+
+  updateOrderStatus: async (id: string, estado: BackendOrderStatus) => {
+    return requestBackend<{ success: boolean; order: BackendOrder }>(
+      `/api/orders/${id}/status`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ estado }),
       },
       true
     );

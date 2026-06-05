@@ -1,8 +1,8 @@
-import type { AuthUser } from '../services/api';
+import { api, type AuthUser, type BackendOrder, type BackendOrderCustomerData } from '../services/api';
 import type { CartItem } from './cart';
 import { getCartItemsCount, getCartSubtotal } from './cart';
 
-export const WUEPA_WHATSAPP_PHONE = '573136704796';
+export const WUEPA_WHATSAPP_PHONE = '573177816764';
 export const ORDERS_STORAGE_KEY = 'wuepa-customer-orders';
 
 export type CustomerOrderStatus = 'pending' | 'paid';
@@ -50,6 +50,50 @@ function getCustomerName(user: AuthUser | null) {
     .map((value) => value?.trim())
     .filter(Boolean)
     .join(' ') || 'Usuario';
+}
+
+function getOrderDate(value: BackendOrder['fechaCreacion']) {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  const seconds = value.seconds ?? value._seconds;
+  const nanoseconds = value.nanoseconds ?? value._nanoseconds ?? 0;
+
+  if (typeof seconds === 'number') {
+    return new Date((seconds * 1000) + Math.floor(nanoseconds / 1000000)).toISOString();
+  }
+
+  return new Date().toISOString();
+}
+
+function getCustomerData(user: AuthUser | null): BackendOrderCustomerData {
+  return {
+    nombre: getCustomerName(user),
+    correo: user?.email ?? '',
+    telefono: '',
+    direccion: '',
+  };
+}
+
+export function mapBackendOrderToCustomerOrder(order: BackendOrder): CustomerOrder {
+  return {
+    id: order.id,
+    createdAt: getOrderDate(order.fechaCreacion),
+    customerName: order.clienteData?.nombre || 'Usuario',
+    customerEmail: order.clienteData?.correo || '',
+    status: order.estado === 'Pagado' ? 'paid' : 'pending',
+    items: (order.productos || []).map((item) => ({
+      id: item.productId,
+      code: item.codigo,
+      name: item.nombre,
+      price: item.precioUnitario,
+      quantity: item.cantidad,
+      image: item.imagenUrl,
+    })),
+    itemCount: (order.productos || []).reduce((total, item) => total + item.cantidad, 0),
+    total: order.total,
+  };
 }
 
 export function loadCustomerOrders() {
@@ -100,6 +144,18 @@ export function createCustomerOrder(items: CartItem[], user: AuthUser | null): C
   };
 }
 
+export async function createBackendCustomerOrder(items: CartItem[], user: AuthUser | null) {
+  const response = await api.createOrder({
+    productos: items.map((item) => ({
+      id: item.id,
+      cantidad: item.quantity,
+    })),
+    clienteData: getCustomerData(user),
+  });
+
+  return mapBackendOrderToCustomerOrder(response.order);
+}
+
 export function addCustomerOrder(order: CustomerOrder) {
   const nextOrders = [order, ...loadCustomerOrders()];
   saveCustomerOrders(nextOrders);
@@ -115,4 +171,17 @@ export function markCustomerOrderAsPaid(orderId: string) {
 
   saveCustomerOrders(nextOrders);
   return nextOrders;
+}
+
+export async function loadBackendCustomerOrders() {
+  const response = await api.getAdminOrders();
+  const backendOrders = response.orders.map(mapBackendOrderToCustomerOrder);
+
+  saveCustomerOrders(backendOrders);
+  return backendOrders;
+}
+
+export async function markBackendCustomerOrderAsPaid(orderId: string) {
+  const response = await api.updateOrderStatus(orderId, 'Pagado');
+  return mapBackendOrderToCustomerOrder(response.order);
 }

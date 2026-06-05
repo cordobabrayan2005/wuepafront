@@ -7,11 +7,13 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { formatCopCurrency } from '../utils/currency';
 import { CartItem, clearCart, getCartItemsCount, getCartSubtotal, loadCartItems, removeCartItem, updateCartItemQuantity } from '../utils/cart';
 import { useAuthStore } from '../stores/authStore';
-import { WUEPA_WHATSAPP_PHONE, addCustomerOrder, createCustomerOrder } from '../utils/orders';
+import { WUEPA_WHATSAPP_PHONE, createBackendCustomerOrder } from '../utils/orders';
 
 export default function Cart() {
   const [items, setItems] = useState<CartItem[]>(() => loadCartItems());
   const [isConfirmingOrder, setIsConfirmingOrder] = useState(false);
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+  const [orderError, setOrderError] = useState('');
   const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
@@ -74,10 +76,29 @@ export default function Cart() {
       return;
     }
 
-    addCustomerOrder(createCustomerOrder(items, user));
-    clearCart();
-    setItems([]);
-    setIsConfirmingOrder(false);
+    const whatsappWindow = window.open('', '_blank', 'noopener,noreferrer');
+    setIsSubmittingOrder(true);
+    setOrderError('');
+
+    createBackendCustomerOrder(items, user)
+      .then(() => {
+        if (whatsappWindow) {
+          whatsappWindow.location.href = whatsappOrderUrl;
+        } else {
+          window.open(whatsappOrderUrl, '_blank', 'noopener,noreferrer');
+        }
+
+        clearCart();
+        setItems([]);
+        setIsConfirmingOrder(false);
+      })
+      .catch((error) => {
+        whatsappWindow?.close();
+        setOrderError(error instanceof Error ? error.message : 'No se pudo guardar el pedido.');
+      })
+      .finally(() => {
+        setIsSubmittingOrder(false);
+      });
   }
 
   return (
@@ -255,20 +276,23 @@ export default function Cart() {
               <span>Total estimado</span>
               <strong>{formatCopCurrency(total)}</strong>
             </div>
+            {orderError ? (
+              <p className="cart-order-error" role="alert">{orderError}</p>
+            ) : null}
             <div className="cart-order-confirmation-actions">
-              <a
+              <button
+                type="button"
                 className="whatsapp-btn cart-checkout-button"
-                href={whatsappOrderUrl}
-                target="_blank"
-                rel="noreferrer"
                 onClick={handleContinueOrder}
+                disabled={isSubmittingOrder}
               >
-                Seguir con el pedido
-              </a>
+                {isSubmittingOrder ? 'Guardando pedido...' : 'Seguir con el pedido'}
+              </button>
               <button
                 type="button"
                 className="cart-cancel-order-button"
                 onClick={() => setIsConfirmingOrder(false)}
+                disabled={isSubmittingOrder}
               >
                 Cancelar
               </button>
