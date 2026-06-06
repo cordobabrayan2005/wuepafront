@@ -85,7 +85,7 @@ export default function Cart() {
     [user?.name, user?.lastname].map((value) => value?.trim()).filter(Boolean).join(' ') || 'Usuario'
   ), [user?.name, user?.lastname]);
   const orderSummaryMessage = useMemo(() => (
-    `Hola Wuepa Accesorios, soy ${customerName} y quiero hacer este pedido:\n\nTelefono: ${checkoutData.telefono}\nDireccion: ${checkoutData.direccion}\n\n${items.map((item) => `${item.name}\nCodigo: ${item.code}\nCantidad: ${item.quantity}\nPrecio: ${formatCopCurrency(item.price)}`).join('\n\n')}\n\nTotal estimado: ${formatCopCurrency(total)}`
+    `Hola Wuepa Accesorios, soy ${customerName} y quiero hacer este pedido:\n\nTelefono: ${checkoutData.telefono}\nDireccion: ${checkoutData.direccion}\n\n${items.map((item) => `${item.name}\nCodigo: ${item.code}\nCantidad: ${item.quantity}\nPrecio: ${formatCopCurrency(item.price)}`).join('\n\n')}\n\nTotal sin envío: ${formatCopCurrency(total)}`
   ), [checkoutData.direccion, checkoutData.telefono, customerName, items, total]);
   const whatsappOrderUrl = items.length === 0 ? '' : `https://wa.me/${WUEPA_WHATSAPP_PHONE}?text=${encodeURIComponent(orderSummaryMessage)}`;
   const mobileMenuItems = [
@@ -259,7 +259,7 @@ export default function Cart() {
           <p className="cart-kicker">Compra segura</p>
           <h2>Revisa tus joyas antes de finalizar el pedido</h2>
           <p>
-            Ajusta cantidades, revisa tu total estimado y luego continúa por WhatsApp para cerrar la compra.
+            Ajusta cantidades, revisa tu total sin envío y luego continúa por WhatsApp para cerrar la compra.
           </p>
         </div>
         <div className="cart-hero-badge">
@@ -340,7 +340,7 @@ export default function Cart() {
         <aside className="cart-summary-panel">
           <div className="cart-summary-card">
             <p className="cart-kicker">Resumen</p>
-            <h3>Total estimado</h3>
+            <h3>Total sin envío</h3>
             <div className="cart-summary-row">
               <span>Productos</span>
               <strong>{itemCount}</strong>
@@ -470,7 +470,7 @@ export default function Cart() {
                 </div>
               )}
               <div className="cart-order-confirmation-total">
-                <span>Total estimado</span>
+                <span>Total sin envío</span>
                 <strong>{formatCopCurrency(total)}</strong>
               </div>
               {orderError ? (
