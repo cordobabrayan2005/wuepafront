@@ -47,7 +47,7 @@ export default function Signup() {
   const [msgType, setMsgType] = useState<"success" | "error" | "info">("info");
 
   const navigate = useNavigate();
-  const checkAuth = useAuthStore((state) => state.checkAuth);
+  const setUser = useAuthStore((state) => state.setUser);
   const socialLogin = useAuthStore((state) => state.socialLogin);
   const logout = useAuthStore((state) => state.logout);
   const isLoading = useAuthStore((state) => state.isLoading);
@@ -108,8 +108,9 @@ export default function Signup() {
         password: form.password,
         confirmPassword: form.confirmPassword
       };
-      await api.signup(formData);
-      checkAuth();
+      const { user, token } = await api.signup(formData);
+      setUser(user);
+      localStorage.setItem("token", token);
       setMsg("Cuenta creada sin problemas. Redirigiendo a compras...");
       setMsgType("success");
       navigate("/buy", {
