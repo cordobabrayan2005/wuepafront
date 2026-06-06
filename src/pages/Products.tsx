@@ -4,7 +4,7 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import MobileBottomNav from '../components/MobileBottomNav';
 import MobileNavMenu from '../components/MobileNavMenu';
 import ScrollToTopButton from '../components/ScrollToTopButton';
-import { addProductToCart, getCartItemsCount, loadCartItems } from '../utils/cart';
+import { addProductToCart, getCachedCartItems, getCartItemsCount, loadCartItems } from '../utils/cart';
 import { formatCopCurrency } from '../utils/currency';
 import { getAvailableProducts, groupProductsByCategory, loadProductsCatalog, loadProductsCatalogFromBackend, ProductCategory, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
 import { DEFAULT_CATEGORIES, getCategoryIcon, loadCategories } from '../utils/categories';
@@ -32,7 +32,7 @@ export default function Products() {
   const [activeCategory, setActiveCategory] = useState<ProductCategory>('collares');
   // Estado para la búsqueda de productos
   const [searchQuery, setSearchQuery] = useState('');
-  const [cartCount, setCartCount] = useState(() => getCartItemsCount(loadCartItems()));
+  const [cartCount, setCartCount] = useState(() => getCartItemsCount(getCachedCartItems()));
   const [feedback, setFeedback] = useState('');
   const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
@@ -91,13 +91,12 @@ export default function Products() {
 
   useEffect(() => {
     function syncCartCount() {
-      setCartCount(getCartItemsCount(loadCartItems()));
+      setCartCount(getCartItemsCount(getCachedCartItems()));
     }
 
-    window.addEventListener('storage', syncCartCount);
+    loadCartItems().then((items) => setCartCount(getCartItemsCount(items))).catch(() => setCartCount(0));
     window.addEventListener('wuepa-cart-updated', syncCartCount as EventListener);
     return () => {
-      window.removeEventListener('storage', syncCartCount);
       window.removeEventListener('wuepa-cart-updated', syncCartCount as EventListener);
     };
   }, []);
@@ -127,15 +126,19 @@ export default function Products() {
     { label: 'Nosotros', to: '/about' },
   ];
 
-  const handleAddToCart = (product: ProductCatalogItem) => {
+  const handleAddToCart = async (product: ProductCatalogItem) => {
     if (product.units <= 0) {
       setFeedback(`${product.name} no tiene unidades disponibles.`);
       return;
     }
 
-    const nextItems = addProductToCart(product);
-    setCartCount(getCartItemsCount(nextItems));
-    setFeedback(`${product.name} se agrego al carrito.`);
+    try {
+      const nextItems = await addProductToCart(product);
+      setCartCount(getCartItemsCount(nextItems));
+      setFeedback(`${product.name} se agrego al carrito.`);
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : 'No se pudo guardar el carrito.');
+    }
   };
 
   // Productos de la categoría activa

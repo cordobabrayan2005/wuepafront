@@ -5,7 +5,7 @@ import MobileBottomNav from '../components/MobileBottomNav';
 import MobileNavMenu from '../components/MobileNavMenu';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { formatCopCurrency } from '../utils/currency';
-import { CartItem, clearCart, getCartItemsCount, getCartSubtotal, loadCartItems, removeCartItem, updateCartItemQuantity } from '../utils/cart';
+import { CartItem, clearCart, getCachedCartItems, getCartItemsCount, getCartSubtotal, loadCartItems, removeCartItem, updateCartItemQuantity } from '../utils/cart';
 import { useAuthStore } from '../stores/authStore';
 import { api } from '../services/api';
 import { WUEPA_WHATSAPP_PHONE, createBackendCustomerOrder } from '../utils/orders';
@@ -14,7 +14,7 @@ const INTERNATIONAL_PHONE_PATTERN = /^\+?[0-9\s()-]+$/;
 const ADDRESS_PATTERN = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9\s#.,°/-]+$/;
 
 export default function Cart() {
-  const [items, setItems] = useState<CartItem[]>(() => loadCartItems());
+  const [items, setItems] = useState<CartItem[]>(() => getCachedCartItems());
   const [isConfirmingOrder, setIsConfirmingOrder] = useState(false);
   const [isEditingCheckoutData, setIsEditingCheckoutData] = useState(false);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
@@ -33,13 +33,14 @@ export default function Cart() {
 
   useEffect(() => {
     function syncCart() {
-      setItems(loadCartItems());
+      setItems(getCachedCartItems());
     }
 
-    window.addEventListener('storage', syncCart);
+    loadCartItems().then(setItems).catch((error) => {
+      setOrderError(error instanceof Error ? error.message : 'No se pudo cargar el carrito.');
+    });
     window.addEventListener('wuepa-cart-updated', syncCart as EventListener);
     return () => {
-      window.removeEventListener('storage', syncCart);
       window.removeEventListener('wuepa-cart-updated', syncCart as EventListener);
     };
   }, []);
@@ -220,9 +221,9 @@ export default function Cart() {
         }
         return createBackendCustomerOrder(items, updatedUser ?? user, normalizedCheckoutData);
       })
-      .then(() => {
-        clearCart();
-        setItems([]);
+      .then(() => clearCart())
+      .then((nextItems) => {
+        setItems(nextItems);
         setIsConfirmingOrder(false);
         window.location.assign(whatsappOrderUrl);
       })
@@ -282,9 +283,10 @@ export default function Cart() {
               <div className="cart-list-header">
                 <h3>Artículos seleccionados</h3>
                 <button type="button" className="cart-clear-button" onClick={() => {
-                  clearCart();
-                  setItems([]);
-                  setIsConfirmingOrder(false);
+                  clearCart()
+                    .then(setItems)
+                    .then(() => setIsConfirmingOrder(false))
+                    .catch((error) => setOrderError(error instanceof Error ? error.message : 'No se pudo vaciar el carrito.'));
                 }}>
                   Vaciar carrito
                 </button>
@@ -310,7 +312,7 @@ export default function Cart() {
                           <button
                             type="button"
                             aria-label={`Disminuir cantidad de ${item.name}`}
-                            onClick={() => setItems(updateCartItemQuantity(item.id, item.quantity - 1))}
+                            onClick={() => updateCartItemQuantity(item.id, item.quantity - 1).then(setItems).catch((error) => setOrderError(error instanceof Error ? error.message : 'No se pudo actualizar el carrito.'))}
                             disabled={item.quantity === 1}
                           >
                             <Minus size={16} />
@@ -319,13 +321,13 @@ export default function Cart() {
                           <button
                             type="button"
                             aria-label={`Aumentar cantidad de ${item.name}`}
-                            onClick={() => setItems(updateCartItemQuantity(item.id, item.quantity + 1))}
+                            onClick={() => updateCartItemQuantity(item.id, item.quantity + 1).then(setItems).catch((error) => setOrderError(error instanceof Error ? error.message : 'No se pudo actualizar el carrito.'))}
                             disabled={item.quantity >= item.units}
                           >
                             <Plus size={16} />
                           </button>
                         </div>
-                        <button type="button" className="cart-remove-button" onClick={() => setItems(removeCartItem(item.id))}>
+                        <button type="button" className="cart-remove-button" onClick={() => removeCartItem(item.id).then(setItems).catch((error) => setOrderError(error instanceof Error ? error.message : 'No se pudo eliminar el producto.'))}>
                           <Trash2 size={16} /> Eliminar
                         </button>
                       </div>

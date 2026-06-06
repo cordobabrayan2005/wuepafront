@@ -2,6 +2,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { create } from 'zustand';
 import { auth } from '../config/firebase';
 import { api, type AuthUser } from '../services/api';
+import { resetCartCache } from '../utils/cart';
 
 type User = AuthUser;
 
@@ -102,6 +103,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: () => {
     void signOut(auth);
+    resetCartCache();
 
     set({
       user: null,

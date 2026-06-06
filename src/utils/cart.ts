@@ -1,114 +1,137 @@
+import { api, BackendCartItem } from '../services/api';
 import { ProductCatalogItem, normalizeProductCode } from './productCatalog';
-
-export const CART_STORAGE_KEY = 'wuepa-cart-items';
 
 export interface CartItem extends ProductCatalogItem {
   quantity: number;
 }
 
-function isCartItem(value: unknown): value is CartItem {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
+let cartItems: CartItem[] = [];
+let cartLoaded = false;
+let cartLoadPromise: Promise<CartItem[]> | null = null;
+let cartCacheVersion = 0;
 
-  const candidate = value as Partial<CartItem>;
-  return typeof candidate.id === 'string'
-    && typeof candidate.code === 'string'
-    && typeof candidate.category === 'string'
-    && typeof candidate.name === 'string'
-    && typeof candidate.description === 'string'
-    && typeof candidate.units === 'number'
-    && typeof candidate.price === 'number'
-    && typeof candidate.image === 'string'
-    && typeof candidate.quantity === 'number';
-}
-
-export function loadCartItems() {
-  if (typeof window === 'undefined') {
-    return [] as CartItem[];
-  }
-
-  const storedValue = window.localStorage.getItem(CART_STORAGE_KEY);
-  if (!storedValue) {
-    return [] as CartItem[];
-  }
-
-  try {
-    const parsedValue = JSON.parse(storedValue);
-    if (!Array.isArray(parsedValue)) {
-      return [] as CartItem[];
-    }
-
-    const normalizedItems = parsedValue
-      .filter(isCartItem)
-      .filter((item) => item.units > 0)
-      .map((item) => ({
-        ...item,
-        code: normalizeProductCode(item),
-        quantity: Math.max(1, Math.min(item.quantity, item.units)),
-      }));
-
-    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(normalizedItems));
-    return normalizedItems;
-  } catch {
-    return [] as CartItem[];
+function removeLegacyCartStorage() {
+  if (typeof window !== 'undefined') {
+    window.localStorage.removeItem('wuepa-cart-items');
   }
 }
 
-export function saveCartItems(items: CartItem[]) {
-  if (typeof window === 'undefined') {
-    return;
+function notifyCartUpdated() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('wuepa-cart-updated'));
   }
-
-  window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-  window.dispatchEvent(new CustomEvent('wuepa-cart-updated'));
 }
 
-export function addProductToCart(product: ProductCatalogItem) {
-  const currentItems = loadCartItems();
+function mapBackendCartItem(item: BackendCartItem): CartItem {
+  const mappedItem: CartItem = {
+    id: item.productId,
+    code: item.codigo,
+    category: item.categoria,
+    name: item.nombre,
+    description: item.descripcion,
+    units: item.unidadesDisponibles,
+    price: item.precio,
+    image: item.imagenUrl,
+    quantity: item.cantidad,
+  };
+
+  return {
+    ...mappedItem,
+    code: normalizeProductCode(mappedItem),
+  };
+}
+
+function updateCartCache(items: BackendCartItem[]) {
+  cartItems = items.map(mapBackendCartItem);
+  cartLoaded = true;
+  notifyCartUpdated();
+  return cartItems;
+}
+
+async function saveCurrentCart(items: CartItem[]) {
+  const response = await api.saveCart(items.map((item) => ({
+    productId: item.id,
+    cantidad: item.quantity,
+  })));
+
+  return updateCartCache(response.productos);
+}
+
+export function getCachedCartItems() {
+  return cartItems;
+}
+
+export async function loadCartItems() {
+  removeLegacyCartStorage();
+
+  if (cartLoaded) {
+    return cartItems;
+  }
+
+  if (!cartLoadPromise) {
+    const requestedVersion = cartCacheVersion;
+    cartLoadPromise = api.getCart()
+      .then((response) => (
+        requestedVersion === cartCacheVersion
+          ? updateCartCache(response.productos)
+          : cartItems
+      ))
+      .finally(() => {
+        cartLoadPromise = null;
+      });
+  }
+
+  return cartLoadPromise;
+}
+
+export async function addProductToCart(product: ProductCatalogItem) {
+  await loadCartItems();
 
   if (product.units <= 0) {
-    return currentItems;
+    return cartItems;
   }
 
-  const existingItem = currentItems.find((item) => item.id === product.id);
-
-  if (existingItem) {
-    const nextItems = currentItems.map((item) => (
+  const existingItem = cartItems.find((item) => item.id === product.id);
+  const nextItems = existingItem
+    ? cartItems.map((item) => (
       item.id === product.id
         ? { ...item, quantity: Math.min(item.quantity + 1, item.units) }
         : item
-    ));
-    saveCartItems(nextItems);
-    return nextItems;
-  }
-
-  const nextItems = [...currentItems, { ...product, quantity: 1 }];
-  saveCartItems(nextItems);
-  return nextItems;
-}
-
-export function updateCartItemQuantity(productId: string, quantity: number) {
-  const nextItems = loadCartItems()
-    .map((item) => (
-      item.id === productId
-        ? { ...item, quantity: Math.max(1, Math.min(quantity, item.units)) }
-        : item
     ))
-    .filter((item) => item.quantity > 0);
+    : [...cartItems, { ...product, quantity: 1 }];
 
-  saveCartItems(nextItems);
-  return nextItems;
+  return saveCurrentCart(nextItems);
 }
 
-export function removeCartItem(productId: string) {
-  const nextItems = loadCartItems().filter((item) => item.id !== productId);
-  saveCartItems(nextItems);
-  return nextItems;
+export async function updateCartItemQuantity(productId: string, quantity: number) {
+  await loadCartItems();
+
+  const nextItems = cartItems.map((item) => (
+    item.id === productId
+      ? { ...item, quantity: Math.max(1, Math.min(quantity, item.units)) }
+      : item
+  ));
+
+  return saveCurrentCart(nextItems);
 }
 
-export function clearCart() {
-  saveCartItems([]);
+export async function removeCartItem(productId: string) {
+  await loadCartItems();
+  return saveCurrentCart(cartItems.filter((item) => item.id !== productId));
+}
+
+export async function clearCart() {
+  const response = await api.clearCart();
+  return updateCartCache(response.productos);
+}
+
+export function resetCartCache() {
+  cartCacheVersion += 1;
+  cartItems = [];
+  cartLoaded = false;
+  cartLoadPromise = null;
+  removeLegacyCartStorage();
+  notifyCartUpdated();
 }
 
 export function getCartItemsCount(items: CartItem[]) {

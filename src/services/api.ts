@@ -96,6 +96,18 @@ export interface CreateOrderPayload {
   clienteData: BackendOrderCustomerData;
 }
 
+export interface BackendCartItem {
+  productId: string;
+  codigo: string;
+  nombre: string;
+  descripcion: string;
+  categoria: string;
+  imagenUrl: string;
+  cantidad: number;
+  precio: number;
+  unidadesDisponibles: number;
+}
+
 interface InstagramSyncResponse {
   success: boolean;
   imported: number;
@@ -588,6 +600,33 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(orderData),
       },
+      true
+    );
+  },
+
+  getCart: async () => {
+    return requestBackend<{ success: boolean; productos: BackendCartItem[] }>(
+      '/api/cart',
+      { method: 'GET' },
+      true
+    );
+  },
+
+  saveCart: async (productos: Array<{ productId: string; cantidad: number }>) => {
+    return requestBackend<{ success: boolean; productos: BackendCartItem[] }>(
+      '/api/cart',
+      {
+        method: 'PUT',
+        body: JSON.stringify({ productos }),
+      },
+      true
+    );
+  },
+
+  clearCart: async () => {
+    return requestBackend<{ success: boolean; productos: BackendCartItem[] }>(
+      '/api/cart',
+      { method: 'DELETE' },
       true
     );
   },

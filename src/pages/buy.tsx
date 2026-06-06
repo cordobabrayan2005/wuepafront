@@ -18,7 +18,7 @@ import MobileBottomNav from '../components/MobileBottomNav';
 import MobileNavMenu from '../components/MobileNavMenu';
 import ScrollToTopButton from '../components/ScrollToTopButton';
 import { useAuthStore } from '../stores/authStore';
-import { addProductToCart, getCartItemsCount, loadCartItems } from '../utils/cart';
+import { addProductToCart, getCachedCartItems, getCartItemsCount, loadCartItems } from '../utils/cart';
 import { formatCopCurrency } from '../utils/currency';
 import { getAvailableProducts, loadProductsCatalog, loadProductsCatalogFromBackend, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
 
@@ -32,7 +32,7 @@ export default function Buy() {
   const [msg, setMsg] = useState('');
   const [msgType, setMsgType] = useState<'success' | 'error' | 'info'>('info');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [cartCount, setCartCount] = useState(() => getCartItemsCount(loadCartItems()));
+  const [cartCount, setCartCount] = useState(() => getCartItemsCount(getCachedCartItems()));
   const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
   const [sortOrder, setSortOrder] = useState<ProductSortOrder>('recent');
   // Usuario autenticado y logout obtenido del store
@@ -69,13 +69,12 @@ export default function Buy() {
 
   useEffect(() => {
     function syncCartCount() {
-      setCartCount(getCartItemsCount(loadCartItems()));
+      setCartCount(getCartItemsCount(getCachedCartItems()));
     }
 
-    window.addEventListener('storage', syncCartCount);
+    loadCartItems().then((items) => setCartCount(getCartItemsCount(items))).catch(() => setCartCount(0));
     window.addEventListener('wuepa-cart-updated', syncCartCount as EventListener);
     return () => {
-      window.removeEventListener('storage', syncCartCount);
       window.removeEventListener('wuepa-cart-updated', syncCartCount as EventListener);
     };
   }, []);
@@ -145,17 +144,22 @@ export default function Buy() {
     },
   ];
 
-  const handleAddToCart = (product: ProductCatalogItem) => {
+  const handleAddToCart = async (product: ProductCatalogItem) => {
     if (product.units <= 0) {
       setMsg(`${product.name} no tiene unidades disponibles.`);
       setMsgType('error');
       return;
     }
 
-    const nextItems = addProductToCart(product);
-    setCartCount(getCartItemsCount(nextItems));
-    setMsg(`${product.name} se agrego al carrito.`);
-    setMsgType('success');
+    try {
+      const nextItems = await addProductToCart(product);
+      setCartCount(getCartItemsCount(nextItems));
+      setMsg(`${product.name} se agrego al carrito.`);
+      setMsgType('success');
+    } catch (error) {
+      setMsg(error instanceof Error ? error.message : 'No se pudo guardar el carrito.');
+      setMsgType('error');
+    }
   };
 
   // Filtra productos según la búsqueda
