@@ -25,7 +25,7 @@ Este repositorio contiene el frontend de Wuepa, una tienda de accesorios con aut
 - **API simulada:**
 	- Todas las funciones de backend (`src/services/api.ts`) son stubs locales.
 
-## Tecnologías
+## sa
 
 - React + TypeScript
 - Vite (dev server)
