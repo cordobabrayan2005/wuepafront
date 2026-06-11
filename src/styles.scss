@@ -547,11 +547,13 @@ button {
 /* .signup-page, .login-page da forma a las pantallas de autenticacion; ajusta estructura y posicion, espaciado, apariencia visual. */
 .signup-page,
 .login-page {
+  --auth-editorial-font: Georgia, 'Times New Roman', serif;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
+  font-family: var(--auth-editorial-font);
   background:
     radial-gradient(circle at 12% 18%, rgba(255, 213, 111, 0.28), transparent 18%),
     radial-gradient(circle at 88% 14%, rgba(237, 153, 7, 0.18), transparent 22%),
@@ -560,11 +562,25 @@ button {
 }
 
 /* body.login-page da forma a las pantallas de autenticacion; ajusta estructura y posicion, espaciado. */
+html:has(body.login-page) {
+  height: 100%;
+  overflow: hidden;
+}
+
 body.login-page {
   display: block;
+  height: 100%;
   padding: 0;
   align-items: initial;
   justify-content: initial;
+  overflow: hidden;
+}
+
+body.login-page #root,
+body.login-page .app,
+body.login-page .container {
+  height: 100%;
+  overflow: hidden;
 }
 
 /* .signup-layout, .login-layout da forma a las pantallas de autenticacion; ajusta estructura y posicion, apariencia visual. */
@@ -610,11 +626,13 @@ main.auth-wrapper.signup-page .signup-right {
 
 /* main.auth-wrapper.signup-page da forma a las pantallas de autenticacion; ajusta estructura y posicion, espaciado. */
 main.auth-wrapper.signup-page {
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
   padding: 0;
   align-items: flex-start;
   justify-content: center;
+  overflow-y: auto;
 }
 
 /* main.auth-wrapper.signup-page .signup-layout da forma a las pantallas de autenticacion; ajusta detalle visual del componente. */
@@ -630,23 +648,25 @@ main.auth-wrapper.signup-page {
 
 /* main.auth-wrapper.login-page .login-layout da forma a las pantallas de autenticacion; ajusta estructura y posicion, apariencia visual. */
 main.auth-wrapper.login-page .login-layout {
-  width: fit-content;
-  max-width: 100%;
+  width: 100%;
+  max-width: none;
   min-height: 100vh;
   border-radius: 0;
   box-shadow: none;
-  grid-template-columns: 56.25vh minmax(420px, 500px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 /* main.auth-wrapper.signup-page .signup-layout da forma a las pantallas de autenticacion; ajusta estructura y posicion, apariencia visual. */
 main.auth-wrapper.signup-page .signup-layout {
-  width: fit-content;
-  max-width: 100%;
-  min-height: 100vh;
+  width: 100%;
+  max-width: none;
+  min-height: 100%;
   border-radius: 0;
   overflow: visible;
   box-shadow: none;
-  grid-template-columns: minmax(420px, 500px) 72vh;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(100%, auto);
+  align-items: stretch;
 }
 
 /* main.auth-wrapper.login-page .login-right da forma a las pantallas de autenticacion; ajusta estructura y posicion, espaciado. */
@@ -659,8 +679,28 @@ main.auth-wrapper.login-page .login-right {
 
 /* main.auth-wrapper.signup-page .signup-left da forma a las pantallas de autenticacion; ajusta estructura y posicion, espaciado. */
 main.auth-wrapper.signup-page .signup-left {
+  width: 100%;
+  min-height: 100%;
   padding: 2.25rem 2rem;
   overflow: visible;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+main.auth-wrapper.signup-page .signup-right {
+  width: 100%;
+  min-height: 0;
+  height: auto;
+  align-self: stretch;
+  background-size: cover;
+}
+
+main.auth-wrapper.signup-page .signup-layout,
+main.auth-wrapper.signup-page .signup-left,
+main.auth-wrapper.signup-page .signup-right {
+  max-height: none;
+  overflow-y: visible;
 }
 
 /* main.auth-wrapper.login-page .login-panel da forma a las pantallas de autenticacion; ajusta estructura y posicion. */
@@ -674,10 +714,63 @@ main.auth-wrapper.signup-page .signup-left {
   text-align: left;
 }
 
+main.auth-wrapper.login-page .signup-title,
+main.auth-wrapper.signup-page .signup-title {
+  font-family: var(--auth-editorial-font);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 0.95;
+}
+
+main.auth-wrapper.login-page .signup-subtitle,
+main.auth-wrapper.signup-page .signup-subtitle {
+  font-family: var(--auth-editorial-font);
+  font-style: italic;
+  letter-spacing: 0.01em;
+}
+
+main.auth-wrapper.login-page input,
+main.auth-wrapper.login-page button,
+main.auth-wrapper.signup-page input,
+main.auth-wrapper.signup-page button {
+  font-family: var(--auth-editorial-font);
+}
+
+main.auth-wrapper.login-page .form-label,
+main.auth-wrapper.signup-page .form-group label,
+main.auth-wrapper.login-page .login-links,
+main.auth-wrapper.signup-page .login-links,
+main.auth-wrapper.login-page .social-signup-container,
+main.auth-wrapper.signup-page .social-signup-container,
+main.auth-wrapper.login-page .back-link,
+main.auth-wrapper.signup-page .back-link {
+  font-family: var(--auth-editorial-font);
+  letter-spacing: 0.015em;
+}
+
+main.auth-wrapper.login-page .login-links {
+  text-align: center;
+}
+
 /* main.auth-wrapper.login-page .login-form, main.auth-wrapper.signup-page .signup-form da forma a las pantallas de autenticacion; ajusta estructura y posicion. */
 main.auth-wrapper.login-page .login-form,
 main.auth-wrapper.signup-page .signup-form {
   width: 100%;
+}
+
+/* Mantiene los campos de registro con el mismo ancho visual que los de inicio de sesion. */
+main.auth-wrapper.signup-page .signup-form {
+  max-width: 460px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+main.auth-wrapper.signup-page .signup-left > .back-link,
+main.auth-wrapper.signup-page .signup-left > .signup-title,
+main.auth-wrapper.signup-page .signup-left > .signup-subtitle,
+main.auth-wrapper.signup-page .signup-left > .login-links,
+main.auth-wrapper.signup-page .signup-left > .login-message {
+  width: min(100%, 460px);
 }
 
 /* .signup-left, .signup-right, .login-left, .login-right da forma a las pantallas de autenticacion; ajusta espaciado. */
@@ -720,8 +813,8 @@ main.auth-wrapper.signup-page .signup-form {
   justify-content: center;
   background-repeat: no-repeat;
   background-size: contain;
-  background-position: top center;
-  background-color: #fff8ec;
+  background-position: center;
+  background-color: #001d2c;
   min-width: 0;
   overflow: hidden;
 }
@@ -1493,7 +1586,7 @@ main.auth-wrapper.signup-page .login-button {
     min-height: min(calc(100vh - 2.5rem), 920px);
     border-radius: 1.5rem;
     box-shadow: 0 18px 48px rgba(0, 0, 0, 0.16);
-    grid-template-columns: minmax(0, 1fr) minmax(420px, 0.9fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   /* main.auth-wrapper.login-page .login-left da forma a las pantallas de autenticacion; ajusta estructura y posicion. */
@@ -6269,6 +6362,11 @@ button {
   .auth-wrapper {
     padding-bottom: 5.3rem;
   }
+
+  main.auth-wrapper.login-page,
+  main.auth-wrapper.signup-page {
+    padding-bottom: 0;
+  }
 }
 
 /* ==========================================================================
@@ -8172,5 +8270,512 @@ body.modal-open {
 @media (max-width: 640px) {
   .admin-category-create {
     flex-direction: column;
+  }
+}
+
+/* ==========================================================================
+   Home editorial
+   Presentacion inspirada en catalogos impresos, sin alterar las imagenes.
+   ========================================================================== */
+.home-page {
+  --home-ink: #3e2819;
+  --home-gold: #a96f26;
+  --home-gold-dark: #81501e;
+  --home-paper: #f8f0e4;
+  --home-line: rgba(127, 82, 34, 0.24);
+  background:
+    radial-gradient(circle at 20% 15%, rgba(139, 88, 36, 0.07) 0 0.7px, transparent 1px),
+    radial-gradient(circle at 75% 72%, rgba(255, 255, 255, 0.5) 0 0.8px, transparent 1.2px),
+    linear-gradient(135deg, #f8efe2, #fffaf2 52%, #f3e5d3);
+  background-size: 12px 12px, 17px 17px, auto;
+  color: var(--home-ink);
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.home-page::before {
+  opacity: 0.24;
+  mix-blend-mode: multiply;
+}
+
+.home-page .wuepa-nav {
+  position: fixed;
+  background: rgba(255, 251, 245, 0.96);
+  border-bottom: 1px solid var(--home-line);
+  box-shadow: 0 5px 18px rgba(84, 49, 20, 0.06);
+  backdrop-filter: blur(14px);
+}
+
+.home-page .wuepa-nav-inner {
+  max-width: 1480px;
+  min-height: 7.2rem;
+  padding: 1.25rem clamp(2rem, 5vw, 5rem);
+}
+
+.home-page .wuepa-brand h1 {
+  color: var(--home-gold-dark);
+  font-size: clamp(3rem, 5vw, 5rem);
+  font-weight: 400;
+  line-height: 0.72;
+  text-transform: capitalize;
+}
+
+.home-page .wuepa-brand p {
+  margin-top: 0.75rem;
+  color: var(--home-ink);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.48em;
+}
+
+.home-page .wuepa-actions {
+  gap: 0;
+}
+
+.home-page .wuepa-actions button {
+  min-width: auto;
+  min-height: auto;
+  margin: 0;
+  padding: 0.5rem 1.25rem;
+  border: 0;
+  border-right: 1px solid var(--home-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--home-ink);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.home-page .wuepa-actions button:last-child {
+  border-right: 0;
+}
+
+.home-page .wuepa-actions svg {
+  display: none;
+}
+
+.home-page .spacer {
+  height: 7.2rem;
+}
+
+.home-page .wuepa-container {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+}
+
+.home-page .wuepa-launch-banner {
+  width: 100%;
+  min-height: 2.8rem;
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--home-line);
+  border-radius: 0;
+  background: linear-gradient(90deg, #ead0ad, #f6e6d1, #ead0ad);
+  color: var(--home-ink);
+  box-shadow: none;
+}
+
+.home-page .wuepa-launch-banner button {
+  border: 0;
+  background: transparent;
+  color: var(--home-gold-dark);
+  text-decoration: underline;
+  box-shadow: none;
+}
+
+.home-page .wuepa-campaign-hero {
+  width: 100%;
+  min-height: clamp(28rem, 43vw, 44rem);
+  margin: 0;
+  grid-template-columns: minmax(0, 1.15fr) minmax(20rem, 1fr) minmax(0, 0.85fr);
+  border: 0;
+  border-bottom: 1px solid var(--home-line);
+  background: var(--home-paper);
+  box-shadow: none;
+}
+
+.home-page .wuepa-campaign-copy {
+  grid-column: 1;
+  grid-row: 1;
+  padding: clamp(2rem, 5vw, 5rem) clamp(6rem, 10vw, 10rem) clamp(2rem, 5vw, 5rem) clamp(0.25rem, 1vw, 1rem);
+  background:
+    radial-gradient(circle at 45% 30%, rgba(171, 115, 43, 0.08), transparent 13rem),
+    linear-gradient(145deg, #f2dfc4, #fbf4e8);
+  box-shadow: none;
+}
+
+.home-page .wuepa-campaign-left {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.home-page .wuepa-campaign-right {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.home-page .wuepa-campaign-logo {
+  display: none;
+}
+
+.home-page .wuepa-campaign-copy p {
+  color: var(--home-gold);
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.18em;
+}
+
+.home-page .wuepa-campaign-copy h2 {
+  width: min(100%, 11ch);
+  color: var(--home-gold-dark);
+  font-size: clamp(2.8rem, 4.5vw, 5.2rem);
+  font-weight: 400;
+  line-height: 0.9;
+}
+
+.home-page .wuepa-campaign-copy small {
+  max-width: 24rem;
+  color: var(--home-ink);
+  font-size: clamp(1rem, 1.45vw, 1.25rem);
+}
+
+.home-page .wuepa-campaign-copy button,
+.home-page .btn-cta {
+  border: 1px solid #b57b32;
+  border-radius: 0.15rem;
+  background: linear-gradient(180deg, #b98239, #9d6726);
+  color: #fffaf2;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.1em;
+  box-shadow: 0 8px 18px rgba(94, 55, 20, 0.18);
+}
+
+.home-page .wuepa-campaign-side::after {
+  background: rgba(76, 48, 27, 0.12);
+}
+
+.home-page .wuepa-quick-showcase {
+  width: min(100% - 4rem, 1320px);
+  margin: 2rem auto;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.home-page .wuepa-quick-showcase .wuepa-quick-card {
+  grid-column: span 2;
+}
+
+.home-page .wuepa-quick-showcase .wuepa-quick-card:nth-child(4) {
+  grid-column: 2 / span 2;
+}
+
+.home-page .wuepa-quick-showcase .wuepa-quick-card:nth-child(5) {
+  grid-column: 4 / span 2;
+}
+
+.home-page .wuepa-quick-showcase button,
+.home-page .wuepa-quick-showcase .wuepa-quick-card-anillos,
+.home-page .wuepa-quick-showcase .wuepa-quick-card-paquetes {
+  min-height: 11rem;
+  border: 1px solid var(--home-line);
+  border-radius: 0.6rem;
+  box-shadow: 0 8px 18px rgba(77, 47, 23, 0.08);
+}
+
+.home-page .wuepa-quick-showcase img {
+  filter: sepia(0.12) saturate(0.82) contrast(0.94);
+}
+
+.home-page .wuepa-quick-showcase button::after {
+  background: linear-gradient(180deg, transparent 20%, rgba(47, 26, 12, 0.62));
+}
+
+.home-page .wuepa-quick-showcase span {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.2rem, 2vw, 1.7rem);
+  font-weight: 400;
+}
+
+.home-page .wuepa-quick-showcase small {
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.home-page .home-products-toolbar {
+  width: min(100% - 4rem, 1440px);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  margin: 2.8rem auto 1.5rem;
+  padding: 1.3rem 0 0.9rem;
+  border-top: 1px solid var(--home-line);
+  border-bottom: 1px solid var(--home-line);
+  background: transparent;
+}
+
+.home-page .home-products-heading {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--home-gold);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.home-page .home-products-heading::before,
+.home-page .home-products-heading::after {
+  content: '✦';
+  margin: 0 0.7rem;
+  font-size: 0.58em;
+}
+
+.home-page .products-toolbar-label,
+.home-page .products-sort-option {
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.06em;
+}
+
+.home-page .products-sort-option {
+  border-color: var(--home-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--home-ink);
+}
+
+.home-page .products-sort-option.active {
+  background: var(--home-gold-dark);
+  color: #fffaf2;
+}
+
+.home-page .home-featured-products {
+  width: min(100% - 4rem, 1440px);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.4rem;
+  margin: 0 auto 2.5rem;
+}
+
+.home-page .product-card-simple {
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--home-line);
+  border-radius: 0.65rem;
+  background: rgba(255, 251, 245, 0.88);
+  box-shadow: 0 8px 18px rgba(77, 47, 23, 0.08);
+}
+
+.home-page .product-card-simple:hover {
+  border-color: rgba(127, 82, 34, 0.42);
+  box-shadow: 0 14px 26px rgba(77, 47, 23, 0.13);
+}
+
+.home-page .product-card-media-simple {
+  min-height: 15rem;
+  border-radius: 0;
+}
+
+.home-page .product-card-image {
+  border-radius: 0;
+  filter: sepia(0.06) saturate(0.92);
+}
+
+.home-page .product-stock-badge {
+  border-radius: 0;
+  background: rgba(61, 37, 20, 0.74);
+  color: #fff8ec;
+  font-family: 'Inter', sans-serif;
+}
+
+.home-page .product-card-content {
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 1rem 1rem 0.55rem;
+}
+
+.home-page .product-card-content h4 {
+  color: var(--home-ink);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+.home-page .product-card-price {
+  color: var(--home-ink);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.home-page .product-login-btn {
+  width: calc(100% - 2rem);
+  min-height: 2.3rem;
+  margin: 0.25rem 1rem 1rem;
+  border: 1px solid #8b745b;
+  border-radius: 999px;
+  background: transparent;
+  color: #4a5e61;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  box-shadow: none;
+}
+
+.home-page .wuepa-cta {
+  width: min(100% - 4rem, 900px);
+  margin: 2rem auto 3rem;
+  padding: 2rem;
+  border: 1px solid var(--home-line);
+  border-radius: 0;
+  background: rgba(255, 249, 240, 0.72);
+  color: var(--home-ink);
+  box-shadow: none;
+}
+
+.home-page .wuepa-cta h3 {
+  color: var(--home-gold-dark);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+}
+
+.home-page .wuepa-footer {
+  margin-top: 0;
+  padding: 2.8rem clamp(1.5rem, 5vw, 5rem) 1.2rem;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 244, 226, 0.08) 0 0.8px, transparent 1.1px),
+    linear-gradient(135deg, #4b2a17, #6b4126 52%, #432515);
+  background-size: 12px 12px, auto;
+  color: #f2dfc7;
+}
+
+.home-page .wuepa-footer-inner {
+  max-width: 1440px;
+  grid-template-columns: 1.4fr repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.home-page .wuepa-footer-brand h2 {
+  margin: 0;
+  color: #f0d0a1;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2.6rem, 4vw, 4rem);
+  font-weight: 400;
+}
+
+.home-page .wuepa-footer-group h3 {
+  color: #f0d0a1;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1100px) {
+  .home-page .wuepa-campaign-hero {
+    grid-template-columns: 1.1fr 0.9fr;
+  }
+
+  .home-page .wuepa-campaign-right {
+    display: none;
+  }
+
+  .home-page .wuepa-quick-showcase {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .home-page .wuepa-quick-showcase .wuepa-quick-card,
+  .home-page .wuepa-quick-showcase .wuepa-quick-card:nth-child(4),
+  .home-page .wuepa-quick-showcase .wuepa-quick-card:nth-child(5) {
+    grid-column: auto;
+  }
+
+  .home-page .home-featured-products {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .home-page .wuepa-nav-inner {
+    min-height: 5.4rem;
+    padding: 1rem;
+  }
+
+  .home-page .wuepa-brand h1 {
+    font-size: 2.8rem;
+  }
+
+  .home-page .spacer {
+    height: 5.4rem;
+  }
+
+  .home-page .wuepa-launch-banner span {
+    display: none;
+  }
+
+  .home-page .wuepa-campaign-hero {
+    width: 100%;
+    min-height: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .home-page .wuepa-campaign-copy {
+    grid-column: 1;
+    min-height: 28rem;
+    padding: 2rem 1.2rem;
+  }
+
+  .home-page .wuepa-campaign-left,
+  .home-page .wuepa-campaign-right {
+    display: none;
+  }
+
+  .home-page .wuepa-quick-showcase,
+  .home-page .home-products-toolbar,
+  .home-page .home-featured-products,
+  .home-page .wuepa-cta {
+    width: min(100% - 2rem, 1440px);
+  }
+
+  .home-page .wuepa-quick-showcase {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+  }
+
+  .home-page .wuepa-quick-showcase .wuepa-quick-card,
+  .home-page .wuepa-quick-showcase .wuepa-quick-card:nth-child(4),
+  .home-page .wuepa-quick-showcase .wuepa-quick-card:nth-child(5) {
+    grid-column: auto;
+  }
+
+  .home-page .home-products-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .home-page .home-featured-products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+  }
+
+  .home-page .product-card-media-simple {
+    min-height: 11rem;
+  }
+
+  .home-page .wuepa-footer-inner {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-page .wuepa-quick-showcase,
+  .home-page .home-featured-products,
+  .home-page .wuepa-footer-inner {
+    grid-template-columns: 1fr;
   }
 }

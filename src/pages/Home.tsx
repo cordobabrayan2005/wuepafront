@@ -199,6 +199,7 @@ export default function Home() {
         </section>
 
         <div className="products-toolbar home-products-toolbar">
+          <h3 className="home-products-heading">Mejores ventas</h3>
           <span className="products-toolbar-label">Ordenar por</span>
           <div className="products-sort-options" role="group" aria-label="Ordenar productos">
             {[
