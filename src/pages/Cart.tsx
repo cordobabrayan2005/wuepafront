@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { MessageCircle, Minus, Plus, ShoppingBag, ShoppingCart, Sparkles, Trash2, X } from 'lucide-react';
 import MobileBottomNav from '../components/MobileBottomNav';
 import MobileNavMenu from '../components/MobileNavMenu';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
@@ -14,6 +14,7 @@ const INTERNATIONAL_PHONE_PATTERN = /^\+?[0-9\s()-]+$/;
 const ADDRESS_PATTERN = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9\s#.,°/-]+$/;
 
 export default function Cart() {
+  const navigate = useNavigate();
   const [items, setItems] = useState<CartItem[]>(() => getCachedCartItems());
   const [isConfirmingOrder, setIsConfirmingOrder] = useState(false);
   const [isEditingCheckoutData, setIsEditingCheckoutData] = useState(false);
@@ -29,6 +30,8 @@ export default function Cart() {
   });
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
+  const logout = useAuthStore((state) => state.logout);
+  const isAdmin = user?.rol === 'admin';
   const hasSavedCheckoutData = Boolean(user?.telefono?.trim() && user?.direccion?.trim());
 
   useEffect(() => {
@@ -94,7 +97,15 @@ export default function Cart() {
     { label: 'Productos', to: '/products' },
     { label: 'Carrito', to: '/cart', isActive: true },
     { label: 'Nosotros', to: '/about' },
+    { label: 'Mi perfil', to: '/profile' },
+    ...(isAdmin ? [{ label: 'Admin', to: '/admin' }] : []),
+    { label: 'Cerrar sesión', onClick: handleLogout, tone: 'danger' as const },
   ];
+
+  function handleLogout() {
+    logout();
+    navigate('/login', { state: { flash: { type: 'info', text: 'Se cerró sesión correctamente.' } } });
+  }
 
   function getCheckoutErrorMessage(error: unknown) {
     const message = error instanceof Error ? error.message : '';
@@ -239,19 +250,29 @@ export default function Cart() {
     <main className="cart-page">
       <header className="products-header cart-header">
         <div className="header-left">
-          <h1>WUEPA</h1>
-          <p>ACCESORIOS</p>
+          <h1>Wuepa</h1>
+          <p>JEWELRY</p>
         </div>
         <MobileNavMenu title="Menú del carrito" items={mobileMenuItems} />
-        <div className="cart-header-center">
-          <p className="cart-kicker">Tu selección</p>
-          <strong>{itemCount} producto{itemCount === 1 ? '' : 's'} en tu carrito</strong>
-        </div>
         <nav className="header-right">
           <Link to="/buy">Inicio</Link>
+          <span aria-hidden="true">|</span>
           <Link to="/products">Productos</Link>
+          <span aria-hidden="true">|</span>
           <Link to="/cart" className="active">Carrito</Link>
+          <span aria-hidden="true">|</span>
           <Link to="/about">Nosotros</Link>
+          <span aria-hidden="true">|</span>
+          <Link to="/profile">Mi perfil</Link>
+          {isAdmin ? (
+            <>
+              <span aria-hidden="true">|</span>
+              <Link to="/admin">Admin</Link>
+            </>
+          ) : null}
+          <button type="button" className="cart-nav-logout" onClick={handleLogout}>
+            Cerrar sesión
+          </button>
         </nav>
       </header>
 
@@ -273,10 +294,15 @@ export default function Cart() {
         <div className="cart-items-panel">
           {items.length === 0 ? (
             <div className="cart-empty-state">
-              <ShoppingBag size={34} />
+              <div className="cart-empty-icon">
+                <ShoppingBag size={34} />
+              </div>
               <h3>Tu carrito está vacío</h3>
               <p>Agrega productos desde el catálogo para verlos aquí y continuar con tu pedido.</p>
-              <Link to="/products" className="primary-button">Explorar productos</Link>
+              <Link to="/products" className="primary-button">
+                <Sparkles size={17} />
+                Explorar productos
+              </Link>
             </div>
           ) : (
             <>
@@ -362,9 +388,13 @@ export default function Cart() {
               disabled={items.length === 0}
               aria-disabled={items.length === 0}
             >
+              <MessageCircle size={18} />
               Finalizar por WhatsApp
             </button>
-            <Link to="/products" className="cart-continue-link">Seguir comprando</Link>
+            <Link to="/products" className="cart-continue-link">
+              <ShoppingCart size={18} />
+              Seguir comprando
+            </Link>
           </div>
         </aside>
       </section>
