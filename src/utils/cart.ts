@@ -88,19 +88,32 @@ export async function addProductToCart(product: ProductCatalogItem) {
   await loadCartItems();
 
   if (product.units <= 0) {
-    return cartItems;
+    throw new Error(`${product.name} ya no tiene unidades disponibles.`);
   }
 
   const existingItem = cartItems.find((item) => item.id === product.id);
+
+  if (existingItem && existingItem.quantity >= Math.min(existingItem.units, product.units)) {
+    throw new Error(`Ya agregaste todas las unidades disponibles de ${product.name}.`);
+  }
+
+  const previousQuantity = existingItem?.quantity ?? 0;
   const nextItems = existingItem
     ? cartItems.map((item) => (
       item.id === product.id
-        ? { ...item, quantity: Math.min(item.quantity + 1, item.units) }
+        ? { ...item, units: product.units, quantity: Math.min(item.quantity + 1, product.units) }
         : item
     ))
     : [...cartItems, { ...product, quantity: 1 }];
 
-  return saveCurrentCart(nextItems);
+  const savedItems = await saveCurrentCart(nextItems);
+  const savedItem = savedItems.find((item) => item.id === product.id);
+
+  if (!savedItem || savedItem.quantity <= previousQuantity) {
+    throw new Error(`${product.name} ya no tiene unidades suficientes. Actualiza el catalogo e intenta nuevamente.`);
+  }
+
+  return savedItems;
 }
 
 export async function updateCartItemQuantity(productId: string, quantity: number) {
