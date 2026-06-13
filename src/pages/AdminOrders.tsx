@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, PackageCheck, ShoppingBag } from 'lucide-react';
+import { CheckCircle2, PackageCheck, ShoppingBag, XCircle } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { api } from '../services/api';
 import { formatCopCurrency } from '../utils/currency';
-import { CustomerOrder, loadBackendCustomerOrders, loadCustomerOrders, markBackendCustomerOrderAsPaid } from '../utils/orders';
+import { cancelBackendCustomerOrder, CustomerOrder, loadBackendCustomerOrders, loadCustomerOrders, markBackendCustomerOrderAsPaid } from '../utils/orders';
 import { loadProductsCatalog, mapBackendProductToCatalogItem, ProductCatalogItem } from '../utils/productCatalog';
 
 type OrdersToast = {
@@ -55,6 +55,7 @@ export default function AdminOrders() {
 
   const pendingOrders = useMemo(() => orders.filter((order) => order.status === 'pending'), [orders]);
   const paidOrders = useMemo(() => orders.filter((order) => order.status === 'paid'), [orders]);
+  const cancelledOrders = useMemo(() => orders.filter((order) => order.status === 'cancelled'), [orders]);
 
   async function handleAcceptPayment(order: CustomerOrder) {
     setActiveOrderId(order.id);
@@ -80,6 +81,30 @@ export default function AdminOrders() {
     }
   }
 
+  async function handleCancelOrder(order: CustomerOrder) {
+    setActiveOrderId(order.id);
+    setToast({ text: 'Rechazando pedido y liberando unidades...', type: 'info' });
+
+    try {
+      await cancelBackendCustomerOrder(order.id);
+      const [backendOrders, backendProducts] = await Promise.all([
+        loadBackendCustomerOrders(),
+        api.getProducts(),
+      ]);
+
+      setOrders(backendOrders);
+      setProducts(backendProducts.map(mapBackendProductToCatalogItem));
+      setToast({ text: 'Pedido rechazado. Las unidades volvieron al inventario.', type: 'success' });
+    } catch (error) {
+      setToast({
+        text: error instanceof Error ? error.message : 'No se pudo rechazar el pedido.',
+        type: 'error',
+      });
+    } finally {
+      setActiveOrderId(null);
+    }
+  }
+
   return (
     <main className="admin-page admin-orders-page">
       {toast && (
@@ -94,7 +119,7 @@ export default function AdminOrders() {
             <p className="admin-kicker">Panel interno</p>
             <h1>Pedidos</h1>
             <p className="admin-subtitle">
-              Revisa pedidos enviados por WhatsApp y confirma el pago para descontar unidades del inventario.
+              Los pedidos pendientes reservan sus unidades. Confirma el pago o rechaza el pedido para liberarlas.
             </p>
           </div>
           <div className="admin-hero-actions">
@@ -117,8 +142,8 @@ export default function AdminOrders() {
             <strong>{orders.length}</strong>
           </article>
           <article className="admin-summary-card">
-            <span>Inventario</span>
-            <strong>{products.length}</strong>
+            <span>Rechazados</span>
+            <strong>{cancelledOrders.length}</strong>
           </article>
         </section>
 
@@ -133,6 +158,7 @@ export default function AdminOrders() {
               orders={pendingOrders}
               activeOrderId={activeOrderId}
               onAcceptPayment={handleAcceptPayment}
+              onCancelOrder={handleCancelOrder}
             />
           </div>
 
@@ -142,6 +168,14 @@ export default function AdminOrders() {
               <h2>Pedidos pagados</h2>
             </div>
             <OrderList emptyText="Aun no hay pedidos pagados." orders={paidOrders} />
+          </div>
+
+          <div className="admin-section-card">
+            <div className="admin-section-heading">
+              <p className="admin-kicker">Liberados</p>
+              <h2>Pedidos rechazados</h2>
+            </div>
+            <OrderList emptyText="No hay pedidos rechazados." orders={cancelledOrders} />
           </div>
         </section>
       </div>
@@ -154,9 +188,10 @@ type OrderListProps = {
   emptyText: string;
   activeOrderId?: string | null;
   onAcceptPayment?: (order: CustomerOrder) => void;
+  onCancelOrder?: (order: CustomerOrder) => void;
 };
 
-function OrderList({ orders, emptyText, activeOrderId, onAcceptPayment }: OrderListProps) {
+function OrderList({ orders, emptyText, activeOrderId, onAcceptPayment, onCancelOrder }: OrderListProps) {
   if (orders.length === 0) {
     return (
       <div className="admin-orders-empty">
@@ -172,7 +207,9 @@ function OrderList({ orders, emptyText, activeOrderId, onAcceptPayment }: OrderL
         <article key={order.id} className="admin-order-card">
           <div className="admin-order-card-header">
             <div>
-              <p className="admin-kicker">{order.status === 'paid' ? 'Pagado' : 'Pendiente'}</p>
+              <p className="admin-kicker">
+                {order.status === 'paid' ? 'Pagado' : order.status === 'cancelled' ? 'Rechazado' : 'Pendiente'}
+              </p>
               <h3>{order.customerName}</h3>
               <span>{formatOrderDate(order.createdAt)}</span>
             </div>
@@ -207,16 +244,29 @@ function OrderList({ orders, emptyText, activeOrderId, onAcceptPayment }: OrderL
             <span>{order.itemCount} producto{order.itemCount === 1 ? '' : 's'}</span>
             {order.status === 'paid' ? (
               <span className="admin-order-status paid"><CheckCircle2 size={16} /> Pagado</span>
+            ) : order.status === 'cancelled' ? (
+              <span className="admin-order-status"><XCircle size={16} /> Rechazado</span>
             ) : (
-              <button
-                type="button"
-                className="admin-primary-btn"
-                onClick={() => onAcceptPayment?.(order)}
-                disabled={activeOrderId === order.id}
-              >
-                <PackageCheck size={16} />
-                {activeOrderId === order.id ? 'Actualizando...' : 'Aceptar pago'}
-              </button>
+              <div className="admin-hero-actions">
+                <button
+                  type="button"
+                  className="admin-primary-btn"
+                  onClick={() => onAcceptPayment?.(order)}
+                  disabled={activeOrderId === order.id}
+                >
+                  <PackageCheck size={16} />
+                  {activeOrderId === order.id ? 'Actualizando...' : 'Aceptar pago'}
+                </button>
+                <button
+                  type="button"
+                  className="admin-danger-btn"
+                  onClick={() => onCancelOrder?.(order)}
+                  disabled={activeOrderId === order.id}
+                >
+                  <XCircle size={16} />
+                  Rechazar pedido
+                </button>
+              </div>
             )}
           </div>
         </article>

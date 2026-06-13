@@ -67,7 +67,7 @@ export default function Products() {
     }
 
     refreshProductsFromBackend();
-    const refreshIntervalId = window.setInterval(refreshProductsFromBackend, 30000);
+    const refreshIntervalId = window.setInterval(refreshProductsFromBackend, 10000);
     window.addEventListener('storage', syncProducts);
     window.addEventListener('focus', refreshProductsFromBackend);
     document.addEventListener('visibilitychange', refreshProductsWhenVisible);

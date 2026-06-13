@@ -5,7 +5,7 @@ import { getCartItemsCount, getCartSubtotal } from './cart';
 export const WUEPA_WHATSAPP_PHONE = '573136704796';
 export const ORDERS_STORAGE_KEY = 'wuepa-customer-orders';
 
-export type CustomerOrderStatus = 'pending' | 'paid';
+export type CustomerOrderStatus = 'pending' | 'paid' | 'cancelled';
 
 export interface CustomerOrderItem {
   id: string;
@@ -41,7 +41,7 @@ function isCustomerOrder(value: unknown): value is CustomerOrder {
     && typeof order.createdAt === 'string'
     && typeof order.customerName === 'string'
     && typeof order.customerEmail === 'string'
-    && (order.status === 'pending' || order.status === 'paid')
+    && (order.status === 'pending' || order.status === 'paid' || order.status === 'cancelled')
     && Array.isArray(order.items)
     && typeof order.itemCount === 'number'
     && typeof order.total === 'number';
@@ -91,7 +91,11 @@ export function mapBackendOrderToCustomerOrder(order: BackendOrder): CustomerOrd
     customerEmail: order.clienteData?.correo || '',
     customerPhone: order.clienteData?.telefono || '',
     customerAddress: order.clienteData?.direccion || '',
-    status: order.estado === 'Pagado' ? 'paid' : 'pending',
+    status: order.estado === 'Pagado'
+      ? 'paid'
+      : order.estado === 'Cancelado'
+        ? 'cancelled'
+        : 'pending',
     items: (order.productos || []).map((item) => ({
       id: item.productId,
       code: item.codigo,
@@ -198,5 +202,10 @@ export async function loadBackendCustomerOrders() {
 
 export async function markBackendCustomerOrderAsPaid(orderId: string) {
   const response = await api.updateOrderStatus(orderId, 'Pagado');
+  return mapBackendOrderToCustomerOrder(response.order);
+}
+
+export async function cancelBackendCustomerOrder(orderId: string) {
+  const response = await api.updateOrderStatus(orderId, 'Cancelado');
   return mapBackendOrderToCustomerOrder(response.order);
 }

@@ -48,22 +48,37 @@ export default function Buy() {
       setProducts(loadProductsCatalog());
     }
 
-    loadProductsCatalogFromBackend()
-      .then((backendProducts) => {
-        if (isMounted) {
-          setProducts(backendProducts);
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setProducts(loadProductsCatalog());
-        }
-      });
+    function refreshProductsFromBackend() {
+      loadProductsCatalogFromBackend()
+        .then((backendProducts) => {
+          if (isMounted) {
+            setProducts(backendProducts);
+          }
+        })
+        .catch(() => {
+          if (isMounted) {
+            setProducts(loadProductsCatalog());
+          }
+        });
+    }
 
+    function refreshProductsWhenVisible() {
+      if (document.visibilityState === 'visible') {
+        refreshProductsFromBackend();
+      }
+    }
+
+    refreshProductsFromBackend();
+    const refreshIntervalId = window.setInterval(refreshProductsFromBackend, 10000);
     window.addEventListener('storage', syncProducts);
+    window.addEventListener('focus', refreshProductsFromBackend);
+    document.addEventListener('visibilitychange', refreshProductsWhenVisible);
     return () => {
       isMounted = false;
+      window.clearInterval(refreshIntervalId);
       window.removeEventListener('storage', syncProducts);
+      window.removeEventListener('focus', refreshProductsFromBackend);
+      document.removeEventListener('visibilitychange', refreshProductsWhenVisible);
     };
   }, []);
 
