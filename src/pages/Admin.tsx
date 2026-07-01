@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import AuthenticatedTopBar from '../components/AuthenticatedTopBar';
+import MobileBottomNav from '../components/MobileBottomNav';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { formatCopCurrency } from '../utils/currency';
 import { api } from '../services/api';
@@ -720,7 +722,9 @@ export default function Admin() {
   const activeProductLabel = isCreating ? 'Nuevo producto' : draft.name || 'Producto sin nombre';
 
   return (
-    <section className="admin-page">
+    <>
+    <AuthenticatedTopBar active="admin" />
+    <section className="admin-page authenticated-page-content">
       {toast && (
         <div role="status" aria-live="polite" className={`auth-toast ${toast.type}`}>
           {toast.text}
@@ -1201,5 +1205,7 @@ export default function Admin() {
         </div>
       </div>
     </section>
+    <MobileBottomNav active="profile" variant="auth" />
+    </>
   );
 }

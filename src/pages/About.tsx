@@ -1,48 +1,36 @@
-/**
- * Componente About
- *
- * Este componente funcional de React renderiza la página "Sobre" de la aplicación demo de Joyería Wuepa.
- * Proporciona información sobre el producto, su misión y características clave.
- *
- * ## Comportamiento
- * - Al montarse, elimina la clase CSS `login-page` del elemento `<body>` para asegurar el estilo correcto al navegar fuera de la vista de inicio de sesión.
- * - Utiliza HTML semántico y atributos ARIA para mejorar la accesibilidad y el soporte para lectores de pantalla.
- *
- * ## Estructura
- * - Sección principal: Muestra el logo de Wuepa, título y subtítulo.
- * - Sección de contenido: Explica qué es Wuepa, resalta las características principales y expone la misión.
- * - Cuadrícula de características: Tarjetas que describen accesibilidad, flujos de autenticación y demo de reuniones.
- * - Información de versión: Muestra la versión actual y detalles de desarrollo.
- * - Navegación: Proporciona un enlace de regreso a la página de inicio.
- *
- * ## Accesibilidad
- * - Se utilizan `role="main"` y `aria-labelledby="about-title"` para la estructura semántica.
- * - Se siguen los principios de WCAG 2.1 para asegurar compatibilidad con tecnologías de asistencia.
- *
- * @function About
- * @returns {JSX.Element} El componente de la página Sobre, que contiene información del producto,
- * declaración de misión, características y enlace de navegación.
- *
- * @example
- * // Uso en una configuración de React Router
- * import About from './About';
- *
- * function App() {
- *   return (
- *     <Routes>
- *       <Route path="/about" element={<About />} />
- *     </Routes>
- *   );
- * }
- */
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Gem, HeartHandshake, ShieldCheck, Sparkles } from 'lucide-react';
+import AuthenticatedTopBar from '../components/AuthenticatedTopBar';
+import MobileBottomNav from '../components/MobileBottomNav';
+import ScrollToTopButton from '../components/ScrollToTopButton';
+import { useAuthStore } from '../stores/authStore';
+
+const aboutFeatures = [
+  {
+    icon: Gem,
+    title: 'Piezas con caracter',
+    text: 'Curamos accesorios pensados para resaltar tu estilo diario, con acabados delicados y combinaciones faciles de usar.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Compra clara',
+    text: 'Cuidamos cada paso del pedido para que puedas revisar tus productos, confirmar tus datos y comprar con tranquilidad.',
+  },
+  {
+    icon: HeartHandshake,
+    title: 'Atencion cercana',
+    text: 'Te acompanamos para elegir piezas, coordinar entregas y resolver dudas con una experiencia humana y sencilla.',
+  },
+];
 
 export default function About() {
   const navigate = useNavigate();
+  const { isAuthed } = useAuthStore();
+  const isAuthenticated = isAuthed || Boolean(localStorage.getItem('user'));
 
   useEffect(() => {
-    document.body.classList.remove("login-page");
+    document.body.classList.remove('login-page');
   }, []);
 
   function handleGoBack() {
@@ -51,64 +39,102 @@ export default function About() {
       return;
     }
 
-    navigate('/products');
+    navigate(isAuthenticated ? '/buy' : '/');
   }
 
   return (
-    <main className="about-page" role="main" aria-labelledby="about-title">
+    <main className="about-page about-page-new" role="main" aria-labelledby="about-title">
+      {isAuthenticated ? (
+        <AuthenticatedTopBar active="home" />
+      ) : (
+        <header className="about-public-header">
+          <Link to="/" className="buy-brand" aria-label="Ir al inicio">
+            <h1>Wuepa</h1>
+            <p>Jewelry</p>
+          </Link>
+          <nav aria-label="Navegacion principal">
+            <Link to="/">Inicio</Link>
+            <Link to="/productssin">Catalogo</Link>
+            <Link to="/login" className="about-header-action">Ingresar</Link>
+          </nav>
+        </header>
+      )}
+
       <section className="about-hero">
+        <div className="about-hero-media" aria-hidden="true">
+          <img src="/collagewue.png" alt="" />
+        </div>
         <div className="about-hero-inner">
-          <h1 id="about-title">Sobre Joyería Wuepa</h1>
-          <p className="about-sub">Tu destino para las joyas más exclusivas y elegantes.</p>
+          <p className="about-kicker">
+            <Sparkles aria-hidden="true" />
+            Accesorios que hablan por ti
+          </p>
+          <h1 id="about-title">Wuepa Jewelry</h1>
+          <p className="about-sub">Joyas y accesorios para acompanar tu esencia, tus planes y esos detalles que vuelven especial lo cotidiano.</p>
+          <div className="about-hero-actions">
+            <Link to={isAuthenticated ? '/products' : '/productssin'} className="primary-button">
+              Ver colecciones
+              <span aria-hidden="true">-&gt;</span>
+            </Link>
+            <button type="button" className="about-secondary-button" onClick={handleGoBack}>
+              Volver
+            </button>
+          </div>
         </div>
       </section>
 
-      <section className="about-content container">
-        <h2 className="section-title">¿Qué es Joyería Wuepa?</h2>
-        <p className="lead">Joyería Wuepa es una tienda dedicada a ofrecer piezas únicas de joyería, seleccionadas cuidadosamente para resaltar tu estilo y personalidad. Nos especializamos en brindar una experiencia de compra segura, personalizada y memorable para cada cliente.</p>
-
-        <h3 className="section-sub">Características principales</h3>
-        <div className="features-grid">
-          <article className="feature-card">
-            <div className="feature-icon">💎</div>
-            <h4>Piezas exclusivas</h4>
-            <p>Ofrecemos una selección de joyas únicas, hechas con materiales de la más alta calidad y diseños innovadores.</p>
-          </article>
-          <article className="feature-card">
-            <div className="feature-icon">🔒</div>
-            <h4>Compra segura</h4>
-            <p>Tu seguridad es nuestra prioridad. Contamos con procesos de autenticación y protección de datos para que compres con total confianza.</p>
-          </article>
-          <article className="feature-card">
-            <div className="feature-icon">🎁</div>
-            <h4>Atención personalizada</h4>
-            <p>Brindamos asesoría y atención personalizada para ayudarte a encontrar la joya perfecta para cada ocasión.</p>
-          </article>
+      <section className="about-content container" aria-label="Informacion sobre Wuepa">
+        <div className="about-story">
+          <p className="about-kicker">Nuestra historia</p>
+          <h2 className="section-title">Detalles elegidos con intencion</h2>
+          <p className="lead">
+            Wuepa nace para reunir accesorios versatiles, expresivos y faciles de combinar. Cada pieza esta pensada para sentirse cercana:
+            un brillo sutil para el dia a dia, un acento especial para salir, o un regalo que diga algo bonito sin explicarlo demasiado.
+          </p>
         </div>
 
-        <h3 className="section-sub">Nuestra misión</h3>
-        <p>En Joyería Wuepa, creemos que cada persona merece brillar. Nuestra misión es ofrecer joyas que inspiren confianza, elegancia y felicidad en cada uno de nuestros clientes.</p>
+        <div className="features-grid">
+          {aboutFeatures.map(({ icon: Icon, title, text }) => (
+            <article className="feature-card" key={title}>
+              <div className="feature-icon">
+                <Icon aria-hidden="true" />
+              </div>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </article>
+          ))}
+        </div>
+
+        <section className="about-mission" aria-labelledby="about-mission-title">
+          <div>
+            <p className="about-kicker">Mision</p>
+            <h2 id="about-mission-title" className="section-title">Que cada persona encuentre una pieza que se sienta suya</h2>
+          </div>
+          <p>
+            Creemos que los accesorios no tienen que ser complicados para tener presencia. Nuestra mision es ofrecer joyas que inspiren
+            confianza, alegria y una forma muy propia de brillar.
+          </p>
+        </section>
 
         <div className="version-row">
           <div className="version-box">
-            <h4>Versión actual</h4>
+            <h3>Tienda digital Wuepa</h3>
             <div className="version-badges">
               <span className="badge">v1.0.0</span>
-              <span className="badge green">Estable</span>
+              <span className="badge green">Activa</span>
             </div>
-            <p className="muted">Construido con React + Vite + TypeScript + SASS. Plataforma lista para mostrar y vender joyas en línea.</p>
+            <p className="muted">Construida con React, Vite, TypeScript y SASS para mostrar catalogo, carrito y pedidos de forma clara.</p>
           </div>
 
           <div className="dev-box">
-            <h4>Desarrollado por</h4>
-            <div className="dev-badge">Joyería Wuepa</div>
+            <h3>Hecho por</h3>
+            <div className="dev-badge">Joyeria Wuepa</div>
           </div>
         </div>
-
-        <div style={{ marginTop: 28 }}>
-          <button type="button" className="primary-btn" onClick={handleGoBack}>Volver</button>
-        </div>
       </section>
+
+      <ScrollToTopButton />
+      <MobileBottomNav active={isAuthenticated ? 'home' : 'products'} variant={isAuthenticated ? 'auth' : 'public'} />
     </main>
   );
 }

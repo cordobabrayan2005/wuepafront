@@ -1,18 +1,6 @@
-/**
- * Componente Buy
- *
- * Página principal de compra de Joyería Wuepa. Permite buscar productos, ver categorías,
- * productos destacados y nuevos productos. Muestra información del usuario autenticado.
- *
- * Estructura:
- * - Header: Barra de navegación, buscador y enlaces principales.
- * - Sección principal: Banner, categorías, productos destacados.
- * - Sidebar: Información del usuario y nuevos productos.
- *
- * @returns {JSX.Element} Página de compra con productos y categorías.
- */
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Heart, LogOut, Search, Send, ShoppingCart, Sparkles, User } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import MobileBottomNav from '../components/MobileBottomNav';
 import MobileNavMenu from '../components/MobileNavMenu';
@@ -22,12 +10,8 @@ import { addProductToCart, getCachedCartItems, getCartItemsCount, loadCartItems 
 import { formatCopCurrency } from '../utils/currency';
 import { getAvailableProducts, loadProductsCatalog, loadProductsCatalogFromBackend, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
 
-/**
- * Componente funcional principal para la página de compra.
- */
 export default function Buy() {
   const FLASH_STORAGE_KEY = 'wuepa-auth-flash';
-  // Estado para la búsqueda de productos
   const [searchQuery, setSearchQuery] = useState('');
   const [msg, setMsg] = useState('');
   const [msgType, setMsgType] = useState<'success' | 'error' | 'info'>('info');
@@ -35,7 +19,6 @@ export default function Buy() {
   const [cartCount, setCartCount] = useState(() => getCartItemsCount(getCachedCartItems()));
   const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
   const [sortOrder, setSortOrder] = useState<ProductSortOrder>('recent');
-  // Usuario autenticado y logout obtenido del store
   const { user, logout } = useAuthStore();
   const isAdmin = user?.rol === 'admin';
   const location = useLocation();
@@ -73,6 +56,7 @@ export default function Buy() {
     window.addEventListener('storage', syncProducts);
     window.addEventListener('focus', refreshProductsFromBackend);
     document.addEventListener('visibilitychange', refreshProductsWhenVisible);
+
     return () => {
       isMounted = false;
       window.clearInterval(refreshIntervalId);
@@ -89,6 +73,7 @@ export default function Buy() {
 
     loadCartItems().then((items) => setCartCount(getCartItemsCount(items))).catch(() => setCartCount(0));
     window.addEventListener('wuepa-cart-updated', syncCartCount as EventListener);
+
     return () => {
       window.removeEventListener('wuepa-cart-updated', syncCartCount as EventListener);
     };
@@ -96,11 +81,12 @@ export default function Buy() {
 
   useEffect(() => {
     const state = location.state as { flash?: { text?: string; type?: 'success' | 'error' | 'info' } } | null;
+
     if (!state?.flash) {
       return;
     }
 
-    setMsg(state.flash.text || 'Acción completada correctamente.');
+    setMsg(state.flash.text || 'Accion completada correctamente.');
     setMsgType(state.flash.type || 'info');
     navigate(location.pathname, { replace: true });
   }, [location, navigate]);
@@ -123,39 +109,65 @@ export default function Buy() {
     }
 
     setIsLoggingOut(true);
-    setMsg('Cerrando sesión...');
+    setMsg('Cerrando sesion...');
     setMsgType('info');
 
     window.setTimeout(() => {
-      sessionStorage.setItem(FLASH_STORAGE_KEY, JSON.stringify({ type: 'info', text: 'Se cerró sesión correctamente.' }));
+      sessionStorage.setItem(FLASH_STORAGE_KEY, JSON.stringify({ type: 'info', text: 'Se cerro sesion correctamente.' }));
       logout();
-      navigate('/login', { state: { flash: { type: 'info', text: 'Se cerró sesión correctamente.' } } });
+      navigate('/login', { state: { flash: { type: 'info', text: 'Se cerro sesion correctamente.' } } });
     }, 650);
   };
 
   const sortedProducts = useMemo(() => sortProductsCatalog(getAvailableProducts(products), sortOrder), [products, sortOrder]);
-  const newProducts = useMemo(() => sortedProducts.slice(0, 4), [sortedProducts]);
+  const filteredProducts = useMemo(() => {
+    const normalizedSearch = searchQuery.toLowerCase();
+
+    return sortedProducts.filter((product) =>
+      product.code.toLowerCase().includes(normalizedSearch)
+      || product.name.toLowerCase().includes(normalizedSearch)
+      || product.description.toLowerCase().includes(normalizedSearch)
+    );
+  }, [searchQuery, sortedProducts]);
+
   const mobileMenuItems = [
     { label: 'Inicio', to: '/buy', isActive: true },
-
-    { label: 'Productos', to: '/products' },
-
+    { label: 'Tienda', to: '/products' },
+    { label: 'Colecciones', to: '/products?category=paquetes' },
     { label: `Carrito (${cartCount})`, to: '/cart' },
-
     { label: 'Nosotros', to: '/about' },
-
-    ...(isAdmin
-      ? [{ label: 'Admin', to: '/admin' }]
-      : []),
-
+    ...(isAdmin ? [{ label: 'Admin', to: '/admin' }] : []),
     {
-      label: isLoggingOut
-        ? 'Cerrando...'
-        : 'Cerrar sesion',
-
+      label: isLoggingOut ? 'Cerrando...' : 'Cerrar sesion',
       onClick: handleLogout,
-
       tone: 'danger' as const
+    },
+  ];
+
+  const featuredCategories = [
+    {
+      label: 'Anillos',
+      image: '/AnillosWue.jpeg',
+      to: '/products?category=anillos',
+      imageClassName: 'category-image-anillos',
+    },
+    {
+      label: 'Collares',
+      image: '/CollaresWue.jpeg',
+      to: '/products?category=collares',
+      imageClassName: 'category-image-collares',
+    },
+    {
+      label: 'Sets',
+      image: '/SetsWue.jpeg',
+      to: '/products?category=paquetes',
+      imageClassName: 'category-image-paquetes',
+    },
+    {
+      label: 'Aretes',
+      image: '/AretesWue.jpeg',
+      to: '/products?category=aretes',
+      imageClassName: 'category-image-aretes',
     },
   ];
 
@@ -177,54 +189,57 @@ export default function Buy() {
     }
   };
 
-  // Filtra productos según la búsqueda
-  const filteredProducts = useMemo(() => {
-    const normalizedSearch = searchQuery.toLowerCase();
-
-    return sortedProducts.filter((product) =>
-      product.code.toLowerCase().includes(normalizedSearch)
-      || product.name.toLowerCase().includes(normalizedSearch)
-      || product.description.toLowerCase().includes(normalizedSearch)
-    );
-  }, [searchQuery, sortedProducts]);
-
-  // Filtra productos destacados según la búsqueda
-  const filteredBestSellers = newProducts.filter((item) =>
-    item.code.toLowerCase().includes(searchQuery.toLowerCase())
-    || item.name.toLowerCase().includes(searchQuery.toLowerCase())
-    || item.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Renderizado principal de la página
   return (
     <main className="buy-page">
+      <div className="buy-promo-bar" aria-label="Promocion Wuepa">
+        <Sparkles aria-hidden="true" />
+        <strong>Accesorios que hablan por ti</strong>
+        <Sparkles aria-hidden="true" />
+      </div>
+
       <header className="buy-header">
         <div className="header-left">
-          <h1>WUEPA</h1>
-          <p>ACCESORIOS</p>
+          <Link to="/buy" className="buy-brand" aria-label="Ir al inicio de compras">
+            <h1>Wuepa</h1>
+            <p>Jewelry</p>
+          </Link>
         </div>
+
         <MobileNavMenu title="Menu principal" items={mobileMenuItems} />
+
+        <nav className="header-right" aria-label="Navegacion principal">
+          <Link to="/buy" className="active">Inicio</Link>
+          <Link to="/products">Tienda</Link>
+          <Link to="/products?category=paquetes">Colecciones</Link>
+          <Link to="/about">Nosotros</Link>
+          {isAdmin && (
+            <Link to="/admin">Admin</Link>
+          )}
+        </nav>
+
         <div className="header-center">
+          <Search aria-hidden="true" />
           <input
             type="text"
-            placeholder="Buscar productos..."
+            placeholder="Buscar..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(event) => setSearchQuery(event.target.value)}
             className="search-bar"
           />
         </div>
-        <nav className="header-right">
-          <Link to="/buy">Inicio</Link>
-          <Link to="/products">Productos</Link>
-          <Link to="/cart" className="cart-link-inline">Carrito <span className="cart-link-count">{cartCount}</span></Link>
-          <Link to="/about">Nosotros</Link>
-          {
-            isAdmin && (
-              <Link to="/admin">Admin</Link>
-            )
-          }
-          <button onClick={handleLogout} disabled={isLoggingOut} className="logout-btn" style={{ marginLeft: 16, background: 'transparent', color: '#e74c3c', border: 'none', padding: '8px 16px', borderRadius: 4, cursor: isLoggingOut ? 'wait' : 'pointer', opacity: isLoggingOut ? 0.7 : 1 }}>{isLoggingOut ? 'Cerrando...' : 'Cerrar sesión'}</button>
-        </nav>
+
+        <div className="buy-header-actions">
+          <Link to="/profile" className="buy-icon-button" aria-label={`Perfil de ${user?.name ?? 'usuario'}`}>
+            <User aria-hidden="true" />
+          </Link>
+          <Link to="/cart" className="buy-icon-button cart-link-inline" aria-label={`Carrito con ${cartCount} productos`}>
+            <ShoppingCart aria-hidden="true" />
+            <span className="cart-link-count">{cartCount}</span>
+          </Link>
+          <button type="button" onClick={handleLogout} disabled={isLoggingOut} className="buy-icon-button logout-btn" aria-label={isLoggingOut ? 'Cerrando sesion' : 'Cerrar sesion'}>
+            <LogOut aria-hidden="true" />
+          </button>
+        </div>
       </header>
 
       {msg && (
@@ -236,55 +251,41 @@ export default function Buy() {
       <section className="buy-content">
         <section className="buy-grid">
           <article className="hero-card">
-            <div>
-              <h2>JOYAS QUE <span>HABLAN POR TI</span></h2>
-              <p>Descubre nuestras colecciones exclusivas de joyas</p>
-              <Link to="/products" className="primary-button">VER PRODUCTOS →</Link>
-            </div>
             <div className="hero-card-media">
-              <img src="/collagewue.png" alt="Destacados" loading="eager" fetchPriority="high" />
+              <img src="/collagewue.png" alt="Accesorios dorados Wuepa" loading="eager" fetchPriority="high" />
+            </div>
+            <div className="hero-card-copy">
+              <h2>Wuepa</h2>
+              <p>accesorios que hablan por ti</p>
+              <Link to="/products" className="primary-button">
+                Descubrir colecciones
+                <span aria-hidden="true">-&gt;</span>
+              </Link>
             </div>
           </article>
 
-          <div className="wuepa-categories">
-            <Link to="/products?category=collares" className="category-card">
-              <img src="/Collareswue.png" alt="Collares" loading="lazy" decoding="async" />
-              <div className="backdrop" />
-              <div className="content">
-                <h4>COLLARES</h4>
-              </div>
-            </Link>
-            <Link to="/products?category=aretes" className="category-card">
-              <img src="/AretesWue.png" alt="Aretes" loading="lazy" decoding="async" />
-              <div className="backdrop" />
-              <div className="content">
-                <h4>ARETES</h4>
-              </div>
-            </Link>
-            <Link to="/products?category=pulseras" className="category-card">
-              <img src="/Pulseraswue.png" alt="Pulseras" loading="lazy" decoding="async" />
-              <div className="backdrop" />
-              <div className="content">
-                <h4>PULSERAS</h4>
-              </div>
-            </Link>
-            <Link to="/products?category=anillos" className="category-card category-card-anillos">
-              <img src="/Anilloswue.png" alt="Anillos" className="category-image-anillos" loading="lazy" decoding="async" />
-              <div className="backdrop" />
-              <div className="content">
-                <h4>ANILLOS</h4>
-              </div>
-            </Link>
-            <Link to="/products?category=paquetes" className="category-card category-card-paquetes">
-              <img src="/CatPaquetes.png" alt="Set de accesorios" className="category-image-paquetes" loading="lazy" decoding="async" />
-              <div className="backdrop" />
-              <div className="content">
-                <h4>SET DE ACCESORIOS</h4>
-              </div>
-            </Link>
-          </div>
+          <section className="buy-categories-section" aria-label="Categorias de productos">
+            <div className="buy-section-heading">
+              <span>Compra por categoria</span>
+              <h3>Elige tu brillo</h3>
+            </div>
+
+            <div className="wuepa-categories buy-categories">
+              {featuredCategories.map((category) => (
+                <Link key={category.label} to={category.to} className="category-card">
+                  <ImageWithFallback src={category.image} alt={category.label} className={category.imageClassName} />
+                  <span className="backdrop" aria-hidden="true" />
+                  <span className="content">
+                    <h4>{category.label}</h4>
+                    <small>Ver categoria</small>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
 
           <div className="products-toolbar buy-products-toolbar">
+            <h3>Productos</h3>
             <span className="products-toolbar-label">Ordenar por</span>
             <div className="products-sort-options" role="group" aria-label="Ordenar productos">
               {[
@@ -304,16 +305,17 @@ export default function Buy() {
             </div>
           </div>
 
-          <h3>PRODUCTOS DESTACADOS</h3>
-          <div className="product-list">
+          <div className="product-list" aria-live="polite">
             {filteredProducts.map((product) => (
               <article key={product.id} className="product-card">
                 <div className="product-card-media">
                   <ImageWithFallback src={product.image} alt={product.name} sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 25vw" />
-                  <span className="product-stock-badge">{product.units} disponibles</span>
+                  <button type="button" className="product-favorite-btn" aria-label={`Guardar ${product.name}`}>
+                    <Heart aria-hidden="true" />
+                  </button>
                 </div>
                 <h4 className="product-card-title">{product.name}</h4>
-                <p className="product-card-description buy-product-description">{product.description}</p>
+                <p className="product-card-description buy-product-description">{product.code}</p>
                 <p className="product-card-price">{formatCopCurrency(product.price)}</p>
                 <div className="product-card-actions">
                   <button type="button" className="add-cart-btn" onClick={() => handleAddToCart(product)} disabled={product.units <= 0}>
@@ -323,42 +325,75 @@ export default function Buy() {
               </article>
             ))}
           </div>
-        </section>
 
-        <aside className="buy-sidebar">
-          <div className="user-card">
-            <h3>Bienvenid@ {user?.name}</h3>
-            <p className="user-email" title={user?.email ?? ''}>{user?.email}</p>
-            <Link to="/profile" className="profile-btn">Ver Perfil</Link>
+          <div className="buy-all-products">
+            <Link to="/products" className="primary-button">
+              Ver todos los productos
+              <span aria-hidden="true">-&gt;</span>
+            </Link>
           </div>
+        </section>
+      </section>
 
-          <div className="best-seller">
-            <h4>NUEVOS PRODUCTOS</h4>
-            <div className="product-list">
-              {filteredBestSellers.map((item) => (
-                <article key={item.id} className="product-card">
-                  <div className="product-card-media">
-                    <ImageWithFallback src={item.image} alt={item.name} sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 25vw" />
-                    <span className="product-stock-badge">{item.units} disponibles</span>
-                  </div>
-                  <h4 className="product-card-title">{item.name}</h4>
-                  <p className="product-card-description buy-product-description">{item.description}</p>
-                  <p className="product-card-price">{formatCopCurrency(item.price)}</p>
-                  <div className="product-card-actions">
-                    <button type="button" className="add-cart-btn" onClick={() => handleAddToCart(item)} disabled={item.units <= 0}>
-                      {item.units > 0 ? 'Agregar al carrito' : 'Agotado'}
-                    </button>
-                  </div>
-                </article>
-              ))}
+      <footer className="buy-footer">
+        <div className="buy-footer-inner">
+          <div className="buy-footer-brand">
+            <h2>Wuepa</h2>
+            <p>Accesorios que hablan por ti. Disenados para resaltar tu esencia y acompanarte en cada momento.</p>
+            <div className="buy-socials" aria-label="Redes sociales">
+              <a href="#" aria-label="Instagram">ig</a>
+              <a href="#" aria-label="TikTok">tk</a>
+              <a href="#" aria-label="Facebook">fb</a>
+              <a href="#" aria-label="Pinterest">pt</a>
             </div>
           </div>
-        </aside>
-      </section>
+
+          <div className="buy-footer-group">
+            <h3>Compra</h3>
+            <Link to="/products?category=collares">Collares</Link>
+            <Link to="/products?category=aretes">Aretes</Link>
+            <Link to="/products?category=pulseras">Pulseras</Link>
+            <Link to="/products?category=anillos">Anillos</Link>
+            <Link to="/products?category=paquetes">Set de accesorios</Link>
+          </div>
+
+          <div className="buy-footer-group">
+            <h3>Nosotros</h3>
+            <Link to="/about">Nuestra historia</Link>
+            <Link to="/about">Materiales</Link>
+            <Link to="/about">Cuidados</Link>
+            <Link to="/about">FAQ</Link>
+            <Link to="/about">Contacto</Link>
+          </div>
+
+          <div className="buy-footer-group">
+            <h3>Soporte</h3>
+            <Link to="/about">Envios y entregas</Link>
+            <Link to="/about">Cambios y devoluciones</Link>
+            <Link to="/about">Terminos y condiciones</Link>
+            <Link to="/about">Politica de privacidad</Link>
+          </div>
+
+          <form className="buy-newsletter" onSubmit={(event) => event.preventDefault()}>
+            <h3>Suscribete</h3>
+            <p>Recibe novedades, lanzamientos y promociones especiales.</p>
+            <label>
+              <span>Tu correo electronico</span>
+              <input type="email" placeholder="Tu correo electronico" />
+              <button type="submit" aria-label="Suscribirse">
+                <Send aria-hidden="true" />
+              </button>
+            </label>
+          </form>
+        </div>
+        <div className="buy-footer-bottom">
+          <span>(c) 2026 Wuepa Jewelry. Todos los derechos reservados.</span>
+          <span>Hecho con amor en Wuepa.</span>
+        </div>
+      </footer>
+
       <ScrollToTopButton />
-      {/* Barra inferior autenticada visible solo en movil despues de iniciar sesion. */}
       <MobileBottomNav active="home" cartCount={cartCount} variant="auth" />
     </main>
   );
 }
-

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import AuthenticatedTopBar from "../components/AuthenticatedTopBar";
 import MobileBottomNav from "../components/MobileBottomNav";
 import { api } from "../services/api";
 import { useAuthStore } from "../stores/authStore";
@@ -225,7 +226,8 @@ export default function Profile() {
 
   return (
     <>
-    <section className="profile-page" role="region" aria-labelledby="profile-title" lang="es">
+    <AuthenticatedTopBar active="profile" />
+    <section className="profile-page authenticated-page-content" role="region" aria-labelledby="profile-title" lang="es">
       <div className="profile-card-new">
         <div className="profile-header-row">
           <button className="profile-close" aria-label="Cerrar" onClick={() => navigate('/buy')}>×</button>

@@ -1,6 +1,8 @@
 // ...existing code...
 /* src/pages/ChangePassword.tsx */
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import AuthenticatedTopBar from "../components/AuthenticatedTopBar";
+import MobileBottomNav from "../components/MobileBottomNav";
 import { api } from "../services/api";
 import PasswordField from "../components/PasswordField";
 import { validatePasswordRules } from "../utils/passwordRules";
@@ -47,11 +49,6 @@ export default function ChangePassword() {
    * Añade una clase CSS a nivel de página mientras el componente está montado para el estilo.
    * Elimina la clase al desmontar el componente.
    */
-  useEffect(() => {
-    document.body.classList.add("login-page");
-    return () => document.body.classList.remove("login-page");
-  }, []);
-
   /**
    * Manejador del envío del formulario.
    *
@@ -88,8 +85,10 @@ export default function ChangePassword() {
   }
 
   return (
-    <div className="login-container" role="main" aria-labelledby="changepw-title" lang="es">
-      <div className="login-card">
+    <main className="change-password-page">
+      <AuthenticatedTopBar active="profile" />
+      <div className="login-container authenticated-page-content" role="main" aria-labelledby="changepw-title" lang="es">
+        <div className="login-card">
         <div className="login-logo">
           <div className="logo-circle large">
           </div>
@@ -111,7 +110,9 @@ export default function ChangePassword() {
           <button type="submit" className="login-button">Guardar</button>
         </form>
         {msg && <p id="changepw-status" role="status" className="login-message">{msg}</p>}
+        </div>
       </div>
-    </div>
+      <MobileBottomNav active="profile" variant="auth" />
+    </main>
   );
 }

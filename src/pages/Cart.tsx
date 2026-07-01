@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MessageCircle, Minus, Plus, ShoppingBag, ShoppingCart, Sparkles, Trash2, X } from 'lucide-react';
+import AuthenticatedTopBar from '../components/AuthenticatedTopBar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import MobileNavMenu from '../components/MobileNavMenu';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
@@ -248,6 +249,7 @@ export default function Cart() {
 
   return (
     <main className="cart-page">
+      <AuthenticatedTopBar active="cart" cartCount={itemCount} />
       <header className="products-header cart-header">
         <div className="header-left">
           <h1>Wuepa</h1>

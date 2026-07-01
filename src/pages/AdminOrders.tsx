@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, PackageCheck, ShoppingBag, XCircle } from 'lucide-react';
+import AuthenticatedTopBar from '../components/AuthenticatedTopBar';
+import MobileBottomNav from '../components/MobileBottomNav';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { api } from '../services/api';
 import { formatCopCurrency } from '../utils/currency';
@@ -106,7 +108,9 @@ export default function AdminOrders() {
   }
 
   return (
-    <main className="admin-page admin-orders-page">
+    <>
+    <AuthenticatedTopBar active="admin" />
+    <main className="admin-page admin-orders-page authenticated-page-content">
       {toast && (
         <div role="status" aria-live="polite" className={`auth-toast ${toast.type}`}>
           {toast.text}
@@ -180,6 +184,8 @@ export default function AdminOrders() {
         </section>
       </div>
     </main>
+    <MobileBottomNav active="profile" variant="auth" />
+    </>
   );
 }
 

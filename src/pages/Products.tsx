@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import AuthenticatedTopBar from '../components/AuthenticatedTopBar';
 import MobileBottomNav from '../components/MobileBottomNav';
-import MobileNavMenu from '../components/MobileNavMenu';
 import ScrollToTopButton from '../components/ScrollToTopButton';
 import { addProductToCart, getCachedCartItems, getCartItemsCount, loadCartItems } from '../utils/cart';
 import { formatCopCurrency } from '../utils/currency';
@@ -119,13 +119,6 @@ export default function Products() {
     }
   }, [categories, location.search]);
 
-  const mobileMenuItems = [
-    { label: 'Inicio', to: '/buy' },
-    { label: 'Productos', to: '/products', isActive: true },
-    { label: `Carrito (${cartCount})`, to: '/cart' },
-    { label: 'Nosotros', to: '/about' },
-  ];
-
   const handleAddToCart = async (product: ProductCatalogItem) => {
     if (product.units <= 0) {
       setFeedback(`${product.name} no tiene unidades disponibles.`);
@@ -158,29 +151,13 @@ export default function Products() {
   // Renderizado principal de la página de productos
   return (
     <div className="products-page">
-      {/* Header */}
-      <header className="products-header">
-        <div className="header-left">
-          <h1>WUEPA</h1>
-          <p>ACCESORIOS</p>
-        </div>
-        <MobileNavMenu title="Menu de compra" items={mobileMenuItems} />
-        <div className="header-center">
-          <input
-            type="text"
-            placeholder="Buscar productos..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-bar"
-          />
-        </div>
-        <nav className="header-right">
-          <Link to="/buy">Inicio</Link>
-          <Link to="/products" className="active">Productos</Link>
-          <Link to="/cart" className="cart-link-inline">Carrito <span className="cart-link-count">{cartCount}</span></Link>
-          <Link to="/about">Nosotros</Link>
-        </nav>
-      </header>
+      <AuthenticatedTopBar
+        active="products"
+        cartCount={cartCount}
+        searchQuery={searchQuery}
+        searchPlaceholder="Buscar productos..."
+        onSearchChange={setSearchQuery}
+      />
 
       {feedback && (
         <div role="status" aria-live="polite" className="auth-toast success">
