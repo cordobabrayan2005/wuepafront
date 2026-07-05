@@ -6904,6 +6904,56 @@ body.modal-open {
   font-weight: 800;
 }
 
+.cart-purchase-terms {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+  padding: 0.95rem;
+  border: 1px solid #efc67e;
+  border-radius: 0.75rem;
+  background: #fffdf8;
+}
+
+.cart-purchase-terms h4 {
+  margin: 0;
+  color: #2d2a25;
+  font-size: 1rem;
+}
+
+.cart-purchase-terms ol {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding-left: 1.15rem;
+  color: #5a4b39;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.cart-purchase-terms li {
+  padding-left: 0.15rem;
+}
+
+.cart-purchase-terms-acceptance {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1d7a6;
+  color: #3d352b;
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.cart-purchase-terms-acceptance input {
+  flex: 0 0 auto;
+  width: 1.05rem;
+  height: 1.05rem;
+  margin-top: 0.1rem;
+  accent-color: #16a39a;
+}
+
 /* .cart-order-confirmation-actions da forma a el carrito de compras; ajusta estructura y posicion, espaciado. */
 .cart-order-confirmation-actions {
   display: grid;
@@ -9041,7 +9091,7 @@ body.modal-open {
   border: 0;
   border-radius: 0;
   box-shadow: none;
-  background: #6d553a;
+  background: #f8f3ea;
 }
 
 .hero-card-media::after {
@@ -9058,10 +9108,9 @@ body.modal-open {
 .hero-card-media img {
   display: block;
   width: 100%;
-  height: 30rem;
+  height: 38rem;
   object-fit: cover;
-  object-position: center 46%;
-  transform: none;
+  object-position: center 48%;
   filter: sepia(0.18) saturate(0.92) contrast(1.02);
 }
 
@@ -9609,7 +9658,7 @@ body.modal-open {
 
   .hero-card-media img {
     height: 24rem;
-    object-position: 58% center;
+    object-position: center;
   }
 
   .hero-card-copy {

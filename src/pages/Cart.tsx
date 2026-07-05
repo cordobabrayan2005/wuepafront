@@ -12,6 +12,36 @@ import { api } from '../services/api';
 import { WUEPA_WHATSAPP_PHONE, createBackendCustomerOrder } from '../utils/orders';
 
 const INTERNATIONAL_PHONE_PATTERN = /^\+?[0-9\s()-]+$/;
+const PURCHASE_TERMS_ACCEPTANCE_STORAGE_KEY = 'wuepa-purchase-terms-accepted';
+
+const PURCHASE_TERMS = [
+  'Broches: Si el broche del producto presenta algún inconveniente poco tiempo después de la compra por un defecto de fabricación, podrá solicitarse la revisión para evaluar el cambio.',
+  'Separados: Los productos separados se conservarán en la tienda por un máximo de un (1) mes. Transcurrido ese tiempo, el apartado se cancelará sin devolución del dinero abonado.',
+  'Cambios y devoluciones: No se realizan devoluciones de dinero. En caso de ser aprobado, el producto únicamente podrá cambiarse por otro artículo de igual o mayor valor, pagando la diferencia si aplica.',
+  'Envíos: El costo del envío será asumido por el cliente, excepto cuando la tienda tenga una promoción o actividad especial que ofrezca este beneficio.',
+  'Productos en promoción: Los artículos adquiridos en promoción, descuento o liquidación no tienen cambio.',
+  'Plazo para cambios: Los cambios deberán solicitarse dentro de los tres (3) días calendario siguientes a la fecha de compra. Después de este plazo no se aceptarán cambios.',
+];
+
+function getPurchaseTermsAcceptanceKey(userId?: string) {
+  return `${PURCHASE_TERMS_ACCEPTANCE_STORAGE_KEY}:${userId || 'guest'}`;
+}
+
+function hasAcceptedPurchaseTerms(userId?: string) {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return window.localStorage.getItem(getPurchaseTermsAcceptanceKey(userId)) === 'true';
+}
+
+function savePurchaseTermsAcceptance(userId?: string) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.setItem(getPurchaseTermsAcceptanceKey(userId), 'true');
+}
 const ADDRESS_PATTERN = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9\s#.,°/-]+$/;
 
 export default function Cart() {
@@ -21,6 +51,8 @@ export default function Cart() {
   const [isEditingCheckoutData, setIsEditingCheckoutData] = useState(false);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
   const [orderError, setOrderError] = useState('');
+  const [hasAcceptedTermsBefore, setHasAcceptedTermsBefore] = useState(() => hasAcceptedPurchaseTerms());
+  const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
   const [checkoutData, setCheckoutData] = useState({
     telefono: '',
     direccion: '',
@@ -34,6 +66,7 @@ export default function Cart() {
   const logout = useAuthStore((state) => state.logout);
   const isAdmin = user?.rol === 'admin';
   const hasSavedCheckoutData = Boolean(user?.telefono?.trim() && user?.direccion?.trim());
+  const shouldShowPurchaseTerms = !hasAcceptedTermsBefore;
 
   useEffect(() => {
     function syncCart() {
@@ -56,6 +89,11 @@ export default function Cart() {
   }, [items.length]);
 
   useEffect(() => {
+    setHasAcceptedTermsBefore(hasAcceptedPurchaseTerms(user?.id));
+    setHasAcceptedTerms(false);
+  }, [user?.id]);
+
+  useEffect(() => {
     if (!isConfirmingOrder) {
       return;
     }
@@ -66,6 +104,7 @@ export default function Cart() {
     };
     setCheckoutData(savedCheckoutData);
     setIsEditingCheckoutData(!savedCheckoutData.telefono || !savedCheckoutData.direccion);
+    setHasAcceptedTerms(false);
     setCheckoutFieldErrors({ telefono: '', direccion: '' });
     setOrderError('');
 
@@ -210,6 +249,11 @@ export default function Cart() {
       return;
     }
 
+    if (shouldShowPurchaseTerms && !hasAcceptedTerms) {
+      setOrderError('Acepta los términos y condiciones de compra para continuar con tu primer pedido.');
+      return;
+    }
+
     setIsSubmittingOrder(true);
     setOrderError('');
 
@@ -232,6 +276,12 @@ export default function Cart() {
           setUser(updatedUser);
         }
         return createBackendCustomerOrder(items, updatedUser ?? user, normalizedCheckoutData);
+      })
+      .then(() => {
+        if (shouldShowPurchaseTerms) {
+          savePurchaseTermsAcceptance(user?.id);
+          setHasAcceptedTermsBefore(true);
+        }
       })
       .then(() => clearCart())
       .then((nextItems) => {
@@ -507,6 +557,32 @@ export default function Cart() {
                 <span>Total sin envío</span>
                 <strong>{formatCopCurrency(total)}</strong>
               </div>
+              {shouldShowPurchaseTerms ? (
+                <section className="cart-purchase-terms" aria-labelledby="cart-purchase-terms-title">
+                  <p className="cart-kicker">Primera compra</p>
+                  <h4 id="cart-purchase-terms-title">Términos y Condiciones de Compra</h4>
+                  <ol>
+                    {PURCHASE_TERMS.map((term) => (
+                      <li key={term}>{term}</li>
+                    ))}
+                  </ol>
+                  <label className="cart-purchase-terms-acceptance">
+                    <input
+                      type="checkbox"
+                      checked={hasAcceptedTerms}
+                      onChange={(event) => {
+                        setHasAcceptedTerms(event.target.checked);
+                        if (event.target.checked) {
+                          setOrderError('');
+                        }
+                      }}
+                      disabled={isSubmittingOrder}
+                      required
+                    />
+                    <span>He leído y acepto los términos y condiciones de compra.</span>
+                  </label>
+                </section>
+              ) : null}
               {orderError ? (
                 <p className="cart-order-error" role="alert">{orderError}</p>
               ) : null}
@@ -514,7 +590,7 @@ export default function Cart() {
                 <button
                   type="submit"
                   className="whatsapp-btn cart-checkout-button"
-                  disabled={isSubmittingOrder}
+                  disabled={isSubmittingOrder || (shouldShowPurchaseTerms && !hasAcceptedTerms)}
                 >
                   {isSubmittingOrder
                     ? 'Guardando pedido...'
