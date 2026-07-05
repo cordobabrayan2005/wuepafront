@@ -38,6 +38,7 @@ export default function Products() {
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [sortOrder, setSortOrder] = useState<ProductSortOrder>('recent');
   const location = useLocation();
+  const headerActiveSection = new URLSearchParams(location.search).get('category') === 'paquetes' ? 'collections' : 'products';
 
   useEffect(() => {
     let isMounted = true;
@@ -152,7 +153,7 @@ export default function Products() {
   return (
     <div className="products-page">
       <AuthenticatedTopBar
-        active="products"
+        active={headerActiveSection}
         cartCount={cartCount}
         searchQuery={searchQuery}
         searchPlaceholder="Buscar productos..."

@@ -45,7 +45,7 @@ export default function About() {
   return (
     <main className="about-page about-page-new" role="main" aria-labelledby="about-title">
       {isAuthenticated ? (
-        <AuthenticatedTopBar active="home" />
+        <AuthenticatedTopBar active="about" />
       ) : (
         <header className="about-public-header">
           <Link to="/" className="buy-brand" aria-label="Ir al inicio">

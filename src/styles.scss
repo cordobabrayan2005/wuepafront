@@ -2486,6 +2486,12 @@ main.auth-wrapper.signup-page .login-button {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.34);
 }
 
+.hero-card-media a {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 /* .hero-card-media img da forma a este bloque visual; ajusta estructura y posicion, movimiento o efectos, encuadre de imagenes. */
 .hero-card-media img {
   display: block;
@@ -2494,6 +2500,45 @@ main.auth-wrapper.signup-page .login-button {
   object-fit: cover;
   object-position: center 47%;
   transform: scale(1.03);
+}
+
+.hero-card-media img.hero-slide-image--second {
+  object-position: center 68%;
+}
+
+.hero-card-media img.hero-slide-image--last {
+  object-position: center 67%;
+}
+
+.hero-slider-dots {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.65rem;
+  z-index: 2;
+}
+
+.hero-slider-dot {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  transition: transform 180ms ease, background-color 180ms ease;
+}
+
+.hero-slider-dot.active,
+.hero-slider-dot:focus-visible {
+  background: var(--buy-gold);
+  transform: scale(1.15);
+}
+
+.hero-slider-dot:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.95);
+  outline-offset: 2px;
 }
 
 /* .categories da forma a este bloque visual; ajusta estructura y posicion, espaciado. */
@@ -3812,7 +3857,7 @@ main.auth-wrapper.signup-page .login-button {
 
 /* .wuepa-categories .category-card .category-image-collares da forma a este bloque visual; ajusta encuadre de imagenes. */
 .wuepa-categories .category-card .category-image-collares {
-  object-position: center 39%;
+  object-position: center 70%;
 }
 
 /* .wuepa-categories .category-card .category-image-anillos ajusta el foco visual de la foto de Anillos. */
@@ -9237,6 +9282,58 @@ body.modal-open {
   right: 1rem;
   display: grid;
   gap: 0.35rem;
+}
+
+.buy-categories-banner {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.buy-categories-banner .category-card-banner {
+  width: min(100%, 78rem);
+  max-width: 100%;
+  min-height: 24rem;
+  overflow: hidden;
+}
+
+.buy-categories-banner .category-card-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.2s ease;
+}
+
+.buy-categories-banner .category-card-banner:hover img {
+  transform: scale(1.02);
+}
+
+.banner-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.banner-dot {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: transform 180ms ease, background-color 180ms ease;
+}
+
+.banner-dot.active,
+.banner-dot:focus-visible {
+  background: var(--buy-gold);
+  transform: scale(1.15);
+}
+
+.banner-dot:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.9);
+  outline-offset: 2px;
 }
 
 .buy-page .buy-categories .category-card .content small {

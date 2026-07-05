@@ -6,7 +6,7 @@ import { useAuthStore } from '../stores/authStore';
 import { getCachedCartItems, getCartItemsCount, loadCartItems } from '../utils/cart';
 
 type AuthenticatedTopBarProps = {
-  active?: 'home' | 'products' | 'cart' | 'profile' | 'admin';
+  active?: 'home' | 'products' | 'collections' | 'about' | 'cart' | 'profile' | 'admin';
   cartCount?: number;
   searchQuery?: string;
   searchPlaceholder?: string;
@@ -62,9 +62,10 @@ export default function AuthenticatedTopBar({
   const mobileMenuItems = [
     { label: 'Inicio', to: '/buy', isActive: active === 'home' },
     { label: 'Tienda', to: '/products', isActive: active === 'products' },
+    { label: 'Colecciones', to: '/products?category=paquetes', isActive: active === 'collections' },
     { label: `Carrito (${displayCartCount})`, to: '/cart', isActive: active === 'cart' },
     { label: 'Mi perfil', to: '/profile', isActive: active === 'profile' },
-    { label: 'Nosotros', to: '/about' },
+    { label: 'Nosotros', to: '/about', isActive: active === 'about' },
     ...(isAdmin ? [{ label: 'Admin', to: '/admin', isActive: active === 'admin' }] : []),
     { label: isLoggingOut ? 'Cerrando...' : 'Cerrar sesion', onClick: handleLogout, tone: 'danger' as const },
   ];
@@ -90,8 +91,8 @@ export default function AuthenticatedTopBar({
         <nav className="header-right" aria-label="Navegacion principal">
           <Link to="/buy" className={active === 'home' ? 'active' : ''}>Inicio</Link>
           <Link to="/products" className={active === 'products' ? 'active' : ''}>Tienda</Link>
-          <Link to="/products?category=paquetes">Colecciones</Link>
-          <Link to="/about">Nosotros</Link>
+          <Link to="/products?category=paquetes" className={active === 'collections' ? 'active' : ''}>Colecciones</Link>
+          <Link to="/about" className={active === 'about' ? 'active' : ''}>Nosotros</Link>
           {isAdmin && (
             <Link to="/admin" className={active === 'admin' ? 'active' : ''}>Admin</Link>
           )}

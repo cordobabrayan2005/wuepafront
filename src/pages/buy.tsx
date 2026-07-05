@@ -19,6 +19,7 @@ export default function Buy() {
   const [cartCount, setCartCount] = useState(() => getCartItemsCount(getCachedCartItems()));
   const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
   const [sortOrder, setSortOrder] = useState<ProductSortOrder>('recent');
+  const [heroSlideIndex, setHeroSlideIndex] = useState(0);
   const { user, logout } = useAuthStore();
   const isAdmin = user?.rol === 'admin';
   const location = useLocation();
@@ -103,6 +104,65 @@ export default function Buy() {
     return () => window.clearTimeout(timeoutId);
   }, [msg, isLoggingOut]);
 
+  const featuredCategories = [
+    {
+      label: 'Collares',
+      image: '/Collareswue.png',
+      to: '/products?category=collares',
+      imageClassName: 'category-image-collares',
+    },
+    {
+      label: 'Pulseras',
+      image: '/Pulseraswue.png',
+      to: '/products?category=pulseras',
+    },
+    {
+      label: 'Aretes',
+      image: '/AretesWue.png',
+      to: '/products?category=aretes',
+      imageClassName: 'category-image-aretes',
+    },
+    {
+      label: 'Anillos',
+      image: '/Anilloswue.png',
+      to: '/products?category=anillos',
+      imageClassName: 'category-image-anillos',
+    },
+    {
+      label: 'Set de accesorios',
+      image: '/CatPaquetes.png',
+      to: '/products?category=paquetes',
+      imageClassName: 'category-image-paquetes',
+    },
+  ];
+
+  const heroSlides = [
+    {
+      label: 'Wuepa',
+      image: '/collagewue.png',
+      to: '/products',
+      alt: 'Accesorios dorados Wuepa',
+    },
+    ...featuredCategories.map((category) => ({
+      label: category.label,
+      image: category.image,
+      to: category.to,
+      alt: category.label,
+    })),
+  ];
+
+  useEffect(() => {
+    if (heroSlides.length === 0) {
+      return;
+    }
+
+    const heroInterval = window.setInterval(() => {
+      setHeroSlideIndex((currentIndex) => (currentIndex + 1) % heroSlides.length);
+    }, 4500);
+
+    return () => window.clearInterval(heroInterval);
+  }, [heroSlides.length]);
+
   const handleLogout = () => {
     if (isLoggingOut) {
       return;
@@ -141,33 +201,6 @@ export default function Buy() {
       label: isLoggingOut ? 'Cerrando...' : 'Cerrar sesion',
       onClick: handleLogout,
       tone: 'danger' as const
-    },
-  ];
-
-  const featuredCategories = [
-    {
-      label: 'Anillos',
-      image: '/AnillosWue.jpeg',
-      to: '/products?category=anillos',
-      imageClassName: 'category-image-anillos',
-    },
-    {
-      label: 'Collares',
-      image: '/CollaresWue.jpeg',
-      to: '/products?category=collares',
-      imageClassName: 'category-image-collares',
-    },
-    {
-      label: 'Sets',
-      image: '/SetsWue.jpeg',
-      to: '/products?category=paquetes',
-      imageClassName: 'category-image-paquetes',
-    },
-    {
-      label: 'Aretes',
-      image: '/AretesWue.jpeg',
-      to: '/products?category=aretes',
-      imageClassName: 'category-image-aretes',
     },
   ];
 
@@ -252,12 +285,30 @@ export default function Buy() {
         <section className="buy-grid">
           <article className="hero-card">
             <div className="hero-card-media">
-              <img src="/collagewue.png" alt="Accesorios dorados Wuepa" loading="eager" fetchPriority="high" />
+              <ImageWithFallback
+                src={heroSlides[heroSlideIndex].image}
+                alt={heroSlides[heroSlideIndex].alt}
+                loading="eager"
+                fetchPriority="high"
+                className={`hero-slide-image ${heroSlideIndex === 1 ? 'hero-slide-image--second' : ''} ${heroSlideIndex === heroSlides.length - 1 ? 'hero-slide-image--last' : ''}`.trim()}
+              />
+              <div className="hero-slider-dots" role="tablist" aria-label="Seleccionar imagen de hero">
+                {heroSlides.map((slide, index) => (
+                  <button
+                    key={slide.label}
+                    type="button"
+                    className={`hero-slider-dot ${heroSlideIndex === index ? 'active' : ''}`}
+                    aria-label={`Ver ${slide.label}`}
+                    aria-selected={heroSlideIndex === index}
+                    onClick={() => setHeroSlideIndex(index)}
+                  />
+                ))}
+              </div>
             </div>
             <div className="hero-card-copy">
               <h2>Wuepa</h2>
               <p>accesorios que hablan por ti</p>
-              <Link to="/products" className="primary-button">
+              <Link to={heroSlides[heroSlideIndex].to} className="primary-button">
                 Descubrir colecciones
                 <span aria-hidden="true">-&gt;</span>
               </Link>
@@ -273,7 +324,12 @@ export default function Buy() {
             <div className="wuepa-categories buy-categories">
               {featuredCategories.map((category) => (
                 <Link key={category.label} to={category.to} className="category-card">
-                  <ImageWithFallback src={category.image} alt={category.label} className={category.imageClassName} />
+                  <ImageWithFallback
+                    src={category.image}
+                    alt={category.label}
+                    className={category.imageClassName}
+                    loading="eager"
+                  />
                   <span className="backdrop" aria-hidden="true" />
                   <span className="content">
                     <h4>{category.label}</h4>
