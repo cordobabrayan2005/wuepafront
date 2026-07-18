@@ -12,7 +12,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: github-pages
   cancel-in-progress: true
 
 jobs:
@@ -22,29 +22,43 @@ jobs:
 
     steps:
       - name: Descargar código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
       - name: Instalar dependencias
         run: npm install
 
       - name: Compilar aplicación
         run: npm run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
 
       - name: Configurar rutas de React
         run: cp dist/index.html dist/404.html
 
-      - name: Subir archivos para GitHub Pages
+      - name: Conservar dominio personalizado
+        run: echo "wuepajewerly.com" > dist/CNAME
+
+      - name: Preparar archivos para GitHub Pages
         uses: actions/upload-pages-artifact@v4
         with:
           path: ./dist
 
   deploy:
-    name: Publicar en GitHub Pages
+    name: Publicar aplicación
     runs-on: ubuntu-latest
     needs: build
 
@@ -53,6 +67,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Desplegar sitio
+      - name: Desplegar en GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
