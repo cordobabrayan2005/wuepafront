@@ -8815,6 +8815,13 @@ body.modal-open {
     padding: 2rem 1.2rem;
   }
 
+  .home-page .wuepa-campaign-copy h2 {
+    width: 100%;
+    max-width: 100%;
+    font-size: clamp(2rem, 10vw, 3.15rem);
+    overflow-wrap: break-word;
+  }
+
   .home-page .wuepa-campaign-left,
   .home-page .wuepa-campaign-right {
     display: none;

@@ -27,11 +27,17 @@ export function getCategoryIcon(id: string) {
 export async function loadCategories() {
   try {
     const categories = await api.getCategories();
-    return categories.map((category) => (
-      category.id === 'paquetes'
-        ? { ...category, nombre: 'Set de accesorios' }
-        : category
-    ));
+    return categories.map((category) => {
+      if (category.id === 'aretes') {
+        return { ...category, nombre: 'Aretes' };
+      }
+
+      if (category.id === 'paquetes') {
+        return { ...category, nombre: 'Set de accesorios' };
+      }
+
+      return category;
+    });
   } catch {
     return DEFAULT_CATEGORIES;
   }

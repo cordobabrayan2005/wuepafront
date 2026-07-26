@@ -133,7 +133,7 @@ export default function Home() {
       <div className="wuepa-container">
         <section className="wuepa-launch-banner" aria-label="Lanzamiento Wuepa">
           <span>Brillo hecho a mano para todos tus looks</span>
-          <strong>Lanzamiento de pagina web</strong>
+          <strong>Lanzamiento de página web</strong>
           <button type="button" onClick={() => navigate('/productssin')}>Ver productos</button>
         </section>
 
@@ -152,11 +152,11 @@ export default function Home() {
             <p>Nueva experiencia online</p>
             <h2>
               Lanzamiento
-              <span>de pagina web</span>
+              <span>de página web</span>
             </h2>
             <small>Collares, pulseras, aretes, anillos y sets de accesorios con el detalle dorado que identifica a Wuepa.</small>
             <button type="button" onClick={() => navigate('/productssin')}>
-              Explorar coleccion
+              Explorar colección
             </button>
           </div>
 
