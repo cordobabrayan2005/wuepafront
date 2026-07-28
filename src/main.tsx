@@ -4,14 +4,14 @@ import ReactDOM from "react-dom/client";
 const rootElement = document.getElementById("root");
 
 if (!rootElement) {
-  throw new Error("No se encontro el nodo raiz de la aplicacion.");
+  throw new Error("No se encontró el nodo raíz de la aplicación.");
 }
 
 const root = ReactDOM.createRoot(rootElement);
 
 function renderBootstrapError(error: unknown) {
   console.error("Bootstrap render error:", error);
-  const message = "No pudimos iniciar la aplicacion en este momento. Intenta recargar la pagina o vuelve a intentarlo mas tarde.";
+  const message = "No pudimos iniciar la aplicación en este momento. Intenta recargar la página o vuelve a intentarlo más tarde.";
 
   root.render(
     <React.StrictMode>
@@ -40,7 +40,7 @@ function renderBootstrapError(error: unknown) {
           <p style={{ margin: 0, color: "#b37716", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", fontSize: "0.82rem" }}>
             Error de inicio
           </p>
-          <h1 style={{ margin: "0.5rem 0 0.75rem" }}>La aplicacion no pudo cargar</h1>
+          <h1 style={{ margin: "0.5rem 0 0.75rem" }}>La aplicación no pudo cargar</h1>
           <p style={{ margin: 0, lineHeight: 1.6 }}>{message}</p>
         </section>
       </main>

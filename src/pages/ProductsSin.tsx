@@ -99,9 +99,9 @@ export default function ProductsSin() {
 
   const mobileMenuItems = [
     { label: 'Inicio', to: '/' },
-    { label: 'Catalogo', to: '/productssin', isActive: true },
+    { label: 'Catálogo', to: '/productssin', isActive: true },
     { label: 'Nosotros', to: '/about' },
-    { label: 'Iniciar sesion', to: '/login', tone: 'accent' as const },
+    { label: 'Iniciar sesión', to: '/login', tone: 'accent' as const },
   ];
 
   // Productos de la categoría activa
@@ -126,7 +126,7 @@ export default function ProductsSin() {
           <h1>WUEPA</h1>
           <p>ACCESORIOS</p>
         </div>
-        <MobileNavMenu title="Catalogo publico" items={mobileMenuItems} />
+        <MobileNavMenu title="Catálogo público" items={mobileMenuItems} />
         <div className="header-center">
           <input
             type="text"
@@ -170,7 +170,7 @@ export default function ProductsSin() {
             {[
               { value: 'az', label: 'A-Z' },
               { value: 'za', label: 'Z-A' },
-              { value: 'recent', label: 'Mas reciente' },
+              { value: 'recent', label: 'Más reciente' },
             ].map((option) => (
               <button
                 key={option.value}
@@ -207,7 +207,7 @@ export default function ProductsSin() {
                   className="product-login-btn"
                   onClick={() => navigate('/login')}
                 >
-                  Iniciar Sesión
+                  Iniciar sesión
                 </button>
               </article>
             ))}
@@ -234,7 +234,7 @@ export default function ProductsSin() {
           </div>
         </div>
         <div className="footer-bottom">
-          © 2026 wuepa. Todos los derechos reservados.
+          © 2026 Wuepa. Todos los derechos reservados.
         </div>
       </footer>
       <ScrollToTopButton />

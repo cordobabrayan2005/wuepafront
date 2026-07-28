@@ -9,8 +9,8 @@ import { useAuthStore } from '../stores/authStore';
 const aboutFeatures = [
   {
     icon: Gem,
-    title: 'Piezas con caracter',
-    text: 'Curamos accesorios pensados para resaltar tu estilo diario, con acabados delicados y combinaciones faciles de usar.',
+    title: 'Piezas con carácter',
+    text: 'Curamos accesorios pensados para resaltar tu estilo diario, con acabados delicados y combinaciones fáciles de usar.',
   },
   {
     icon: ShieldCheck,
@@ -19,8 +19,8 @@ const aboutFeatures = [
   },
   {
     icon: HeartHandshake,
-    title: 'Atencion cercana',
-    text: 'Te acompanamos para elegir piezas, coordinar entregas y resolver dudas con una experiencia humana y sencilla.',
+    title: 'Atención cercana',
+    text: 'Te acompañamos para elegir piezas, coordinar entregas y resolver dudas con una experiencia humana y sencilla.',
   },
 ];
 
@@ -52,9 +52,9 @@ export default function About() {
             <h1>Wuepa</h1>
             <p>Jewelry</p>
           </Link>
-          <nav aria-label="Navegacion principal">
+          <nav aria-label="Navegación principal">
             <Link to="/">Inicio</Link>
-            <Link to="/productssin">Catalogo</Link>
+            <Link to="/productssin">Catálogo</Link>
             <Link to="/login" className="about-header-action">Ingresar</Link>
           </nav>
         </header>
@@ -70,7 +70,7 @@ export default function About() {
             Accesorios que hablan por ti
           </p>
           <h1 id="about-title">Wuepa Jewelry</h1>
-          <p className="about-sub">Joyas y accesorios para acompanar tu esencia, tus planes y esos detalles que vuelven especial lo cotidiano.</p>
+          <p className="about-sub">Joyas y accesorios para acompañar tu esencia, tus planes y esos detalles que vuelven especial lo cotidiano.</p>
           <div className="about-hero-actions">
             <Link to={isAuthenticated ? '/products' : '/productssin'} className="primary-button">
               Ver colecciones
@@ -83,13 +83,13 @@ export default function About() {
         </div>
       </section>
 
-      <section className="about-content container" aria-label="Informacion sobre Wuepa">
+      <section className="about-content container" aria-label="Información sobre Wuepa">
         <div className="about-story">
           <p className="about-kicker">Nuestra historia</p>
-          <h2 className="section-title">Detalles elegidos con intencion</h2>
+          <h2 className="section-title">Detalles elegidos con intención</h2>
           <p className="lead">
-            Wuepa nace para reunir accesorios versatiles, expresivos y faciles de combinar. Cada pieza esta pensada para sentirse cercana:
-            un brillo sutil para el dia a dia, un acento especial para salir, o un regalo que diga algo bonito sin explicarlo demasiado.
+            Wuepa nace para reunir accesorios versátiles, expresivos y fáciles de combinar. Cada pieza está pensada para sentirse cercana:
+            un brillo sutil para el día a día, un acento especial para salir, o un regalo que diga algo bonito sin explicarlo demasiado.
           </p>
         </div>
 
@@ -107,12 +107,12 @@ export default function About() {
 
         <section className="about-mission" aria-labelledby="about-mission-title">
           <div>
-            <p className="about-kicker">Mision</p>
+            <p className="about-kicker">Misión</p>
             <h2 id="about-mission-title" className="section-title">Que cada persona encuentre una pieza que se sienta suya</h2>
           </div>
           <p>
-            Creemos que los accesorios no tienen que ser complicados para tener presencia. Nuestra mision es ofrecer joyas que inspiren
-            confianza, alegria y una forma muy propia de brillar.
+            Creemos que los accesorios no tienen que ser complicados para tener presencia. Nuestra misión es ofrecer joyas que inspiren
+            confianza, alegría y una forma muy propia de brillar.
           </p>
         </section>
 
@@ -123,12 +123,12 @@ export default function About() {
               <span className="badge">v1.0.0</span>
               <span className="badge green">Activa</span>
             </div>
-            <p className="muted">Construida con React, Vite, TypeScript y SASS para mostrar catalogo, carrito y pedidos de forma clara.</p>
+            <p className="muted">Construida con React, Vite, TypeScript y SASS para mostrar catálogo, carrito y pedidos de forma clara.</p>
           </div>
 
           <div className="dev-box">
             <h3>Hecho por</h3>
-            <div className="dev-badge">Joyeria Wuepa</div>
+            <div className="dev-badge">Joyería Wuepa</div>
           </div>
         </div>
       </section>

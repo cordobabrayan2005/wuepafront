@@ -25,8 +25,8 @@ export default class AppErrorBoundary extends React.Component<React.PropsWithChi
         <main className="app-error-state">
           <div className="app-error-card">
             <p className="app-error-kicker">Error de interfaz</p>
-            <h1>No se pudo cargar la pagina</h1>
-            <p>No pudimos mostrar esta seccion en este momento. Intenta recargar la pagina o vuelve al inicio.</p>
+            <h1>No se pudo cargar la página</h1>
+            <p>No pudimos mostrar esta sección en este momento. Intenta recargar la página o vuelve al inicio.</p>
             <button type="button" className="btn-primary" onClick={() => window.location.assign('/')}>
               Volver al inicio
             </button>

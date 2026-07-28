@@ -49,7 +49,7 @@ export default function MobileBottomNav({ active, cartCount = 0, variant = 'publ
   const publicItems = [
     { key: 'home', label: 'Inicio', to: '/', icon: HomeIcon },
     { key: 'products', label: 'Productos', to: '/productssin', icon: Package },
-    { key: 'login', label: 'Iniciar sesion', to: '/login', icon: LogIn },
+    { key: 'login', label: 'Iniciar sesión', to: '/login', icon: LogIn },
     { key: 'signup', label: 'Crear cuenta', to: '/signup', icon: UserPlus, tone: 'accent' },
   ] as const;
   // Define las acciones para usuarios autenticados, incluyendo el contador visible del carrito.

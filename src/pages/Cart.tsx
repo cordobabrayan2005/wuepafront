@@ -160,7 +160,7 @@ export default function Cart() {
     }
 
     if (normalizedMessage.includes('sesion')) {
-      return 'Tu sesion vencio. Inicia sesion de nuevo y vuelve a finalizar el pedido.';
+      return 'Tu sesión venció. Inicia sesión de nuevo y vuelve a finalizar el pedido.';
     }
 
     if (normalizedMessage.includes('suficientes unidades') || normalizedMessage.includes('stock')) {

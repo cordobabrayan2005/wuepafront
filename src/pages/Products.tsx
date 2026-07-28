@@ -193,7 +193,7 @@ export default function Products() {
             {[
               { value: 'az', label: 'A-Z' },
               { value: 'za', label: 'Z-A' },
-              { value: 'recent', label: 'Mas reciente' },
+              { value: 'recent', label: 'Más reciente' },
             ].map((option) => (
               <button
                 key={option.value}

@@ -6,6 +6,8 @@
 /* :root da forma a tokens globales de diseno; ajusta detalle visual del componente. */
 :root {
   color-scheme: light;
+  --font-editorial-display: Georgia, 'Times New Roman', serif;
+  --font-editorial-body: 'Palatino Linotype', Palatino, 'Book Antiqua', serif;
   --bg-primary: #fff8ec;
   --bg-secondary: #fdf6ec;
   --text: #2d2a25;
@@ -33,7 +35,7 @@
 /* body da forma a la base global del documento; ajusta espaciado, apariencia visual, tipografia. */
 body {
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-editorial-body);
   background: linear-gradient(135deg, #fff8ec, #f7f0dd 47%, #fdf0bd);
   color: var(--text);
 }
@@ -94,7 +96,7 @@ body {
 
 /* h1, h2, h3, h4, h5, h6 da forma a la base global del documento; ajusta tipografia. */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Bebas Neue', 'Inter', sans-serif;
+  font-family: var(--font-editorial-display);
 }
 
 /* ==========================================================================
@@ -10016,7 +10018,9 @@ body.modal-open {
   align-items: center;
   justify-content: center;
   gap: 0.55rem;
+  width: 11rem;
   min-height: 2.35rem;
+  box-sizing: border-box;
   padding: 0.68rem 1.1rem;
   border-radius: 999px;
   font-size: 0.72rem;
@@ -10500,4 +10504,30 @@ body.modal-open {
   .cart-page .cart-item-card {
     grid-template-columns: 1fr;
   }
+}
+
+/* ==========================================================================
+   Sistema tipográfico editorial
+   Limita toda la interfaz a dos familias: una de exhibición para títulos y
+   subtítulos, y otra editorial de lectura para el resto del contenido.
+   ========================================================================== */
+
+body,
+body * {
+  font-family: var(--font-editorial-body) !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+[class*="title"],
+[class*="subtitle"],
+[class*="heading"],
+[class*="kicker"],
+[class*="brand"],
+[class*="logo"] {
+  font-family: var(--font-editorial-display) !important;
 }

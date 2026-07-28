@@ -169,13 +169,13 @@ export default function Buy() {
     }
 
     setIsLoggingOut(true);
-    setMsg('Cerrando sesion...');
+    setMsg('Cerrando sesión...');
     setMsgType('info');
 
     window.setTimeout(() => {
-      sessionStorage.setItem(FLASH_STORAGE_KEY, JSON.stringify({ type: 'info', text: 'Se cerro sesion correctamente.' }));
+      sessionStorage.setItem(FLASH_STORAGE_KEY, JSON.stringify({ type: 'info', text: 'Se cerró sesión correctamente.' }));
       logout();
-      navigate('/login', { state: { flash: { type: 'info', text: 'Se cerro sesion correctamente.' } } });
+      navigate('/login', { state: { flash: { type: 'info', text: 'Se cerró sesión correctamente.' } } });
     }, 650);
   };
 
@@ -198,7 +198,7 @@ export default function Buy() {
     { label: 'Nosotros', to: '/about' },
     ...(isAdmin ? [{ label: 'Admin', to: '/admin' }] : []),
     {
-      label: isLoggingOut ? 'Cerrando...' : 'Cerrar sesion',
+      label: isLoggingOut ? 'Cerrando...' : 'Cerrar sesión',
       onClick: handleLogout,
       tone: 'danger' as const
     },
@@ -269,7 +269,7 @@ export default function Buy() {
             <ShoppingCart aria-hidden="true" />
             <span className="cart-link-count">{cartCount}</span>
           </Link>
-          <button type="button" onClick={handleLogout} disabled={isLoggingOut} className="buy-icon-button logout-btn" aria-label={isLoggingOut ? 'Cerrando sesion' : 'Cerrar sesion'}>
+          <button type="button" onClick={handleLogout} disabled={isLoggingOut} className="buy-icon-button logout-btn" aria-label={isLoggingOut ? 'Cerrando sesión' : 'Cerrar sesión'}>
             <LogOut aria-hidden="true" />
           </button>
         </div>
@@ -307,7 +307,7 @@ export default function Buy() {
             </div>
             <div className="hero-card-copy">
               <h2>Wuepa</h2>
-              <p>accesorios que hablan por ti</p>
+              <p>Accesorios que hablan por ti</p>
               <Link to={heroSlides[heroSlideIndex].to} className="primary-button">
                 Descubrir colecciones
                 <span aria-hidden="true">-&gt;</span>
@@ -347,7 +347,7 @@ export default function Buy() {
               {[
                 { value: 'az', label: 'A-Z' },
                 { value: 'za', label: 'Z-A' },
-                { value: 'recent', label: 'Mas reciente' },
+                { value: 'recent', label: 'Más reciente' },
               ].map((option) => (
                 <button
                   key={option.value}
@@ -395,7 +395,7 @@ export default function Buy() {
         <div className="buy-footer-inner">
           <div className="buy-footer-brand">
             <h2>Wuepa</h2>
-            <p>Accesorios que hablan por ti. Disenados para resaltar tu esencia y acompanarte en cada momento.</p>
+            <p>Accesorios que hablan por ti. Diseñados para resaltar tu esencia y acompañarte en cada momento.</p>
             <div className="buy-socials" aria-label="Redes sociales">
               <a href="#" aria-label="Instagram">ig</a>
               <a href="#" aria-label="TikTok">tk</a>
@@ -426,7 +426,7 @@ export default function Buy() {
             <h3>Soporte</h3>
             <Link to="/about">Envios y entregas</Link>
             <Link to="/about">Cambios y devoluciones</Link>
-            <Link to="/about">Terminos y condiciones</Link>
+            <Link to="/about">Términos y condiciones</Link>
             <Link to="/about">Politica de privacidad</Link>
           </div>
 

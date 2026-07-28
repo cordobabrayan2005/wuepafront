@@ -101,7 +101,7 @@ export default function Home() {
   );
   const mobileMenuItems = [
     { label: 'Crear cuenta', to: '/signup', tone: 'accent' as const },
-    { label: 'Iniciar sesion', to: '/login', tone: 'default' as const },
+    { label: 'Iniciar sesión', to: '/login', tone: 'default' as const },
     { label: 'Productos', to: '/productssin' },
   ];
 
@@ -174,27 +174,27 @@ export default function Home() {
           <button type="button" onClick={() => navigate('/productssin?category=collares')} className="wuepa-quick-card">
             <ImageWithFallback src="/Collareswue.png" alt="" className="wuepa-quick-image-collares" />
             <span>Collares</span>
-            <small>Ver mas →</small>
+            <small>Ver más →</small>
           </button>
           <button type="button" onClick={() => navigate('/productssin?category=pulseras')} className="wuepa-quick-card">
             <ImageWithFallback src="/Pulseraswue.png" alt="" />
             <span>Pulseras</span>
-            <small>Ver mas →</small>
+            <small>Ver más →</small>
           </button>
           <button type="button" onClick={() => navigate('/productssin?category=aretes')} className="wuepa-quick-card">
             <ImageWithFallback src="/AretesWue.png" alt="" />
             <span>Aretes</span>
-            <small>Ver mas →</small>
+            <small>Ver más →</small>
           </button>
           <button type="button" onClick={() => navigate('/productssin?category=anillos')} className="wuepa-quick-card wuepa-quick-card-anillos">
             <ImageWithFallback src="/Anilloswue.png" alt="" className="wuepa-quick-image-anillos" />
             <span>Anillos</span>
-            <small>Ver mas →</small>
+            <small>Ver más →</small>
           </button>
           <button type="button" onClick={() => navigate('/productssin?category=paquetes')} className="wuepa-quick-card wuepa-quick-card-paquetes">
             <ImageWithFallback src="/CatPaquetes.png" alt="" className="wuepa-quick-image-paquetes" />
             <span>Set de accesorios</span>
-            <small>Ver mas →</small>
+            <small>Ver más →</small>
           </button>
         </section>
 
@@ -205,7 +205,7 @@ export default function Home() {
             {[
               { value: 'az', label: 'A-Z' },
               { value: 'za', label: 'Z-A' },
-              { value: 'recent', label: 'Mas reciente' },
+              { value: 'recent', label: 'Más reciente' },
             ].map((option) => (
               <button
                 key={option.value}
@@ -272,9 +272,9 @@ export default function Home() {
           </div>
 
           <div className="wuepa-footer-group">
-            <h3>InformaciÃ³n</h3>
+            <h3>Información</h3>
             <ul>
-              <li><a href="#">Sobre Nosotros</a></li>
+              <li><a href="#">Sobre nosotros</a></li>
               <li><a href="#">FAQ</a></li>
             </ul>
           </div>
@@ -282,7 +282,7 @@ export default function Home() {
           <div className="wuepa-footer-group">
             <h3>Legal</h3>
             <ul>
-              <li><a href="#">TÃ©rminos</a></li>
+              <li><a href="#">Términos</a></li>
               <li><a href="#">Privacidad</a></li>
               <li><a href="#">Devoluciones</a></li>
             </ul>
@@ -290,7 +290,7 @@ export default function Home() {
         </div>
 
         <div className="wuepa-footer-bottom">
-          Â© 2026 wuepa. Todos los derechos reservados.
+          © 2026 Wuepa. Todos los derechos reservados.
         </div>
       </footer>
 

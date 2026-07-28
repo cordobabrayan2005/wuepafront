@@ -326,7 +326,7 @@ async function requestBackend<T>(
   try {
     token = withAuth ? await getFirebaseToken() : null;
   } catch {
-    throw new Error('Tu sesion vencio. Inicia sesion de nuevo para continuar.');
+    throw new Error('Tu sesión venció. Inicia sesión de nuevo para continuar.');
   }
 
   let response: Response;
@@ -348,7 +348,7 @@ async function requestBackend<T>(
 
   if (!response.ok) {
     if (response.status === 401) {
-      throw new Error('Tu sesion vencio. Inicia sesion de nuevo para continuar.');
+      throw new Error('Tu sesión venció. Inicia sesión de nuevo para continuar.');
     }
 
     if (response.status === 403) {

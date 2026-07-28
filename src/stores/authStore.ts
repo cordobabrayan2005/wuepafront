@@ -69,7 +69,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.setItem('token', token);
     } catch (error) {
       set({
-        error: error instanceof Error ? error.message : 'No se pudo iniciar sesion',
+        error: error instanceof Error ? error.message : 'No se pudo iniciar sesión',
       });
       throw error;
     } finally {
@@ -164,7 +164,7 @@ onAuthStateChanged(auth, async (firebaseUser) => {
       user: null,
       isAuthed: false,
       isLoading: false,
-      error: error instanceof Error ? error.message : 'No se pudo sincronizar la sesion',
+      error: error instanceof Error ? error.message : 'No se pudo sincronizar la sesión',
     });
   }
 });

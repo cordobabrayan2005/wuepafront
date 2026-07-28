@@ -53,9 +53,9 @@ export default function AuthenticatedTopBar({
     setIsLoggingOut(true);
 
     window.setTimeout(() => {
-      sessionStorage.setItem(FLASH_STORAGE_KEY, JSON.stringify({ type: 'info', text: 'Se cerro sesion correctamente.' }));
+      sessionStorage.setItem(FLASH_STORAGE_KEY, JSON.stringify({ type: 'info', text: 'Se cerró sesión correctamente.' }));
       logout();
-      navigate('/login', { state: { flash: { type: 'info', text: 'Se cerro sesion correctamente.' } } });
+      navigate('/login', { state: { flash: { type: 'info', text: 'Se cerró sesión correctamente.' } } });
     }, 450);
   }
 
@@ -67,7 +67,7 @@ export default function AuthenticatedTopBar({
     { label: 'Mi perfil', to: '/profile', isActive: active === 'profile' },
     { label: 'Nosotros', to: '/about', isActive: active === 'about' },
     ...(isAdmin ? [{ label: 'Admin', to: '/admin', isActive: active === 'admin' }] : []),
-    { label: isLoggingOut ? 'Cerrando...' : 'Cerrar sesion', onClick: handleLogout, tone: 'danger' as const },
+    { label: isLoggingOut ? 'Cerrando...' : 'Cerrar sesión', onClick: handleLogout, tone: 'danger' as const },
   ];
 
   return (
@@ -121,7 +121,7 @@ export default function AuthenticatedTopBar({
             <ShoppingCart aria-hidden="true" />
             <span className="cart-link-count">{displayCartCount}</span>
           </Link>
-          <button type="button" onClick={handleLogout} disabled={isLoggingOut} className="buy-icon-button logout-btn" aria-label={isLoggingOut ? 'Cerrando sesion' : 'Cerrar sesion'}>
+          <button type="button" onClick={handleLogout} disabled={isLoggingOut} className="buy-icon-button logout-btn" aria-label={isLoggingOut ? 'Cerrando sesión' : 'Cerrar sesión'}>
             <LogOut aria-hidden="true" />
           </button>
         </div>
