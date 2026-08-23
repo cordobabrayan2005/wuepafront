@@ -49,6 +49,7 @@ export default function MobileBottomNav({ active, cartCount = 0, variant = 'publ
   const publicItems = [
     { key: 'home', label: 'Inicio', to: '/', icon: HomeIcon },
     { key: 'products', label: 'Productos', to: '/productssin', icon: Package },
+    { key: 'cart', label: cartCount > 0 ? `Carrito ${cartCount}` : 'Carrito', to: '/cart', icon: ShoppingCart },
     { key: 'login', label: 'Iniciar sesión', to: '/login', icon: LogIn },
     { key: 'signup', label: 'Crear cuenta', to: '/signup', icon: UserPlus, tone: 'accent' },
   ] as const;

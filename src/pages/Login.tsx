@@ -63,6 +63,16 @@ export default function Login({ onAuth }: Props) {
   const location = useLocation();
   const { login, socialLogin, isLoading } = useAuthStore();  // Nuevo
 
+  function getPostLoginDestination() {
+    const requestedDestination = (location.state as { from?: unknown } | null)?.from;
+
+    return typeof requestedDestination === 'string'
+      && requestedDestination.startsWith('/')
+      && !requestedDestination.startsWith('//')
+      ? requestedDestination
+      : '/buy';
+  }
+
   /**
    * Manejador del envío del formulario.
    *
@@ -83,7 +93,7 @@ export default function Login({ onAuth }: Props) {
 
       if (userData.rol === 'admin') {
 
-        navigate("/buy", {
+        navigate(getPostLoginDestination(), {
           state: {
             flash: {
               type: "success",
@@ -94,7 +104,7 @@ export default function Login({ onAuth }: Props) {
 
       } else {
 
-        navigate("/buy", {
+        navigate(getPostLoginDestination(), {
           state: {
             flash: {
               type: "success",
@@ -128,7 +138,7 @@ export default function Login({ onAuth }: Props) {
 
       if (userData.rol === 'admin') {
 
-        navigate("/buy", {
+        navigate(getPostLoginDestination(), {
           state: {
             flash: {
               type: "success",
@@ -139,7 +149,7 @@ export default function Login({ onAuth }: Props) {
 
       } else {
 
-        navigate("/buy", {
+        navigate(getPostLoginDestination(), {
           state: {
             flash: {
               type: "success",

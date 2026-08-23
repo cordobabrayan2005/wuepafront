@@ -2,7 +2,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { create } from 'zustand';
 import { auth } from '../config/firebase';
 import { api, type AuthUser } from '../services/api';
-import { resetCartCache } from '../utils/cart';
+import { mergeGuestCartIntoAccountCart, resetCartCache } from '../utils/cart';
 
 type User = AuthUser;
 
@@ -59,6 +59,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const { user, token } = await api.login(email, password);
 
+      try {
+        await mergeGuestCartIntoAccountCart();
+      } catch {
+        // El inicio de sesión no debe fallar si el carrito aún no puede sincronizarse.
+        resetCartCache();
+      }
+
       set({
         user,
         isAuthed: true,
@@ -82,6 +89,13 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     try {
       const { user, token } = await api.socialLogin('', provider);
+
+      try {
+        await mergeGuestCartIntoAccountCart();
+      } catch {
+        // El inicio de sesión no debe fallar si el carrito aún no puede sincronizarse.
+        resetCartCache();
+      }
 
       set({
         user,

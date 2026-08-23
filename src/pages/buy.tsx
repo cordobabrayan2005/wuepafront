@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Heart, LogOut, Search, Send, ShoppingCart, Sparkles, User } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import CartPreviewDrawer from '../components/CartPreviewDrawer';
 import MobileBottomNav from '../components/MobileBottomNav';
 import MobileNavMenu from '../components/MobileNavMenu';
 import ScrollToTopButton from '../components/ScrollToTopButton';
@@ -17,6 +18,7 @@ export default function Buy() {
   const [msgType, setMsgType] = useState<'success' | 'error' | 'info'>('info');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [cartCount, setCartCount] = useState(() => getCartItemsCount(getCachedCartItems()));
+  const [isCartPreviewOpen, setIsCartPreviewOpen] = useState(false);
   const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
   const [sortOrder, setSortOrder] = useState<ProductSortOrder>('recent');
   const [heroSlideIndex, setHeroSlideIndex] = useState(0);
@@ -265,15 +267,16 @@ export default function Buy() {
           <Link to="/profile" className="buy-icon-button" aria-label={`Perfil de ${user?.name ?? 'usuario'}`}>
             <User aria-hidden="true" />
           </Link>
-          <Link to="/cart" className="buy-icon-button cart-link-inline" aria-label={`Carrito con ${cartCount} productos`}>
+          <button type="button" className="buy-icon-button cart-link-inline" onClick={() => setIsCartPreviewOpen(true)} aria-label={`Carrito con ${cartCount} productos`}>
             <ShoppingCart aria-hidden="true" />
             <span className="cart-link-count">{cartCount}</span>
-          </Link>
+          </button>
           <button type="button" onClick={handleLogout} disabled={isLoggingOut} className="buy-icon-button logout-btn" aria-label={isLoggingOut ? 'Cerrando sesión' : 'Cerrar sesión'}>
             <LogOut aria-hidden="true" />
           </button>
         </div>
       </header>
+      <CartPreviewDrawer isOpen={isCartPreviewOpen} onClose={() => setIsCartPreviewOpen(false)} />
 
       {msg && (
         <div role="status" aria-live="polite" className={`auth-toast ${msgType}`}>

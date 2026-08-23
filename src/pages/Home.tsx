@@ -15,13 +15,15 @@
  * @returns {JSX.Element} Página principal de la tienda.
  */
 
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, ShoppingCart } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import CartPreviewDrawer from '../components/CartPreviewDrawer';
 import MobileBottomNav from '../components/MobileBottomNav';
 import MobileNavMenu from '../components/MobileNavMenu';
 import { formatCopCurrency } from '../utils/currency';
+import { addProductToCart, getCachedCartItems, getCartItemsCount, getCartSubtotal, loadCartItems } from '../utils/cart';
 import { getAvailableProducts, loadProductsCatalog, loadProductsCatalogFromBackend, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
 
 /**
@@ -30,29 +32,12 @@ import { getAvailableProducts, loadProductsCatalog, loadProductsCatalogFromBacke
 export default function Home() {
   // Hook de navegación
   const navigate = useNavigate();
-  // Estado para mostrar/ocultar la barra de navegación
-  const [showNavbar, setShowNavbar] = useState(true);
   const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
   const [sortOrder, setSortOrder] = useState<ProductSortOrder>('recent');
-  // Referencia para el último scroll vertical
-  const lastScrollY = useRef(0);
-
-  // Efecto para cambiar el título y manejar la visibilidad de la navbar al hacer scroll
-  useEffect(() => {
-    document.title = 'wuepa';
-
-    const handleScroll = () => {
-      if (window.scrollY > lastScrollY.current && window.scrollY > 80) {
-        setShowNavbar(false);
-      } else {
-        setShowNavbar(true);
-      }
-      lastScrollY.current = window.scrollY;
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const [cartCount, setCartCount] = useState(() => getCartItemsCount(getCachedCartItems()));
+  const [cartTotal, setCartTotal] = useState(() => getCartSubtotal(getCachedCartItems()));
+  const [cartMessage, setCartMessage] = useState('');
+  const [isCartPreviewOpen, setIsCartPreviewOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -95,6 +80,31 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    function setCartSummary(items: ReturnType<typeof getCachedCartItems>) {
+      setCartCount(getCartItemsCount(items));
+      setCartTotal(getCartSubtotal(items));
+    }
+
+    function syncCartSummary() {
+      setCartSummary(getCachedCartItems());
+    }
+
+    loadCartItems().then(setCartSummary).catch(() => setCartSummary([]));
+    window.addEventListener('wuepa-cart-updated', syncCartSummary as EventListener);
+
+    return () => window.removeEventListener('wuepa-cart-updated', syncCartSummary as EventListener);
+  }, []);
+
+  useEffect(() => {
+    if (!cartMessage) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => setCartMessage(''), 1800);
+    return () => window.clearTimeout(timeoutId);
+  }, [cartMessage]);
+
   const featuredProducts = useMemo(
     () => sortProductsCatalog(getAvailableProducts(products), sortOrder).slice(0, 8),
     [products, sortOrder]
@@ -103,13 +113,30 @@ export default function Home() {
     { label: 'Crear cuenta', to: '/signup', tone: 'accent' as const },
     { label: 'Iniciar sesión', to: '/login', tone: 'default' as const },
     { label: 'Productos', to: '/productssin' },
+    { label: `Carrito (${cartCount}) · ${formatCopCurrency(cartTotal)}`, to: '/cart' },
   ];
+
+  async function handleAddToCart(product: ProductCatalogItem) {
+    if (product.units <= 0) {
+      setCartMessage(`${product.name} está agotado.`);
+      return;
+    }
+
+    try {
+      const nextItems = await addProductToCart(product);
+      setCartCount(getCartItemsCount(nextItems));
+      setCartTotal(getCartSubtotal(nextItems));
+      setCartMessage(`${product.name} se agregó al carrito.`);
+    } catch (error) {
+      setCartMessage(error instanceof Error ? error.message : 'No se pudo agregar el producto al carrito.');
+    }
+  }
 
   // Renderizado principal de la página de inicio
   return (
     <div className="home-page">
       {/* Navbar */}
-      <nav className={`wuepa-nav${showNavbar ? '' : ' hidden'}`}>
+      <nav className="wuepa-nav">
         <div className="wuepa-nav-inner">
           <button type="button" className="wuepa-brand" onClick={() => navigate('/')} aria-label="Ir al inicio">
             <div>
@@ -125,9 +152,22 @@ export default function Home() {
               <ShoppingBag aria-hidden="true" />
               Productos
             </button>
+            <button type="button" onClick={() => setIsCartPreviewOpen(true)} className="wuepa-cart-icon-btn" aria-label={`Ver carrito con ${cartCount} productos por ${formatCopCurrency(cartTotal)}`}>
+              <span className="home-cart-icon" aria-hidden="true">
+                <ShoppingCart />
+                <span className="home-cart-count">{cartCount}</span>
+              </span>
+              <span className="home-cart-total" aria-hidden="true">{formatCopCurrency(cartTotal)}</span>
+            </button>
           </div>
         </div>
       </nav>
+      <CartPreviewDrawer isOpen={isCartPreviewOpen} onClose={() => setIsCartPreviewOpen(false)} />
+      {cartMessage ? (
+        <div className="auth-toast info" role="status" aria-live="polite">
+          {cartMessage}
+        </div>
+      ) : null}
       <div className="spacer"></div>
 
       <div className="wuepa-container">
@@ -237,9 +277,10 @@ export default function Home() {
               </div>
               <button
                 className="product-login-btn"
-                onClick={() => navigate('/login')}
+                onClick={() => handleAddToCart(product)}
+                disabled={product.units <= 0}
               >
-                INICIAR SESIÓN
+                {product.units > 0 ? 'AGREGAR AL CARRITO' : 'AGOTADO'}
               </button>
             </article>
           ))}
@@ -295,7 +336,7 @@ export default function Home() {
       </footer>
 
       {/* Bottom Navigation */}
-      <MobileBottomNav active="home" />
+      <MobileBottomNav active="home" cartCount={cartCount} />
     </div>
   );
 }

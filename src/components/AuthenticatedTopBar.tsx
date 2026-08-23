@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogOut, Search, ShoppingCart, Sparkles, User } from 'lucide-react';
+import CartPreviewDrawer from './CartPreviewDrawer';
 import MobileNavMenu from './MobileNavMenu';
 import { useAuthStore } from '../stores/authStore';
-import { getCachedCartItems, getCartItemsCount, loadCartItems } from '../utils/cart';
+import { formatCopCurrency } from '../utils/currency';
+import { getCachedCartItems, getCartItemsCount, getCartSubtotal, loadCartItems } from '../utils/cart';
 
 type AuthenticatedTopBarProps = {
   active?: 'home' | 'products' | 'collections' | 'about' | 'cart' | 'profile' | 'admin';
@@ -22,28 +24,32 @@ export default function AuthenticatedTopBar({
 }: AuthenticatedTopBarProps) {
   const FLASH_STORAGE_KEY = 'wuepa-auth-flash';
   const [internalCartCount, setInternalCartCount] = useState(() => getCartItemsCount(getCachedCartItems()));
+  const [internalCartTotal, setInternalCartTotal] = useState(() => getCartSubtotal(getCachedCartItems()));
+  const [isCartPreviewOpen, setIsCartPreviewOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const isAdmin = user?.rol === 'admin';
   const displayCartCount = cartCount ?? internalCartCount;
+  const displayCartTotal = internalCartTotal;
 
   useEffect(() => {
-    if (typeof cartCount === 'number') {
-      return undefined;
+    function setCartSummary(items: ReturnType<typeof getCachedCartItems>) {
+      setInternalCartCount(getCartItemsCount(items));
+      setInternalCartTotal(getCartSubtotal(items));
     }
 
-    function syncCartCount() {
-      setInternalCartCount(getCartItemsCount(getCachedCartItems()));
+    function syncCartSummary() {
+      setCartSummary(getCachedCartItems());
     }
 
-    loadCartItems().then((items) => setInternalCartCount(getCartItemsCount(items))).catch(() => setInternalCartCount(0));
-    window.addEventListener('wuepa-cart-updated', syncCartCount as EventListener);
+    loadCartItems().then(setCartSummary).catch(() => setCartSummary([]));
+    window.addEventListener('wuepa-cart-updated', syncCartSummary as EventListener);
 
     return () => {
-      window.removeEventListener('wuepa-cart-updated', syncCartCount as EventListener);
+      window.removeEventListener('wuepa-cart-updated', syncCartSummary as EventListener);
     };
-  }, [cartCount]);
+  }, []);
 
   function handleLogout() {
     if (isLoggingOut) {
@@ -117,15 +123,17 @@ export default function AuthenticatedTopBar({
           <Link to="/profile" className="buy-icon-button" aria-label={`Perfil de ${user?.name ?? 'usuario'}`}>
             <User aria-hidden="true" />
           </Link>
-          <Link to="/cart" className="buy-icon-button cart-link-inline" aria-label={`Carrito con ${displayCartCount} productos`}>
+          <button type="button" className="buy-icon-button cart-link-inline cart-link-with-total" onClick={() => setIsCartPreviewOpen(true)} aria-label={`Carrito con ${displayCartCount} productos por ${formatCopCurrency(displayCartTotal)}`}>
             <ShoppingCart aria-hidden="true" />
             <span className="cart-link-count">{displayCartCount}</span>
-          </Link>
+            <span className="cart-link-total" aria-hidden="true">{formatCopCurrency(displayCartTotal)}</span>
+          </button>
           <button type="button" onClick={handleLogout} disabled={isLoggingOut} className="buy-icon-button logout-btn" aria-label={isLoggingOut ? 'Cerrando sesión' : 'Cerrar sesión'}>
             <LogOut aria-hidden="true" />
           </button>
         </div>
       </header>
+      <CartPreviewDrawer isOpen={isCartPreviewOpen} onClose={() => setIsCartPreviewOpen(false)} />
     </div>
   );
 }

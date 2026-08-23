@@ -1,10 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import CartPreviewDrawer from '../components/CartPreviewDrawer';
+import { ShoppingCart } from 'lucide-react';
 import MobileBottomNav from '../components/MobileBottomNav';
 import MobileNavMenu from '../components/MobileNavMenu';
 import ScrollToTopButton from '../components/ScrollToTopButton';
 import { formatCopCurrency } from '../utils/currency';
+import { addProductToCart, getCachedCartItems, getCartItemsCount, getCartSubtotal, loadCartItems } from '../utils/cart';
 import { getAvailableProducts, groupProductsByCategory, loadProductsCatalog, loadProductsCatalogFromBackend, ProductCategory, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
 import { DEFAULT_CATEGORIES, getCategoryIcon, loadCategories } from '../utils/categories';
 
@@ -34,6 +37,10 @@ export default function ProductsSin() {
   const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [sortOrder, setSortOrder] = useState<ProductSortOrder>('recent');
+  const [cartCount, setCartCount] = useState(() => getCartItemsCount(getCachedCartItems()));
+  const [cartTotal, setCartTotal] = useState(() => getCartSubtotal(getCachedCartItems()));
+  const [cartMessage, setCartMessage] = useState('');
+  const [isCartPreviewOpen, setIsCartPreviewOpen] = useState(false);
   // Navegación y ubicación para manejo de rutas
   const navigate = useNavigate();
   const location = useLocation();
@@ -88,6 +95,31 @@ export default function ProductsSin() {
     });
   }, []);
 
+  useEffect(() => {
+    function setCartSummary(items: ReturnType<typeof getCachedCartItems>) {
+      setCartCount(getCartItemsCount(items));
+      setCartTotal(getCartSubtotal(items));
+    }
+
+    function syncCartSummary() {
+      setCartSummary(getCachedCartItems());
+    }
+
+    loadCartItems().then(setCartSummary).catch(() => setCartSummary([]));
+    window.addEventListener('wuepa-cart-updated', syncCartSummary as EventListener);
+
+    return () => window.removeEventListener('wuepa-cart-updated', syncCartSummary as EventListener);
+  }, []);
+
+  useEffect(() => {
+    if (!cartMessage) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => setCartMessage(''), 1800);
+    return () => window.clearTimeout(timeoutId);
+  }, [cartMessage]);
+
   // Cambia la categoría activa según el parámetro de la URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -100,9 +132,26 @@ export default function ProductsSin() {
   const mobileMenuItems = [
     { label: 'Inicio', to: '/' },
     { label: 'Catálogo', to: '/productssin', isActive: true },
+    { label: `Carrito (${cartCount}) · ${formatCopCurrency(cartTotal)}`, to: '/cart' },
     { label: 'Nosotros', to: '/about' },
     { label: 'Iniciar sesión', to: '/login', tone: 'accent' as const },
   ];
+
+  async function handleAddToCart(product: ProductCatalogItem) {
+    if (product.units <= 0) {
+      setCartMessage(`${product.name} está agotado.`);
+      return;
+    }
+
+    try {
+      const nextItems = await addProductToCart(product);
+      setCartCount(getCartItemsCount(nextItems));
+      setCartTotal(getCartSubtotal(nextItems));
+      setCartMessage(`${product.name} se agregó al carrito.`);
+    } catch (error) {
+      setCartMessage(error instanceof Error ? error.message : 'No se pudo agregar el producto al carrito.');
+    }
+  }
 
   // Productos de la categoría activa
   const currentProducts = groupProductsByCategory(getAvailableProducts(products))[activeCategory] ?? [];
@@ -139,9 +188,23 @@ export default function ProductsSin() {
         <nav className="header-right">
           <Link to="/">Inicio</Link>
           <Link to="/productssin" className="active">Productos</Link>
+          <button type="button" className="products-cart-link" onClick={() => setIsCartPreviewOpen(true)} aria-label={`Ver carrito con ${cartCount} productos por ${formatCopCurrency(cartTotal)}`}>
+            <span className="products-cart-icon" aria-hidden="true">
+              <ShoppingCart size={17} />
+              <span className="products-cart-count">{cartCount}</span>
+            </span>
+            <span className="products-cart-total" aria-hidden="true">{formatCopCurrency(cartTotal)}</span>
+          </button>
           <Link to="/about">Nosotros</Link>
         </nav>
       </header>
+      <CartPreviewDrawer isOpen={isCartPreviewOpen} onClose={() => setIsCartPreviewOpen(false)} />
+
+      {cartMessage ? (
+        <div className="auth-toast info" role="status" aria-live="polite">
+          {cartMessage}
+        </div>
+      ) : null}
 
       <div className="products-container">
         {/* Hero Section */}
@@ -205,9 +268,10 @@ export default function ProductsSin() {
                 </div>
                 <button
                   className="product-login-btn"
-                  onClick={() => navigate('/login')}
+                  onClick={() => handleAddToCart(product)}
+                  disabled={product.units <= 0}
                 >
-                  Iniciar sesión
+                  {product.units > 0 ? 'Agregar al carrito' : 'Agotado'}
                 </button>
               </article>
             ))}
@@ -239,7 +303,7 @@ export default function ProductsSin() {
       </footer>
       <ScrollToTopButton />
       {/* Navegacion inferior solo visible en movil para accesos publicos rapidos. */}
-      <MobileBottomNav active="products" />
+      <MobileBottomNav active="products" cartCount={cartCount} />
     </div>
   );
 }

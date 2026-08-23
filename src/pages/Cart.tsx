@@ -64,6 +64,7 @@ export default function Cart() {
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
   const logout = useAuthStore((state) => state.logout);
+  const isAuthed = Boolean(user);
   const isAdmin = user?.rol === 'admin';
   const hasSavedCheckoutData = Boolean(user?.telefono?.trim() && user?.direccion?.trim());
   const shouldShowPurchaseTerms = !hasAcceptedTermsBefore;
@@ -126,25 +127,33 @@ export default function Cart() {
   const subtotal = useMemo(() => getCartSubtotal(items), [items]);
   const total = subtotal;
   const customerName = useMemo(() => (
-    [user?.name, user?.lastname].map((value) => value?.trim()).filter(Boolean).join(' ') || 'Usuario'
+    [user?.name, user?.lastname].map((value) => value?.trim()).filter(Boolean).join(' ') || 'Cliente'
   ), [user?.name, user?.lastname]);
   const orderSummaryMessage = useMemo(() => (
     `Hola Wuepa Accesorios, soy ${customerName} y quiero hacer este pedido:\n\nTelefono: ${checkoutData.telefono}\nDireccion: ${checkoutData.direccion}\n\n${items.map((item) => `${item.name}\nCodigo: ${item.code}\nCantidad: ${item.quantity}\nPrecio: ${formatCopCurrency(item.price)}`).join('\n\n')}\n\nTotal sin envío: ${formatCopCurrency(total)}`
   ), [checkoutData.direccion, checkoutData.telefono, customerName, items, total]);
   const whatsappOrderUrl = items.length === 0 ? '' : `https://wa.me/${WUEPA_WHATSAPP_PHONE}?text=${encodeURIComponent(orderSummaryMessage)}`;
   const mobileMenuItems = [
-    { label: 'Inicio', to: '/buy' },
-    { label: 'Productos', to: '/products' },
+    { label: 'Inicio', to: isAuthed ? '/buy' : '/' },
+    { label: 'Productos', to: isAuthed ? '/products' : '/productssin' },
     { label: 'Carrito', to: '/cart', isActive: true },
     { label: 'Nosotros', to: '/about' },
-    { label: 'Mi perfil', to: '/profile' },
-    ...(isAdmin ? [{ label: 'Admin', to: '/admin' }] : []),
-    { label: 'Cerrar sesión', onClick: handleLogout, tone: 'danger' as const },
+    ...(isAuthed
+      ? [
+        { label: 'Mi perfil', to: '/profile' },
+        ...(isAdmin ? [{ label: 'Admin', to: '/admin' }] : []),
+        { label: 'Cerrar sesión', onClick: handleLogout, tone: 'danger' as const },
+      ]
+      : [{ label: 'Iniciar sesión', onClick: handleLogin, tone: 'accent' as const }]),
   ];
 
   function handleLogout() {
     logout();
     navigate('/login', { state: { flash: { type: 'info', text: 'Se cerró sesión correctamente.' } } });
+  }
+
+  function handleLogin() {
+    navigate('/login', { state: { from: '/cart' } });
   }
 
   function getCheckoutErrorMessage(error: unknown) {
@@ -261,7 +270,7 @@ export default function Cart() {
       telefono: checkoutData.telefono.trim(),
       direccion: checkoutData.direccion.trim(),
     };
-    const saveCheckoutData = isEditingCheckoutData
+    const saveCheckoutData = isEditingCheckoutData && user
       ? api.updateProfile({
         name: user?.name ?? '',
         lastname: user?.lastname ?? '',
@@ -275,7 +284,9 @@ export default function Cart() {
         if (updatedUser) {
           setUser(updatedUser);
         }
-        return createBackendCustomerOrder(items, updatedUser ?? user, normalizedCheckoutData);
+        return updatedUser
+          ? createBackendCustomerOrder(items, updatedUser, normalizedCheckoutData)
+          : Promise.resolve();
       })
       .then(() => {
         if (shouldShowPurchaseTerms) {
@@ -299,7 +310,7 @@ export default function Cart() {
 
   return (
     <main className="cart-page">
-      <AuthenticatedTopBar active="cart" cartCount={itemCount} />
+      {isAuthed ? <AuthenticatedTopBar active="cart" cartCount={itemCount} /> : null}
       <header className="products-header cart-header">
         <div className="header-left">
           <h1>Wuepa</h1>
@@ -307,24 +318,33 @@ export default function Cart() {
         </div>
         <MobileNavMenu title="Menú del carrito" items={mobileMenuItems} />
         <nav className="header-right">
-          <Link to="/buy">Inicio</Link>
+          <Link to={isAuthed ? '/buy' : '/'}>Inicio</Link>
           <span aria-hidden="true">|</span>
-          <Link to="/products">Productos</Link>
+          <Link to={isAuthed ? '/products' : '/productssin'}>Productos</Link>
           <span aria-hidden="true">|</span>
           <Link to="/cart" className="active">Carrito</Link>
           <span aria-hidden="true">|</span>
           <Link to="/about">Nosotros</Link>
           <span aria-hidden="true">|</span>
-          <Link to="/profile">Mi perfil</Link>
+          {isAuthed ? <>
+            <span aria-hidden="true">|</span>
+            <Link to="/profile">Mi perfil</Link>
+          </> : null}
           {isAdmin ? (
             <>
               <span aria-hidden="true">|</span>
               <Link to="/admin">Admin</Link>
             </>
           ) : null}
-          <button type="button" className="cart-nav-logout" onClick={handleLogout}>
-            Cerrar sesión
-          </button>
+          {isAuthed ? (
+            <button type="button" className="cart-nav-logout" onClick={handleLogout}>
+              Cerrar sesión
+            </button>
+          ) : (
+            <button type="button" className="cart-nav-login" onClick={handleLogin}>
+              Iniciar sesión
+            </button>
+          )}
         </nav>
       </header>
 
@@ -351,7 +371,7 @@ export default function Cart() {
               </div>
               <h3>Tu carrito está vacío</h3>
               <p>Agrega productos desde el catálogo para verlos aquí y continuar con tu pedido.</p>
-              <Link to="/products" className="primary-button">
+              <Link to={isAuthed ? '/products' : '/productssin'} className="primary-button">
                 <Sparkles size={17} />
                 Explorar productos
               </Link>
@@ -433,6 +453,13 @@ export default function Cart() {
               <span>Total</span>
               <strong>{formatCopCurrency(total)}</strong>
             </div>
+            {!isAuthed ? (
+              <section className="cart-guest-choice" aria-label="Opciones de compra">
+                <p>¿Ya tienes una cuenta?</p>
+                <button type="button" onClick={handleLogin}>Iniciar sesión</button>
+                <span>o continúa como invitada.</span>
+              </section>
+            ) : null}
             <button
               type="button"
               className={`whatsapp-btn cart-checkout-button${items.length === 0 ? ' disabled' : ''}`}
@@ -441,9 +468,9 @@ export default function Cart() {
               aria-disabled={items.length === 0}
             >
               <MessageCircle size={18} />
-              Finalizar por WhatsApp
+              {isAuthed ? 'Finalizar por WhatsApp' : 'Continuar como invitado'}
             </button>
-            <Link to="/products" className="cart-continue-link">
+            <Link to={isAuthed ? '/products' : '/productssin'} className="cart-continue-link">
               <ShoppingCart size={18} />
               Seguir comprando
             </Link>
@@ -594,7 +621,9 @@ export default function Cart() {
                 >
                   {isSubmittingOrder
                     ? 'Guardando pedido...'
-                    : hasSavedCheckoutData && !isEditingCheckoutData
+                    : !isAuthed
+                      ? 'Continuar por WhatsApp'
+                      : hasSavedCheckoutData && !isEditingCheckoutData
                       ? 'Usar estos datos y continuar'
                       : 'Guardar datos y continuar'}
                 </button>
@@ -611,8 +640,7 @@ export default function Cart() {
           </section>
         </div>
       ) : null}
-      {/* Barra inferior autenticada visible solo en movil, con carrito como seccion activa. */}
-      <MobileBottomNav active="cart" cartCount={itemCount} variant="auth" />
+      <MobileBottomNav active="cart" cartCount={itemCount} variant={isAuthed ? 'auth' : 'public'} />
     </main>
   );
 }
