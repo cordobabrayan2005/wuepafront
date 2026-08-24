@@ -76,9 +76,12 @@ export default function MobileBottomNav({ active, cartCount = 0, variant = 'publ
           ].filter(Boolean).join(' ');
 
           return (
-            <button key={item.key} type="button" onClick={() => navigate(item.to)} className={className}>
-              <Icon className="w-6 h-6" />
+            <button key={item.key} type="button" onClick={() => navigate(item.to)} className={className} aria-label={item.label}>
+              <Icon className="w-6 h-6" aria-hidden="true" />
               <span>{item.label}</span>
+              {item.key === 'cart' && cartCount > 0 ? (
+                <small className="wuepa-mobile-bottom-count" aria-hidden="true">{cartCount}</small>
+              ) : null}
             </button>
           );
         })}

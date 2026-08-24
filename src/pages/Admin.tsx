@@ -9,7 +9,6 @@ import { DEFAULT_CATEGORIES, getCategoryLabel, loadCategories } from '../utils/c
 import {
   createEmptyProduct,
   generateProductCode,
-  isCurrentProductCode,
   mapBackendProductToCatalogItem,
   ProductCatalogItem,
   ProductCategory,
@@ -126,16 +125,7 @@ export default function Admin() {
     setIsLoadingProducts(true);
 
     api.getProducts()
-      .then(async (backendProducts) => {
-        const outdatedProducts = backendProducts.filter((product) => !isCurrentProductCode(product.codigo || ''));
-
-        if (outdatedProducts.length > 0) {
-          await Promise.all(outdatedProducts.map((product) => {
-            const mappedProduct = mapBackendProductToCatalogItem(product);
-            return api.updateProduct(product.id, { codigo: mappedProduct.code });
-          }));
-        }
-
+      .then((backendProducts) => {
         const mappedProducts = backendProducts.map(mapBackendProductToCatalogItem);
         console.log('PRODUCTOS BACKEND', mappedProducts);
 
@@ -351,7 +341,7 @@ export default function Admin() {
     setDraft((currentDraft) => {
       const defaultCurrentCode = generateProductCode(currentDraft.category, currentDraft.id);
       const nextDefaultCode = generateProductCode(category, currentDraft.id);
-      const shouldRefreshCode = currentDraft.code === defaultCurrentCode || !/^W-\d{6}$/.test(currentDraft.code.trim().toUpperCase());
+      const shouldRefreshCode = currentDraft.code === defaultCurrentCode || !currentDraft.code.trim();
 
       return {
         ...currentDraft,
@@ -974,7 +964,7 @@ export default function Admin() {
                         aria-invalid={Boolean(fieldErrors.code)}
                         className={fieldErrors.code ? 'admin-input-error' : ''}
                       />
-                      <small className="admin-field-help">Usa un codigo corto y unico para ubicar el producto.</small>
+                      <small className="admin-field-help">Se genera automaticamente al crear el producto, pero puedes modificarlo por un codigo unico.</small>
                       {fieldErrors.code && <small className="admin-field-error">{fieldErrors.code}</small>}
                     </label>
 

@@ -4,6 +4,7 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import AuthenticatedTopBar from '../components/AuthenticatedTopBar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import ScrollToTopButton from '../components/ScrollToTopButton';
+import ProductDescriptionDialog from '../components/ProductDescriptionDialog';
 import { addProductToCart, getCachedCartItems, getCartItemsCount, loadCartItems } from '../utils/cart';
 import { formatCopCurrency } from '../utils/currency';
 import { getAvailableProducts, groupProductsByCategory, loadProductsCatalog, loadProductsCatalogFromBackend, ProductCategory, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
@@ -37,6 +38,7 @@ export default function Products() {
   const [products, setProducts] = useState<ProductCatalogItem[]>(() => loadProductsCatalog());
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [sortOrder, setSortOrder] = useState<ProductSortOrder>('recent');
+  const [selectedProduct, setSelectedProduct] = useState<ProductCatalogItem | null>(null);
   const location = useLocation();
   const headerActiveSection = new URLSearchParams(location.search).get('category') === 'paquetes' ? 'collections' : 'products';
 
@@ -212,7 +214,21 @@ export default function Products() {
           <h3>{categories.find(c => c.id === activeCategory)?.nombre}</h3>
           <div className="products-grid">
             {filteredProducts.map((product) => (
-              <article key={product.id} className="product-card-simple">
+              <article
+                key={product.id}
+                className="product-card-simple product-card-openable"
+                role="button"
+                tabIndex={0}
+                aria-label={`Ver descripción completa de ${product.name}`}
+                onClick={() => setSelectedProduct(product)}
+                onKeyDown={(event) => {
+                  if (event.target !== event.currentTarget) return;
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setSelectedProduct(product);
+                  }
+                }}
+              >
                 <div className="product-card-media product-card-media-simple">
                   <ImageWithFallback
                     src={product.image}
@@ -224,13 +240,15 @@ export default function Products() {
                 </div>
                 <div className="product-card-content">
                   <h4 className="product-card-title">{product.name}</h4>
-                  <p className="product-card-description products-page-description">{product.description}</p>
                   <p className="product-card-price">{formatCopCurrency(product.price)}</p>
                 </div>
                 <button
                   type="button"
                   className="add-cart-btn add-cart-btn-secondary"
-                  onClick={() => handleAddToCart(product)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleAddToCart(product);
+                  }}
                   disabled={product.units <= 0}
                 >
                   {product.units > 0 ? 'Agregar al carrito' : 'Agotado'}
@@ -263,6 +281,7 @@ export default function Products() {
           © 2026 wuepa. Todos los derechos reservados.
         </div>
       </footer>
+      <ProductDescriptionDialog product={selectedProduct} onClose={() => setSelectedProduct(null)} />
       <ScrollToTopButton />
       {/* Barra inferior autenticada visible solo en movil para navegar despues del login. */}
       <MobileBottomNav active="products" cartCount={cartCount} variant="auth" />

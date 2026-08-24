@@ -109,7 +109,7 @@ export function isCurrentProductCode(code: string) {
 
 export function normalizeProductCode(product: Pick<ProductCatalogItem, 'id' | 'category' | 'code'>) {
   const normalizedCode = product.code.trim().toUpperCase();
-  return isCurrentProductCode(normalizedCode) ? normalizedCode : generateProductCode(product.category, product.id);
+  return normalizedCode || generateProductCode(product.category, product.id);
 }
 
 export const initialProductsCatalog: ProductCatalogItem[] = [

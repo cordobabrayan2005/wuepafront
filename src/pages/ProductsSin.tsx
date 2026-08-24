@@ -6,6 +6,7 @@ import { ShoppingCart } from 'lucide-react';
 import MobileBottomNav from '../components/MobileBottomNav';
 import MobileNavMenu from '../components/MobileNavMenu';
 import ScrollToTopButton from '../components/ScrollToTopButton';
+import ProductDescriptionDialog from '../components/ProductDescriptionDialog';
 import { formatCopCurrency } from '../utils/currency';
 import { addProductToCart, getCachedCartItems, getCartItemsCount, getCartSubtotal, loadCartItems } from '../utils/cart';
 import { getAvailableProducts, groupProductsByCategory, loadProductsCatalog, loadProductsCatalogFromBackend, ProductCategory, ProductCatalogItem, ProductSortOrder, sortProductsCatalog } from '../utils/productCatalog';
@@ -41,6 +42,7 @@ export default function ProductsSin() {
   const [cartTotal, setCartTotal] = useState(() => getCartSubtotal(getCachedCartItems()));
   const [cartMessage, setCartMessage] = useState('');
   const [isCartPreviewOpen, setIsCartPreviewOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<ProductCatalogItem | null>(null);
   // Navegación y ubicación para manejo de rutas
   const navigate = useNavigate();
   const location = useLocation();
@@ -252,7 +254,21 @@ export default function ProductsSin() {
           <h3>{categories.find(c => c.id === activeCategory)?.nombre}</h3>
           <div className="products-grid">
             {filteredProducts.map((product) => (
-              <article key={product.id} className="product-card-simple">
+              <article
+                key={product.id}
+                className="product-card-simple product-card-openable"
+                role="button"
+                tabIndex={0}
+                aria-label={`Ver descripción completa de ${product.name}`}
+                onClick={() => setSelectedProduct(product)}
+                onKeyDown={(event) => {
+                  if (event.target !== event.currentTarget) return;
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setSelectedProduct(product);
+                  }
+                }}
+              >
                 <div className="product-card-media product-card-media-simple">
                   <ImageWithFallback
                     src={product.image}
@@ -268,7 +284,10 @@ export default function ProductsSin() {
                 </div>
                 <button
                   className="product-login-btn"
-                  onClick={() => handleAddToCart(product)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleAddToCart(product);
+                  }}
                   disabled={product.units <= 0}
                 >
                   {product.units > 0 ? 'Agregar al carrito' : 'Agotado'}
@@ -301,6 +320,7 @@ export default function ProductsSin() {
           © 2026 Wuepa. Todos los derechos reservados.
         </div>
       </footer>
+      <ProductDescriptionDialog product={selectedProduct} onClose={() => setSelectedProduct(null)} />
       <ScrollToTopButton />
       {/* Navegacion inferior solo visible en movil para accesos publicos rapidos. */}
       <MobileBottomNav active="products" cartCount={cartCount} />
