@@ -11473,7 +11473,7 @@ h6,
   }
 }
 
-/* Tamano movil de tienda: ancho completo, dos productos por fila y scroll vertical. */
+/* Tamano movil de tienda: ancho completo, un producto por fila y scroll vertical. */
 @media (max-width: 767px) {
   :root {
     --mobile-feed-gutter: 0px;
@@ -11511,7 +11511,7 @@ h6,
   .buy-page .product-list,
   .buy-page .buy-grid > .product-list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     width: calc(100% - 1rem);
     height: auto;
     gap: 0.55rem;
