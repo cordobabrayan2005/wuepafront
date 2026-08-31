@@ -132,7 +132,7 @@ export default function Buy() {
     },
     {
       label: 'Set de accesorios',
-      image: '/CatPaquetes.png',
+      image: '/SetsWue.jpeg',
       to: '/products?category=paquetes',
       imageClassName: 'category-image-paquetes',
     },
@@ -364,6 +364,7 @@ export default function Buy() {
             </div>
           </div>
 
+          <p className="mobile-swipe-hint" aria-hidden="true">Desliza hacia arriba para ver más productos</p>
           <div className="product-list" aria-live="polite">
             {filteredProducts.map((product) => (
               <article key={product.id} className="product-card">

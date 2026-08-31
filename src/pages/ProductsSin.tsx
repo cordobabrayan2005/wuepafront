@@ -252,6 +252,7 @@ export default function ProductsSin() {
         {/* Products Grid */}
         <section className="products-section">
           <h3>{categories.find(c => c.id === activeCategory)?.nombre}</h3>
+          <p className="mobile-swipe-hint" aria-hidden="true">Desliza hacia arriba para ver más productos</p>
           <div className="products-grid">
             {filteredProducts.map((product) => (
               <article

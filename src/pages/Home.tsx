@@ -232,7 +232,7 @@ export default function Home() {
             <small>Ver más →</small>
           </button>
           <button type="button" onClick={() => navigate('/productssin?category=paquetes')} className="wuepa-quick-card wuepa-quick-card-paquetes">
-            <ImageWithFallback src="/CatPaquetes.png" alt="" className="wuepa-quick-image-paquetes" />
+            <ImageWithFallback src="/SetsWue.jpeg" alt="" className="wuepa-quick-image-paquetes" />
             <span>Set de accesorios</span>
             <small>Ver más →</small>
           </button>
@@ -259,6 +259,7 @@ export default function Home() {
           </div>
         </div>
 
+        <p className="mobile-swipe-hint" aria-hidden="true">Desliza hacia arriba para ver más productos</p>
         <section className="products-grid home-featured-products">
           {featuredProducts.map((product) => (
             <article key={product.id} className="product-card-simple">

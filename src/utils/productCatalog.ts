@@ -85,7 +85,7 @@ export function getDefaultProductImage(category: ProductCategory) {
   }
 
   if (category === 'paquetes') {
-    return '/CatPaquetes.png';
+    return '/SetsWue.jpeg';
   }
 
   return accessoryImage('Collarcorazon.png');
